@@ -1,0 +1,18 @@
+{
+  "name": "casl2-web",
+  "version": "0.1.0",
+  "description": "",
+  "main": "src/hello.js",
+  "dependencies": {},
+  "devDependencies": {
+    "ts-node": "^10.2.0",
+    "typescript": "^4.3.5"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "ts-node src/hello.ts"
+  },
+  "keywords": [],
+  "author": "bati11",
+  "license": "MIT"
+}
