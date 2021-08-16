@@ -5,11 +5,15 @@
   "main": "src/hello.js",
   "dependencies": {},
   "devDependencies": {
+    "@types/jest": "^27.0.1",
+    "jest": "^27.0.6",
+    "ts-jest": "^27.0.4",
     "ts-node": "^10.2.0",
     "typescript": "^4.3.5"
   },
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --runInBand",
     "dev": "ts-node src/hello.ts"
   },
   "keywords": [],
