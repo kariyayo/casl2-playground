@@ -1,6 +1,6 @@
-import { Memory } from "./memory"
 import { Label, makeProcedure } from "./procedureFactory"
-import { Register } from "./register"
+import { Memory } from "../infra/memory"
+import { Register } from "../infra/register"
 
 describe(`makeLD`, () => {
   const tokens = {

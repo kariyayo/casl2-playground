@@ -1,5 +1,5 @@
-import { Memory } from "./memory"
-import { isGeneralRegister, Register } from "./register"
+import { isGeneralRegister, Register } from "../infra/register"
+import { Memory } from "../infra/memory"
 import { Tokens } from "./tokenizer"
 
 export type Instruction = {
