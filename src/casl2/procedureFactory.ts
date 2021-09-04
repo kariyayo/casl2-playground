@@ -1,4 +1,4 @@
-import { Register } from "../infra/register"
+import { FlagRegister, GeneralRegister } from "../infra/register"
 import { Memory } from "../infra/memory"
 import { Instruction, Label, Tokens } from "./types"
 import { makeLD } from "./procedures/makeLD"
@@ -8,7 +8,8 @@ import { makeADDA } from "./procedures/makeADDA"
 export function makeProcedure(
   tokens: Tokens,
   labels: Map<string, Label>,
-  grMap: Map<string, Register>,
+  flagRegister: FlagRegister,
+  grMap: Map<string, GeneralRegister>,
   memory: Memory
 ): Instruction | null {
   switch (tokens.operator) {
@@ -31,7 +32,7 @@ export function makeProcedure(
     case "LAD":
       return makeLAD(tokens, labels, grMap, memory)
     case "ADDA":
-      return makeADDA(tokens, labels, grMap, memory)
+      return makeADDA(tokens, labels, flagRegister, grMap, memory)
     case "SUBA":
       break
     case "ADDL":

@@ -1,7 +1,7 @@
 import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
-import { Register, isGeneralRegister, getGrOrThrow } from "./registerAccessor"
+import { GeneralRegister, FlagRegister, isGeneralRegister, getGrOrThrow } from "./registerAccessor"
 
 const numFmt = /[0-9]+/
 function isNumeric(s: string): boolean {
@@ -11,7 +11,8 @@ function isNumeric(s: string): boolean {
 export function makeADDA(
   tokens: Tokens,
   labels: Map<string, Label>,
-  grMap: Map<string, Register>,
+  flagRegister: FlagRegister,
+  grMap: Map<string, GeneralRegister>,
   memory: Memory
 ): Instruction {
   const ts = tokens.operand.split(",")

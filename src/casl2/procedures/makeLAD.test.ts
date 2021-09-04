@@ -1,7 +1,7 @@
 import { Memory } from "../../infra/memory"
 import { Label } from "../types"
 import { makeLAD } from "./makeLAD"
-import { getGrOrThrow, Register } from "./registerAccessor"
+import { getGrOrThrow, GeneralRegister } from "./registerAccessor"
 
 describe(`makeLAD`, () => {
   const labels = new Map<string, Label>()
@@ -14,9 +14,9 @@ describe(`makeLAD`, () => {
     { tokens: { label: "BB", operator: "LAD", operand: "GR1,AA,GR2" }, expected: 2200},
   ])(`$# :: $tokens`, ({tokens, expected}) => {
     // given
-    const grMap = new Map<string, Register>()
+    const grMap = new Map<string, GeneralRegister>()
     for (let i = 0; i <= 7; i++) {
-      grMap.set(`GR${i}`, new Register())
+      grMap.set(`GR${i}`, new GeneralRegister())
     }
     getGrOrThrow("GR2", grMap).store(200)
 
@@ -38,9 +38,9 @@ describe(`makeLAD`, () => {
     { tokens: { label: "BB", operator: "LAD", operand: "GR1" }},
   ])(`$# :: $tokens`, ({tokens}) => {
     // given
-    const grMap = new Map<string, Register>()
+    const grMap = new Map<string, GeneralRegister>()
     for (let i = 0; i <= 7; i++) {
-      grMap.set(`GR${i}`, new Register())
+      grMap.set(`GR${i}`, new GeneralRegister())
     }
     getGrOrThrow("GR2", grMap).store(200)
 

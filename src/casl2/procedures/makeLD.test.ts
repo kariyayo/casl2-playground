@@ -1,7 +1,7 @@
 import { Memory } from "../../infra/memory"
 import { Label } from "../types"
 import { makeLD } from "./makeLD"
-import { Register } from "./registerAccessor"
+import { GeneralRegister } from "./registerAccessor"
 
 describe(`makeLD`, () => {
   const tokens = {
@@ -11,9 +11,9 @@ describe(`makeLD`, () => {
   }
   const labels = new Map<string, Label>()
   labels.set("AA", {label: "AA", memAddress: 2000})
-  const grMap = new Map<string, Register>()
+  const grMap = new Map<string, GeneralRegister>()
   for (let i = 0; i <= 7; i++) {
-    grMap.set(`GR${i}`, new Register())
+    grMap.set(`GR${i}`, new GeneralRegister())
   }
   const memory = new Memory()
   memory.store(5000, 123)

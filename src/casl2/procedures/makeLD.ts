@@ -1,12 +1,12 @@
 import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
-import { Register, isGeneralRegister, getGrOrThrow } from "./registerAccessor"
+import { GeneralRegister, isGeneralRegister, getGrOrThrow } from "./registerAccessor"
 
 export function makeLD(
   tokens: Tokens,
   labels: Map<string, Label>,
-  grMap: Map<string, Register>,
+  grMap: Map<string, GeneralRegister>,
   memory: Memory
 ): Instruction {
   const ts = tokens.operand.split(",")
