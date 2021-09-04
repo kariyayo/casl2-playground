@@ -18,4 +18,10 @@ export class FlagRegister {
   overflowFlag = false
   signFlag = false
   zeroFlag = false
+  toString() {
+    const of = this.overflowFlag ? "1" : "0"
+    const sf = this.signFlag ? "1" : "0"
+    const zf = this.zeroFlag ? "1" : "0"
+    return of + sf + zf
+  }
 }
