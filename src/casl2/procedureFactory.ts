@@ -17,6 +17,8 @@ export function makeProcedure(
       break
     case "END":
       break
+    case "DC":
+      break
     case "IN":
       break
     case "OUT":
