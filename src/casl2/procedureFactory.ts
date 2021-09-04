@@ -3,6 +3,7 @@ import { Memory } from "../infra/memory"
 import { Instruction, Label, Tokens } from "./types"
 import { makeLD } from "./procedures/makeLD"
 import { makeLAD } from "./procedures/makeLAD"
+import { makeADDA } from "./procedures/makeADDA"
 
 export function makeProcedure(
   tokens: Tokens,
@@ -30,7 +31,7 @@ export function makeProcedure(
     case "LAD":
       return makeLAD(tokens, labels, grMap, memory)
     case "ADDA":
-      break
+      return makeADDA(tokens, labels, grMap, memory)
     case "SUBA":
       break
     case "ADDL":
