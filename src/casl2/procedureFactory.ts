@@ -2,6 +2,7 @@ import { Register } from "../infra/register"
 import { Memory } from "../infra/memory"
 import { Instruction, Label, Tokens } from "./types"
 import { makeLD } from "./procedures/makeLD"
+import { makeLAD } from "./procedures/makeLAD"
 
 export function makeProcedure(
   tokens: Tokens,
@@ -27,7 +28,7 @@ export function makeProcedure(
     case "ST":
       break
     case "LAD":
-      break
+      return makeLAD(tokens, labels, grMap, memory)
     case "ADDA":
       break
     case "SUBA":
