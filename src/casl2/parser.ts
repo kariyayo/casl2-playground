@@ -1,4 +1,5 @@
-import { Tokens, tokenize } from "./tokenizer"
+import { tokenize } from "./tokenizer"
+import { Tokens } from "./types"
 
 const r = /^\s*;.*$/
 

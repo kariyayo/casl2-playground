@@ -1,6 +1,7 @@
-import { Label, makeProcedure } from "./procedureFactory"
-import { Memory } from "../infra/memory"
-import { Register } from "../infra/register"
+import { Memory } from "../../infra/memory"
+import { Label } from "../types"
+import { makeLD } from "./makeLD"
+import { Register } from "./registerAccessor"
 
 describe(`makeLD`, () => {
   const tokens = {
@@ -17,11 +18,10 @@ describe(`makeLD`, () => {
   const memory = new Memory()
   memory.store(5000, 123)
 
-  const res = makeProcedure(tokens, labels, grMap, memory)
-  test(`makeProcedure() returns function`, () => {
+  const res = makeLD(tokens, labels, grMap, memory)
+  test(`makeLD() returns function`, () => {
     expect(res).not.toBeNull()
   })
-
 
   res?.proc()
   test(`GR1 should be loaded data`, () => {

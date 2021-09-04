@@ -1,10 +1,7 @@
-export type Tokens = {
-	label: string
-	operator: string
-	operand: string
-}
+import { Tokens } from "./types"
 
 const splitReg = /\t+/
+
 export function tokenize(line: string): Tokens | Error {
 	let result = line.trimRight().split(splitReg)
 	if (result.length == 2) {
