@@ -23,7 +23,8 @@ export class Memory {
   }
 }
 
-const WORD_LENGTH = 2 // byte
+export const START_ADDRESS = 1000
+export const WORD_LENGTH = 2 // byte
 const INT16_MAX = 32767
 
 const numFmt = /[0-9]+/

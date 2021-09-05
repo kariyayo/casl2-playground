@@ -8,7 +8,7 @@ describe(`makeDC`, () => {
   labels.set("AA", {label: "AA", memAddress: 2000})
 
   describe.each([
-    { tokens: { label: "AA", operator: "DC", operand: "30" }, expected: 30},
+    { tokens: { lineNum: 0, instructionNum: 0, label: "AA", operator: "DC", operand: "30" }, expected: 30},
   ])(`$# :: $tokens`, ({tokens, expected}) => {
     // given
     const memory = new Memory()

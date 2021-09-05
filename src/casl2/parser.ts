@@ -8,16 +8,19 @@ export function aggregateByLabel(text: string): Map<string, Array<Tokens>> | Err
   const lines = text.split("\n")
   let currentLabel = ""
   let currentTokens: Array<Tokens> = []
-  for (const line of lines) {
+  let instructionNum = 0
+  for (let lineNum = 0; lineNum < lines.length; lineNum++) {
+    const line = lines[lineNum]
     if (r.test(line)) {
       // Comment Line
       continue
     }
     // line -> tokens
-    const tokenized = tokenize(line)
+    const tokenized = tokenize(line, lineNum, instructionNum)
     if (tokenized instanceof Error) {
       return tokenized
     }
+    instructionNum++
     const label = tokenized.label
     if (label != "") {
       if (currentLabel != "") {

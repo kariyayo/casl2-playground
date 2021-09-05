@@ -9,6 +9,8 @@ export type Instruction = {
 }
 
 export type Tokens = {
+  lineNum: number
+  instructionNum: number
 	label: string
 	operator: string
 	operand: string

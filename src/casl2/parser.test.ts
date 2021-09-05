@@ -14,13 +14,13 @@ A				DC		3 ; ここもコメント
     expected: (() => {
       const m = new Map()
       m.set("SAMPLE1", [
-          {label: "SAMPLE1", operator: "START", operand: ""},
-          {label: "", operator: "LT", operand: "GR1,A"},
-          {label: "", operator: "RET", operand: ""},
+          {lineNum: 0, instructionNum: 0, label: "SAMPLE1", operator: "START", operand: ""},
+          {lineNum: 2, instructionNum: 1, label: "", operator: "LT", operand: "GR1,A"},
+          {lineNum: 3, instructionNum: 2, label: "", operator: "RET", operand: ""},
       ])
       m.set("A", [
-          {label: "A", operator: "DC", operand: "3"},
-          {label: "", operator: "END", operand: ""},
+          {lineNum: 5, instructionNum: 3, label: "A", operator: "DC", operand: "3"},
+          {lineNum: 6, instructionNum: 4, label: "", operator: "END", operand: ""},
       ])
       return m
     })(),

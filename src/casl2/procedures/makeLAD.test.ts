@@ -1,5 +1,5 @@
 import { Memory } from "../../infra/memory"
-import { Label } from "../types"
+import { Label, Tokens } from "../types"
 import { makeLAD } from "./makeLAD"
 import { getGrOrThrow, GeneralRegister } from "./registerAccessor"
 
@@ -9,9 +9,18 @@ describe(`makeLAD`, () => {
   const memory = new Memory()
 
   describe.each([
-    { tokens: { label: "BB", operator: "LAD", operand: "GR1,500" }, expected: 500},
-    { tokens: { label: "BB", operator: "LAD", operand: "GR1,AA" }, expected: 2000},
-    { tokens: { label: "BB", operator: "LAD", operand: "GR1,AA,GR2" }, expected: 2200},
+    {
+        tokens: create({ label: "BB", operator: "LAD", operand: "GR1,500" }),
+        expected: 500
+    },
+    {
+        tokens: create({ label: "BB", operator: "LAD", operand: "GR1,AA" }),
+        expected: 2000
+    },
+    {
+        tokens: create({ label: "BB", operator: "LAD", operand: "GR1,AA,GR2" }),
+        expected: 2200
+    },
   ])(`$# :: $tokens`, ({tokens, expected}) => {
     // given
     const grMap = new Map<string, GeneralRegister>()
@@ -33,9 +42,9 @@ describe(`makeLAD`, () => {
   })
 
   describe.each([
-    { tokens: { label: "BB", operator: "LAD", operand: "GR1,AA," }},
-    { tokens: { label: "BB", operator: "LAD", operand: "GR1,AA,20" }},
-    { tokens: { label: "BB", operator: "LAD", operand: "GR1" }},
+    { tokens: create({ label: "BB", operator: "LAD", operand: "GR1,AA," })},
+    { tokens: create({ label: "BB", operator: "LAD", operand: "GR1,AA,20" })},
+    { tokens: create({ label: "BB", operator: "LAD", operand: "GR1" })},
   ])(`$# :: $tokens`, ({tokens}) => {
     // given
     const grMap = new Map<string, GeneralRegister>()
@@ -50,3 +59,17 @@ describe(`makeLAD`, () => {
     })
   })
 })
+
+function create(params: {
+  lineNum?: number,
+  instructionNum?: number,
+  label?: string,
+  operator: string,
+  operand: string
+}): Tokens {
+  let { lineNum, instructionNum, label, operator, operand } = params
+  lineNum = lineNum || 0
+  instructionNum = instructionNum || 0
+  label = label || ""
+  return { lineNum, instructionNum, label, operator, operand }
+}

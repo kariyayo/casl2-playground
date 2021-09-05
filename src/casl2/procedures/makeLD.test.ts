@@ -5,6 +5,8 @@ import { GeneralRegister } from "./registerAccessor"
 
 describe(`makeLD`, () => {
   const tokens = {
+    lineNum: 1,
+    instructionNum: 4,
     label: "AA",
     operator: "LD",
     operand: "GR1,#5000",
