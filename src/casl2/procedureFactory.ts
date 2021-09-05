@@ -1,6 +1,7 @@
 import { FlagRegister, GeneralRegister } from "../infra/register"
 import { Memory } from "../infra/memory"
 import { Instruction, Label, Tokens } from "./types"
+import { execDC } from "./procedures/execDC"
 import { makeLD } from "./procedures/makeLD"
 import { makeLAD } from "./procedures/makeLAD"
 import { makeADDA } from "./procedures/makeADDA"
@@ -18,7 +19,7 @@ export function makeProcedure(
     case "END":
       break
     case "DC":
-      break
+      return execDC(tokens, labels, memory)
     case "IN":
       break
     case "OUT":

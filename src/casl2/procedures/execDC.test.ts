@@ -1,7 +1,7 @@
 import { Memory, START_ADDRESS, WORD_LENGTH } from "../../infra/memory"
 import { Label } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
-import { makeDC } from "./makeDC"
+import { execDC } from "./execDC"
 
 describe(`makeDC`, () => {
   const labels = new Map<string, Label>()
@@ -18,7 +18,7 @@ describe(`makeDC`, () => {
 
     // when, then
 
-    makeDC(tokens, labels, memory)
+    execDC(tokens, labels, memory)
     test(`Label "AA" should be loaded address`, () => {
       expect(memory.lookup(getLabelOrThrow("AA", labels).memAddress)).toEqual(expected)
     })
@@ -35,7 +35,7 @@ describe(`makeDC`, () => {
 
     // when, then
 
-    makeDC(tokens, labels, memory)
+    execDC(tokens, labels, memory)
     test(`memory#(start+2inst) should be loaded address`, () => {
       expect(memory.lookup(START_ADDRESS+(tokens.instructionNum*WORD_LENGTH))).toEqual(expected)
     })

@@ -2,7 +2,7 @@ import { Memory, START_ADDRESS, WORD_LENGTH } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
 
-export function makeDC(
+export function execDC(
   tokens: Tokens,
   labels: Map<string, Label>,
   memory: Memory
