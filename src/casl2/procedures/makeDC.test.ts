@@ -1,4 +1,4 @@
-import { Memory } from "../../infra/memory"
+import { Memory, START_ADDRESS, WORD_LENGTH } from "../../infra/memory"
 import { Label } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
 import { makeDC } from "./makeDC"
@@ -8,7 +8,10 @@ describe(`makeDC`, () => {
   labels.set("AA", {label: "AA", memAddress: 2000})
 
   describe.each([
-    { tokens: { lineNum: 0, instructionNum: 0, label: "AA", operator: "DC", operand: "30" }, expected: 30},
+    {
+       tokens: { lineNum: 0, instructionNum: 2, label: "AA", operator: "DC", operand: "30" },
+       expected: 30
+    },
   ])(`$# :: $tokens`, ({tokens, expected}) => {
     // given
     const memory = new Memory()
@@ -22,6 +25,27 @@ describe(`makeDC`, () => {
     res?.proc()
     test(`Label "AA" should be loaded address`, () => {
       expect(memory.lookup(getLabelOrThrow("AA", labels).memAddress)).toEqual(expected)
+    })
+  })
+
+  describe.each([
+    {
+       tokens: { lineNum: 0, instructionNum: 2, label: "", operator: "DC", operand: "30" },
+       expected: 30
+    },
+  ])(`$# :: $tokens`, ({tokens, expected}) => {
+    // given
+    const memory = new Memory()
+
+    // when, then
+
+    const res = makeDC(tokens, labels, memory)
+    test(`makeDC returns function`, () => {
+      expect(res).not.toBeNull()
+    })
+    res?.proc()
+    test(`memory#(start+2inst) should be loaded address`, () => {
+      expect(memory.lookup(START_ADDRESS+(tokens.instructionNum*WORD_LENGTH))).toEqual(expected)
     })
   })
 })
