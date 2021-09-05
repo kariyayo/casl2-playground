@@ -9,23 +9,18 @@ export function makeDC(
 ): Instruction {
   const operand = tokens.operand
   const labelText = tokens.label
-  let address = 0
-  if (labelText == "") {
-    address = START_ADDRESS + (tokens.instructionNum * WORD_LENGTH)
-    return {
-      tokens,
-      proc: () => {
-        memory.store(address, operand)
-      }
-    }
-  } else {
-    const label = getLabelOrThrow(labelText, labels)
-    address = label.memAddress
-  }
+  const address =
+    labelText == "" ?
+      START_ADDRESS + (tokens.instructionNum * WORD_LENGTH)
+      : getLabelOrThrow(labelText, labels).memAddress
+
+  // load constant value in memory
+  memory.store(address, operand)
+
   return {
     tokens,
     proc: () => {
-      memory.store(address, operand)
+      // NOP
     }
   }
 }

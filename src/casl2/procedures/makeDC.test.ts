@@ -18,11 +18,7 @@ describe(`makeDC`, () => {
 
     // when, then
 
-    const res = makeDC(tokens, labels, memory)
-    test(`makeDC returns function`, () => {
-      expect(res).not.toBeNull()
-    })
-    res?.proc()
+    makeDC(tokens, labels, memory)
     test(`Label "AA" should be loaded address`, () => {
       expect(memory.lookup(getLabelOrThrow("AA", labels).memAddress)).toEqual(expected)
     })
@@ -39,11 +35,7 @@ describe(`makeDC`, () => {
 
     // when, then
 
-    const res = makeDC(tokens, labels, memory)
-    test(`makeDC returns function`, () => {
-      expect(res).not.toBeNull()
-    })
-    res?.proc()
+    makeDC(tokens, labels, memory)
     test(`memory#(start+2inst) should be loaded address`, () => {
       expect(memory.lookup(START_ADDRESS+(tokens.instructionNum*WORD_LENGTH))).toEqual(expected)
     })
