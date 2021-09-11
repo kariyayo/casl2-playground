@@ -14,6 +14,8 @@ export function makeLD(
   const value = ts[1]
   const distGR = getGrOrThrow(target, grMap)
   const grx = ts.length > 2 ? ts[2] : null
+  const wordLength = 2
+
   if (isGeneralRegister(value)) {
     // GR -> GR
     const srcGR = getGrOrThrow(value, grMap)
@@ -21,6 +23,7 @@ export function makeLD(
       throw new Error(`cannot use GRx: ${tokens}`)
     }
     return {
+      wordLength,
       tokens,
       proc: () => {
         distGR.store(srcGR.lookup())
@@ -41,6 +44,7 @@ export function makeLD(
       address = address + indexGR.lookup()
     }
     return {
+      wordLength,
       tokens,
       proc: () => {
         distGR.store(memory.lookup(address))

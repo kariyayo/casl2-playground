@@ -2,11 +2,11 @@ export class Memory {
   content: DataView = new DataView(new ArrayBuffer(WORD_LENGTH * 65536))
 
   lookup(address: number): number {
-    return this.content.getInt16(address)
+    return this.content.getInt16(address * WORD_LENGTH)
   }
 
   store(address: number, value: number | string) {
-    if (address > this.content.byteLength) {
+    if (address * WORD_LENGTH > this.content.byteLength) {
       throw new Error(`invalid address. address=${address}`)
     }
     if (value > INT16_MAX) {
@@ -16,15 +16,14 @@ export class Memory {
       if (!isNumeric(value)) {
         throw new Error(`invalid value. value=${value}`)
       }
-      this.content.setInt16(address, Number(value))
+      this.content.setInt16(address * WORD_LENGTH, Number(value))
     } else {
-      this.content.setInt16(address, value)
+      this.content.setInt16(address * WORD_LENGTH, value)
     }
   }
 }
 
-export const START_ADDRESS = 1000
-export const WORD_LENGTH = 2 // byte
+const WORD_LENGTH = 2 // byte
 const INT16_MAX = 32767
 
 const numFmt = /[0-9]+/

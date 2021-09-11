@@ -19,6 +19,7 @@ export function makeLAD(
   const value = ts[1]
   const distGR = getGrOrThrow(target, grMap)
   const grx = ts.length > 2 ? ts[2] : null
+  const wordLength = 2
 
   let address = 0
   if (isNumeric(value)) {
@@ -32,6 +33,7 @@ export function makeLAD(
     address = address + indexGR.lookup()
   }
   return {
+    wordLength,
     tokens,
     proc: () => {
       distGR.store(address)

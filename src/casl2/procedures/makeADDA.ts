@@ -19,12 +19,14 @@ export function makeADDA(
   const operand1 = ts[0]
   const target = ts[1]
   const grx = ts.length > 2 ? ts[2] : null
+  let wordLength = 1
 
   if (isGeneralRegister(target)) {
     // GR1+GR2 -> GR1
     const operand1GR = getGrOrThrow(operand1, grMap)
     const operand2GR = getGrOrThrow(target, grMap)
     return {
+      wordLength,
       tokens,
       proc: () => {
         const v = operand1GR.lookup() + operand2GR.lookup()
@@ -44,8 +46,10 @@ export function makeADDA(
     if (grx != null) {
       const indexGR = getGrOrThrow(grx, grMap)
       address = address + indexGR.lookup()
+      wordLength++
     }
     return {
+      wordLength,
       tokens,
       proc: () => {
         const v = operand1GR.lookup() + memory.lookup(address)

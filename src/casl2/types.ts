@@ -4,6 +4,7 @@ export type Label = {
 }
 
 export type Instruction = {
+  wordLength: number
   tokens: Tokens
   proc: () => void
 }

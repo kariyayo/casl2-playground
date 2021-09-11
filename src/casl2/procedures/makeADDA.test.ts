@@ -10,31 +10,31 @@ describe(`makeADDA`, () => {
   describe.each([
     {
         tokens: create({operator: "ADDA", operand: "GR1,GR2"}),
-        expected: {GR: 300, FR: "000"}
+        expected: { wordLength: 1, GR: 300, FR: "000"}
     },
     {
         tokens: create({ operator: "ADDA", operand: "GR1,AA" }),
-        expected: {GR: 120, FR: "000"}
+        expected: { wordLength: 1, GR: 120, FR: "000" }
     },
     {
         tokens: create({ operator: "ADDA", operand: "GR1,1000" }),
-        expected: {GR: 120, FR: "000"}
+        expected: { wordLength: 1, GR: 120, FR: "000" }
     },
     {
         tokens: create({ operator: "ADDA", operand: "GR1,1016" }),
-        expected: {GR: 100, FR: "000"}
+        expected: { wordLength: 1, GR: 100, FR: "000" }
     },
     {
         tokens: create({ operator: "ADDA", operand: "GR1,984,GR3" }),
-        expected: {GR: 120, FR: "000"}
+        expected: { wordLength: 2, GR: 120, FR: "000" }
     },
     {
         tokens: create({ operator: "ADDA", operand: "GR1,1000,GR3" }),
-        expected: {GR: 100, FR: "000"}
+        expected: { wordLength: 2, GR: 100, FR: "000" }
     },
     {
         tokens: create({ operator: "ADDA", operand: "GR4,GR5" }),
-        expected: {GR: 100, FR: "001"}
+        expected: { wordLength: 1, GR: 100, FR: "001"}
     },
   ])(`$# :: $tokens`, ({tokens, expected}) => {
     // given
@@ -52,8 +52,9 @@ describe(`makeADDA`, () => {
     // when, then
 
     const res = makeADDA(tokens, labels, flagRegister, grMap, memory)
-    test(`makeADDA returns function`, () => {
-      expect(res).not.toBeNull()
+    test(`makeADDA returns Instruction`, () => {
+      expect(res?.proc).not.toBeNull()
+      expect(res?.wordLength).toBe(expected.wordLength)
     })
     res?.proc()
     test(`GR1 should be added value`, () => {

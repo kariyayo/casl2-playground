@@ -1,23 +1,23 @@
-import { Memory, START_ADDRESS, WORD_LENGTH } from "../../infra/memory"
+import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
 
 export function execDC(
   tokens: Tokens,
   labels: Map<string, Label>,
-  memory: Memory
+  memory: Memory,
+  currentMemAddress: number,
 ): Instruction {
   const operand = tokens.operand
   const labelText = tokens.label
   const address =
-    labelText == "" ?
-      START_ADDRESS + (tokens.instructionNum * WORD_LENGTH)
-      : getLabelOrThrow(labelText, labels).memAddress
+    labelText == "" ? currentMemAddress : getLabelOrThrow(labelText, labels).memAddress
 
   // load constant value in memory
   memory.store(address, operand)
 
   return {
+    wordLength: 1,
     tokens,
     proc: () => {
       // NOP

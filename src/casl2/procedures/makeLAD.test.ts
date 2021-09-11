@@ -11,15 +11,15 @@ describe(`makeLAD`, () => {
   describe.each([
     {
         tokens: create({ label: "BB", operator: "LAD", operand: "GR1,500" }),
-        expected: 500
+        expected: { wordLength: 2, GR: 500 }
     },
     {
         tokens: create({ label: "BB", operator: "LAD", operand: "GR1,AA" }),
-        expected: 2000
+        expected: { wordLength: 2, GR: 2000 }
     },
     {
         tokens: create({ label: "BB", operator: "LAD", operand: "GR1,AA,GR2" }),
-        expected: 2200
+        expected: { wordLength: 2, GR: 2200 }
     },
   ])(`$# :: $tokens`, ({tokens, expected}) => {
     // given
@@ -32,12 +32,13 @@ describe(`makeLAD`, () => {
     // when, then
 
     const res = makeLAD(tokens, labels, grMap, memory)
-    test(`makeLAD returns function`, () => {
-      expect(res).not.toBeNull()
+    test(`makeLAD returns Instruction`, () => {
+      expect(res?.proc).not.toBeNull()
+      expect(res?.wordLength).toBe(expected.wordLength)
     })
     res?.proc()
     test(`GR1 should be loaded address`, () => {
-      expect(grMap.get("GR1")?.lookup()).toEqual(expected)
+      expect(grMap.get("GR1")?.lookup()).toEqual(expected.GR)
     })
   })
 

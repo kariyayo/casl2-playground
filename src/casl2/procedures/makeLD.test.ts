@@ -21,8 +21,9 @@ describe(`makeLD`, () => {
   memory.store(5000, 123)
 
   const res = makeLD(tokens, labels, grMap, memory)
-  test(`makeLD() returns function`, () => {
-    expect(res).not.toBeNull()
+  test(`makeLD() returns Instruction`, () => {
+    expect(res?.proc).not.toBeNull()
+    expect(res?.wordLength).toBe(2)
   })
 
   res?.proc()
