@@ -19,8 +19,13 @@ export function execDC(
   return {
     wordLength: 1,
     tokens,
-    proc: () => {
-      // NOP
+    gen: () => {
+      return {
+        bytecode: new ArrayBuffer(0),
+        proc: () => {
+          // NOP
+        }
+      }
     }
   }
 }

@@ -10,38 +10,39 @@ describe(`makeADDA`, () => {
   describe.each([
     {
         tokens: create({operator: "ADDA", operand: "GR1,GR2"}),
-        expected: { wordLength: 1, GR: 300, FR: "000"}
+        expected: { wordLength: 1, bytecode: [0x24, 0x12], GR: 300, FR: "000"}
     },
     {
         tokens: create({ operator: "ADDA", operand: "GR1,AA" }),
-        expected: { wordLength: 1, GR: 120, FR: "000" }
+        expected: { wordLength: 2, bytecode: [0x20, 0x10, 1000], GR: 120, FR: "000" }
     },
     {
         tokens: create({ operator: "ADDA", operand: "GR1,1000" }),
-        expected: { wordLength: 1, GR: 120, FR: "000" }
+        expected: { wordLength: 2, bytecode: [0x20, 0x10, 1000], GR: 120, FR: "000" }
     },
     {
         tokens: create({ operator: "ADDA", operand: "GR1,1016" }),
-        expected: { wordLength: 1, GR: 100, FR: "000" }
+        expected: { wordLength: 2, bytecode: [0x20, 0x10, 1016], GR: 100, FR: "000" }
     },
     {
         tokens: create({ operator: "ADDA", operand: "GR1,984,GR3" }),
-        expected: { wordLength: 2, GR: 120, FR: "000" }
+        expected: { wordLength: 2, bytecode: [0x20, 0x13, 1000], GR: 120, FR: "000" }
     },
     {
         tokens: create({ operator: "ADDA", operand: "GR1,1000,GR3" }),
-        expected: { wordLength: 2, GR: 100, FR: "000" }
+        expected: { wordLength: 2, bytecode: [0x20, 0x13, 1016], GR: 100, FR: "000" }
     },
     {
         tokens: create({ operator: "ADDA", operand: "GR4,GR5" }),
-        expected: { wordLength: 1, GR: 100, FR: "001"}
+        expected: { wordLength: 1, bytecode:[0x24, 0x45], GR: 100, FR: "001"}
     },
   ])(`$# :: $tokens`, ({tokens, expected}) => {
     // given
     const flagRegister = new FlagRegister()
     const grMap = new Map<string, GeneralRegister>()
     for (let i = 0; i <= 7; i++) {
-      grMap.set(`GR${i}`, new GeneralRegister())
+      const name = `GR${i}`
+      grMap.set(name, new GeneralRegister(name))
     }
     getGrOrThrow("GR1", grMap).store(100)
     getGrOrThrow("GR2", grMap).store(200)
@@ -53,10 +54,15 @@ describe(`makeADDA`, () => {
 
     const res = makeADDA(tokens, labels, flagRegister, grMap, memory)
     test(`makeADDA returns Instruction`, () => {
-      expect(res?.proc).not.toBeNull()
+      expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
+      expect(new DataView(res?.gen().bytecode).getUint8(0)).toEqual(expected.bytecode[0])
+      expect(new DataView(res?.gen().bytecode).getUint8(1)).toEqual(expected.bytecode[1])
+      if (expected.wordLength == 2) {
+        expect(new DataView(res?.gen().bytecode).getUint16(2)).toEqual(expected.bytecode[2])
+      }
     })
-    res?.proc()
+    res?.gen().proc()
     test(`GR1 should be added value`, () => {
       expect(grMap.get("GR1")?.lookup()).toEqual(expected.GR)
     })

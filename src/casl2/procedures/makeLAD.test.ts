@@ -11,21 +11,22 @@ describe(`makeLAD`, () => {
   describe.each([
     {
         tokens: create({ label: "BB", operator: "LAD", operand: "GR1,500" }),
-        expected: { wordLength: 2, GR: 500 }
+        expected: { wordLength: 2, bytecode: [0x12, 0x10, 500], GR: 500 }
     },
     {
         tokens: create({ label: "BB", operator: "LAD", operand: "GR1,AA" }),
-        expected: { wordLength: 2, GR: 2000 }
+        expected: { wordLength: 2, bytecode: [0x12, 0x10, 2000], GR: 2000 }
     },
     {
         tokens: create({ label: "BB", operator: "LAD", operand: "GR1,AA,GR2" }),
-        expected: { wordLength: 2, GR: 2200 }
+        expected: { wordLength: 2, bytecode: [0x12, 0x12, 2200], GR: 2200 }
     },
   ])(`$# :: $tokens`, ({tokens, expected}) => {
     // given
     const grMap = new Map<string, GeneralRegister>()
     for (let i = 0; i <= 7; i++) {
-      grMap.set(`GR${i}`, new GeneralRegister())
+      const name = `GR${i}`
+      grMap.set(name, new GeneralRegister(name))
     }
     getGrOrThrow("GR2", grMap).store(200)
 
@@ -33,10 +34,13 @@ describe(`makeLAD`, () => {
 
     const res = makeLAD(tokens, labels, grMap, memory)
     test(`makeLAD returns Instruction`, () => {
-      expect(res?.proc).not.toBeNull()
+      expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
+      expect(new DataView(res?.gen().bytecode).getUint8(0)).toEqual(expected.bytecode[0])
+      expect(new DataView(res?.gen().bytecode).getUint8(1)).toEqual(expected.bytecode[1])
+      expect(new DataView(res?.gen().bytecode).getUint16(2)).toEqual(expected.bytecode[2])
     })
-    res?.proc()
+    res?.gen().proc()
     test(`GR1 should be loaded address`, () => {
       expect(grMap.get("GR1")?.lookup()).toEqual(expected.GR)
     })
@@ -50,7 +54,8 @@ describe(`makeLAD`, () => {
     // given
     const grMap = new Map<string, GeneralRegister>()
     for (let i = 0; i <= 7; i++) {
-      grMap.set(`GR${i}`, new GeneralRegister())
+      const name = `GR${i}`
+      grMap.set(name, new GeneralRegister(name))
     }
     getGrOrThrow("GR2", grMap).store(200)
 

@@ -8,3 +8,23 @@ export function getGrOrThrow(text: string, grMap: Map<string, GeneralRegister>):
   }
   return gr
 }
+export function grToBytecode(gr: GeneralRegister | null): number {
+  if (gr == null) return 0
+  switch (gr.name) {
+    case "GR1":
+      return 1
+    case "GR2":
+      return 2
+    case "GR3":
+      return 3
+    case "GR4":
+      return 4
+    case "GR5":
+      return 5
+    case "GR6":
+      return 6
+    case "GR7":
+      return 7
+  }
+  return 0
+}

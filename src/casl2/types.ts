@@ -6,7 +6,10 @@ export type Label = {
 export type Instruction = {
   wordLength: number
   tokens: Tokens
-  proc: () => void
+  gen: () => {
+    bytecode: ArrayBuffer
+    proc: () => void
+  }
 }
 
 export type Tokens = {

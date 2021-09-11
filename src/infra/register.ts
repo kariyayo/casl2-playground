@@ -4,6 +4,10 @@ export function isGeneralRegister(text: string): boolean {
 
 export class GeneralRegister {
   content: DataView = new DataView(new ArrayBuffer(2))
+  name: string
+  constructor(name: string) {
+    this.name = name
+  }
 
   lookup(): number {
     return this.content.getInt16(0)
