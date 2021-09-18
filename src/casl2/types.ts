@@ -6,7 +6,7 @@ export type Label = {
 export type Instruction = {
   wordLength: number
   tokens: Tokens
-  gen: () => {
+  gen: (currentMemAddress?: number) => {
     bytecode: ArrayBuffer
     proc: () => void
   }

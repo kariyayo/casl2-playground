@@ -12,7 +12,6 @@ export function makeProcedure(
   flagRegister: FlagRegister,
   grMap: Map<string, GeneralRegister>,
   memory: Memory,
-  currentMemAddress: number,
 ): Instruction | null {
   switch (tokens.operator) {
     case "START":
@@ -20,7 +19,7 @@ export function makeProcedure(
     case "END":
       break
     case "DC":
-      return execDC(tokens, labels, memory, currentMemAddress)
+      return execDC(tokens, labels, memory)
     case "IN":
       break
     case "OUT":

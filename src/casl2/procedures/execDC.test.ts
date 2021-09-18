@@ -21,7 +21,12 @@ describe(`makeDC`, () => {
 
     // when, then
 
-    execDC(params.tokens, labels, memory, params.currentMemAddress)
+    const res = execDC(params.tokens, labels, memory)
+    test(`makeDC() returns Instruction`, () => {
+      expect(res?.gen).not.toBeNull()
+      expect(res?.wordLength).toBe(1)
+    })
+    res?.gen(params.currentMemAddress)
     test(`Label "AA" should be loaded address`, () => {
       expect(memory.lookup(getLabelOrThrow("AA", labels).memAddress)).toEqual(expected)
     })
@@ -41,7 +46,12 @@ describe(`makeDC`, () => {
 
     // when, then
 
-    execDC(params.tokens, labels, memory, params.currentMemAddress)
+    const res = execDC(params.tokens, labels, memory)
+    test(`makeDC() returns Instruction`, () => {
+      expect(res?.gen).not.toBeNull()
+      expect(res?.wordLength).toBe(1)
+    })
+    res?.gen(params.currentMemAddress)
     test(`memory#(start+2inst) should be loaded address`, () => {
       expect(memory.lookup(params.currentMemAddress)).toEqual(expected)
     })
