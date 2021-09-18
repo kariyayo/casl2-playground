@@ -28,7 +28,7 @@ const testCase = [
   {
     param: "",
     expected: null,
-    error: Error(`invalid token num. line:""`)
+    error: Error(`invalid token num. L1 line:""`)
   },
 ]
 

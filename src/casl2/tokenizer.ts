@@ -8,7 +8,7 @@ export function tokenize(line: string, lineNum: number, instructionNum: number):
 		result = result.concat("")
 	}
 	if (result.length != 3) {
-		return new Error(`invalid token num. line:"${line}"`)
+		return new Error(`invalid token num. L${lineNum+1} line:"${line}"`)
 	}
 	return {
 		lineNum,
