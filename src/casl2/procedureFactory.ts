@@ -6,6 +6,9 @@ import { makeLD } from "./procedures/makeLD"
 import { makeLAD } from "./procedures/makeLAD"
 import { makeADDA } from "./procedures/makeADDA"
 import { execDS } from "./procedures/execDS"
+import { execSTART } from "./procedures/execSTART"
+import { execEND } from "./procedures/execEND"
+import { makeRET } from "./procedures/makeRET"
 
 export function makeProcedure(
   tokens: Tokens,
@@ -16,9 +19,9 @@ export function makeProcedure(
 ): Instruction | null {
   switch (tokens.operator) {
     case "START":
-      break
+      return execSTART(tokens, labels, memory)
     case "END":
-      break
+      return execEND(tokens, labels, memory)
     case "DC":
       return execDC(tokens, labels, memory)
     case "DS":
@@ -45,6 +48,8 @@ export function makeProcedure(
       break
     case "SUBL":
       break
+    case "RET":
+      return makeRET(tokens, labels, memory)
     default:
       throw Error("")
   }
