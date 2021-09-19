@@ -5,6 +5,7 @@ import { execDC } from "./procedures/execDC"
 import { makeLD } from "./procedures/makeLD"
 import { makeLAD } from "./procedures/makeLAD"
 import { makeADDA } from "./procedures/makeADDA"
+import { execDS } from "./procedures/execDS"
 
 export function makeProcedure(
   tokens: Tokens,
@@ -20,6 +21,8 @@ export function makeProcedure(
       break
     case "DC":
       return execDC(tokens, labels, memory)
+    case "DS":
+      return execDS(tokens, labels, memory)
     case "IN":
       break
     case "OUT":
