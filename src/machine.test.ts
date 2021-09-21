@@ -17,10 +17,6 @@ AAA	DC		1
 			END`
     const machine = makeMachine(program, startAddress)
 
-    test(`startAddress stored in PR`, () => {
-      expect(machine.PR.lookup()).toEqual(startAddress)
-    })
-
     test(`1L`, () => {
       expect(machine.assembleResult[0].memAddress).toEqual(0x1000)
       expect(machine.assembleResult[0].bytecode).toEqual(null)
@@ -42,11 +38,6 @@ AAA	DC		1
       expect(machine.assembleResult[1].tokens.operand).toEqual("GR1,8")
     })
 
-    test(`step() -> "LAD GR1,8"`, () => {
-      expect(machine.step()).toEqual(true)
-      expect(machine.PR.lookup()).toEqual(0x1002)
-    })
-
     test(`3L`, () => {
       expect(machine.assembleResult[2].memAddress).toEqual(0x1002)
       expect(machine.assembleResult[2].bytecode?.byteLength).toEqual(4)
@@ -56,11 +47,6 @@ AAA	DC		1
       expect(machine.assembleResult[2].tokens.label).toEqual("")
       expect(machine.assembleResult[2].tokens.operator).toEqual("LD")
       expect(machine.assembleResult[2].tokens.operand).toEqual("GR2,AAA")
-    })
-
-    test(`step() -> "LD GR2,AAA"`, () => {
-      expect(machine.step()).toEqual(true)
-      expect(machine.PR.lookup()).toEqual(0x1004)
     })
 
     test(`4L`, () => {
@@ -74,11 +60,6 @@ AAA	DC		1
       expect(machine.assembleResult[3].tokens.operand).toEqual("GR1,AAA,GR2")
     })
 
-    test(`step() -> "ADDA GR1,AAA,GR2"`, () => {
-      expect(machine.step()).toEqual(true)
-      expect(machine.PR.lookup()).toEqual(0x1006)
-    })
-
     test(`5L`, () => {
       expect(machine.assembleResult[4].memAddress).toEqual(0x1006)
       expect(machine.assembleResult[4].bytecode?.byteLength).toEqual(2)
@@ -88,12 +69,6 @@ AAA	DC		1
       expect(machine.assembleResult[4].tokens.label).toEqual("")
       expect(machine.assembleResult[4].tokens.operator).toEqual("RET")
       expect(machine.assembleResult[4].tokens.operand).toEqual("")
-    })
-
-    test(`step() -> "RET"`, () => {
-      expect(machine.step()).toEqual(true)
-      expect(machine.PR.lookup()).toEqual(0xEEEE)
-      expect(machine.step()).toEqual(false)
     })
 
     test(`6L`, () => {
@@ -126,6 +101,35 @@ AAA	DC		1
       expect(machine.assembleResult[7].tokens.label).toEqual("")
       expect(machine.assembleResult[7].tokens.operator).toEqual("END")
       expect(machine.assembleResult[7].tokens.operand).toEqual("")
+    })
+
+    test(`step()`, () => {
+      // startAddress stored in PR
+      expect(machine.PR.lookup()).toEqual(startAddress)
+
+      // LAD GR1,8
+      expect(machine.grMap.get("GR1")!.lookup()).toEqual(0)
+      expect(machine.step()).toEqual(true)
+      expect(machine.PR.lookup()).toEqual(0x1002)
+      expect(machine.grMap.get("GR1")!.lookup()).toEqual(8)
+
+      // LD GR2,AAA
+      expect(machine.step()).toEqual(true)
+      expect(machine.PR.lookup()).toEqual(0x1004)
+      expect(machine.memory.lookup(machine.labels.get("AAA")!.memAddress)).toEqual(1)
+      expect(machine.grMap.get("GR2")!.lookup()).toEqual(1)
+
+      // ADDA GR1,AAA,GR2
+      expect(machine.grMap.get("GR1")!.lookup()).toEqual(8)
+      expect(machine.memory.lookup(machine.labels.get("AAA")!.memAddress + machine.grMap.get("GR2")!.lookup())).toEqual(3)
+      expect(machine.step()).toEqual(true)
+      expect(machine.PR.lookup()).toEqual(0x1006)
+      expect(machine.grMap.get("GR1")!.lookup()).toEqual(8 + 3)
+
+      // RET
+      expect(machine.step()).toEqual(true)
+      expect(machine.PR.lookup()).toEqual(0xEEEE)
+      expect(machine.step()).toEqual(false)
     })
   })
 })

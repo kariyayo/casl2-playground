@@ -22,15 +22,19 @@ describe(`makeADDA`, () => {
     },
     {
         tokens: create({ operator: "ADDA", operand: "GR1,1016" }),
-        expected: { wordLength: 2, bytecode: [0x20, 0x10, 1016], GR: 100, FR: "000" }
+        expected: { wordLength: 2, bytecode: [0x20, 0x10, 1016], GR: 130, FR: "000" }
     },
     {
-        tokens: create({ operator: "ADDA", operand: "GR1,984,GR3" }),
-        expected: { wordLength: 2, bytecode: [0x20, 0x13, 1000], GR: 120, FR: "000" }
+        tokens: create({ operator: "ADDA", operand: "GR1,AA,GR3" }),
+        expected: { wordLength: 2, bytecode: [0x20, 0x13, 1000], GR: 130, FR: "000" }
     },
     {
         tokens: create({ operator: "ADDA", operand: "GR1,1000,GR3" }),
-        expected: { wordLength: 2, bytecode: [0x20, 0x13, 1016], GR: 100, FR: "000" }
+        expected: { wordLength: 2, bytecode: [0x20, 0x13, 1000], GR: 130, FR: "000" }
+    },
+    {
+        tokens: create({ operator: "ADDA", operand: "GR1,984,GR3" }),
+        expected: { wordLength: 2, bytecode: [0x20, 0x13, 984], GR: 120, FR: "000" }
     },
     {
         tokens: create({ operator: "ADDA", operand: "GR4,GR5" }),
@@ -49,6 +53,7 @@ describe(`makeADDA`, () => {
     getGrOrThrow("GR3", grMap).store(16)
     const memory = new Memory()
     memory.store(1000, 20)
+    memory.store(1016, 30)
 
     // when, then
 

@@ -36,19 +36,19 @@ export function makeLAD(
     tokens,
     gen: () => {
       // e.g. LAD GR1,adr => [0x1210, address]
-      let address = getAddress()
-      if (grx != null) {
-        const indexGR = getGrOrThrow(grx, grMap)
-        address = address + indexGR.lookup()
-      }
+      const operandAddress = getAddress()
       const bytecode = new ArrayBuffer(4)
       const view = new DataView(bytecode)
       view.setUint8(0, opCode)
       view.setUint8(1, (grToBytecode(distGR) << 4) + grToBytecode(indexGR))
-      view.setUint16(2, address, false)
+      view.setUint16(2, operandAddress, false)
       return {
         bytecode,
         proc: (PR: GeneralRegister) => {
+          let address = operandAddress
+          if (indexGR != null) {
+            address = address + indexGR.lookup()
+          }
           distGR.store(address)
           advancePR(PR, wordLength)
         }

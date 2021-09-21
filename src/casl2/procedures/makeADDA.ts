@@ -63,18 +63,19 @@ export function makeADDA(
       tokens,
       gen: () => {
         // e.g. ADDA GR1,adr
-        let address = getAddress()
-        if (indexGR != null) {
-          address = address + indexGR.lookup()
-        }
+        const operandAddress = getAddress()
         const bytecode = new ArrayBuffer(4)
         const view = new DataView(bytecode)
         view.setUint8(0, opCode)
         view.setUint8(1, (grToBytecode(operand1GR) << 4) + grToBytecode(indexGR))
-        view.setUint16(2, address, false)
+        view.setUint16(2, operandAddress, false)
         return {
           bytecode,
           proc: (PR: GeneralRegister) => {
+            let address = operandAddress
+            if (indexGR != null) {
+              address = address + indexGR.lookup()
+            }
             const v = operand1GR.lookup() + memory.lookup(address)
             setFragRegister(flagRegister, v)
             operand1GR.store(v)

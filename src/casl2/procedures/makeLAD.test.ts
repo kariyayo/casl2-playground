@@ -19,7 +19,7 @@ describe(`makeLAD`, () => {
     },
     {
         tokens: create({ label: "BB", operator: "LAD", operand: "GR1,AA,GR2" }),
-        expected: { wordLength: 2, bytecode: [0x12, 0x12, 2200], GR: 2200 }
+        expected: { wordLength: 2, bytecode: [0x12, 0x12, 2000], GR: 2200 }
     },
   ])(`$# :: $tokens`, ({tokens, expected}) => {
     // given

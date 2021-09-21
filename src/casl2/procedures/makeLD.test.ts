@@ -62,7 +62,7 @@ describe(`makeLD`, () => {
       expect(res?.wordLength).toBe(2)
       expect(new DataView(res?.gen()!.bytecode).getUint8(0)).toEqual(0x10)
       expect(new DataView(res?.gen()!.bytecode).getUint8(1)).toEqual(0x13)
-      expect(new DataView(res?.gen()!.bytecode).getUint16(2)).toEqual(5002)
+      expect(new DataView(res?.gen()!.bytecode).getUint16(2)).toEqual(5000)
     })
 
     res?.gen()!.proc(new GeneralRegister("PR"))
