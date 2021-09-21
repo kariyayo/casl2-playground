@@ -1,3 +1,5 @@
+import { GeneralRegister } from "../infra/register"
+
 export type Label = {
   label: string
   memAddress: number
@@ -6,9 +8,9 @@ export type Label = {
 export type Instruction = {
   wordLength: number
   tokens: Tokens
-  gen: (currentMemAddress?: number) => {
+  gen: (currentMemAddress?: number) => null | {
     bytecode: ArrayBuffer
-    proc: () => void
+    proc: (PR: GeneralRegister) => void
   }
 }
 

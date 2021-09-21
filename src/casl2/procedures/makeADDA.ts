@@ -1,7 +1,7 @@
 import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
-import { GeneralRegister, FlagRegister, isGeneralRegister, getGrOrThrow, grToBytecode } from "./registerAccessor"
+import { GeneralRegister, FlagRegister, isGeneralRegister, getGrOrThrow, grToBytecode, advancePR } from "./registerAccessor"
 
 const numFmt = /[0-9]+/
 function isNumeric(s: string): boolean {
@@ -37,10 +37,11 @@ export function makeADDA(
         byteArray[1] = (grToBytecode(operand1GR) << 4) + grToBytecode(operand2GR)
         return {
           bytecode,
-          proc: () => {
+          proc: (PR: GeneralRegister) => {
             const v = operand1GR.lookup() + operand2GR.lookup()
             setFragRegister(flagRegister, v)
             operand1GR.store(v)
+            advancePR(PR, wordLength)
           }
         }
       }
@@ -73,10 +74,11 @@ export function makeADDA(
         view.setUint16(2, address, false)
         return {
           bytecode,
-          proc: () => {
+          proc: (PR: GeneralRegister) => {
             const v = operand1GR.lookup() + memory.lookup(address)
             setFragRegister(flagRegister, v)
             operand1GR.store(v)
+            advancePR(PR, wordLength)
           }
         }
       }

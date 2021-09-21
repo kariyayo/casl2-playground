@@ -9,13 +9,6 @@ export function execSTART(
   return {
     wordLength: 0,
     tokens,
-    gen: () => {
-      return {
-        bytecode: new ArrayBuffer(0),
-        proc: () => {
-          // NOP
-        }
-      }
-    }
+    gen: () => null
   }
 }

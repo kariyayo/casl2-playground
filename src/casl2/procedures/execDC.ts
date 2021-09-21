@@ -1,6 +1,7 @@
 import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
+import { advancePR, GeneralRegister } from "./registerAccessor"
 
 const numFmt = /[0-9]+/
 function isNumeric(s: string): boolean {
@@ -17,8 +18,9 @@ export function execDC(
   if (!isNumeric(operand)) {
     throw new Error(`operand should be number: ${tokens}`)
   }
+  const wordLength = 1
   return {
-    wordLength: 1,
+    wordLength,
     tokens,
     gen: (currentMemAddress) => {
       const address =
@@ -34,8 +36,8 @@ export function execDC(
       view.setInt16(0, Number(operand))
       return {
         bytecode,
-        proc: () => {
-          // NOP
+        proc: (PR: GeneralRegister) => {
+          advancePR(PR, wordLength)
         }
       }
     }

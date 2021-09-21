@@ -4,7 +4,6 @@ import { makeLD } from "./makeLD"
 import { GeneralRegister } from "./registerAccessor"
 
 describe(`makeLD`, () => {
-
   describe(`GR <- memory`, () => {
     const tokens = {
       lineNum: 1,
@@ -27,12 +26,12 @@ describe(`makeLD`, () => {
     test(`makeLD() returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(2)
-      expect(new DataView(res?.gen().bytecode).getUint8(0)).toEqual(0x10)
-      expect(new DataView(res?.gen().bytecode).getUint8(1)).toEqual(0x10)
-      expect(new DataView(res?.gen().bytecode).getUint16(2)).toEqual(5000)
+      expect(new DataView(res?.gen()!.bytecode).getUint8(0)).toEqual(0x10)
+      expect(new DataView(res?.gen()!.bytecode).getUint8(1)).toEqual(0x10)
+      expect(new DataView(res?.gen()!.bytecode).getUint16(2)).toEqual(5000)
     })
 
-    res?.gen().proc()
+    res?.gen()!.proc(new GeneralRegister("PR"))
     test(`GR1 should be loaded data`, () => {
       expect(grMap.get("GR1")?.lookup()).toEqual(123)
     })
@@ -61,12 +60,12 @@ describe(`makeLD`, () => {
     test(`makeLD() returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(2)
-      expect(new DataView(res?.gen().bytecode).getUint8(0)).toEqual(0x10)
-      expect(new DataView(res?.gen().bytecode).getUint8(1)).toEqual(0x13)
-      expect(new DataView(res?.gen().bytecode).getUint16(2)).toEqual(5002)
+      expect(new DataView(res?.gen()!.bytecode).getUint8(0)).toEqual(0x10)
+      expect(new DataView(res?.gen()!.bytecode).getUint8(1)).toEqual(0x13)
+      expect(new DataView(res?.gen()!.bytecode).getUint16(2)).toEqual(5002)
     })
 
-    res?.gen().proc()
+    res?.gen()!.proc(new GeneralRegister("PR"))
     test(`GR1 should be loaded data`, () => {
       expect(grMap.get("GR1")?.lookup()).toEqual(123)
     })
@@ -93,11 +92,11 @@ describe(`makeLD`, () => {
     test(`makeLD() returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(1)
-      expect(new DataView(res?.gen().bytecode).getUint8(0)).toEqual(0x14)
-      expect(new DataView(res?.gen().bytecode).getUint8(1)).toEqual(0x12)
+      expect(new DataView(res?.gen()!.bytecode).getUint8(0)).toEqual(0x14)
+      expect(new DataView(res?.gen()!.bytecode).getUint8(1)).toEqual(0x12)
     })
 
-    res?.gen().proc()
+    res?.gen()!.proc(new GeneralRegister("PR"))
     test(`GR1 should be loaded data`, () => {
       expect(grMap.get("GR1")?.lookup()).toEqual(123)
     })

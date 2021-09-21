@@ -1,7 +1,7 @@
 import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
-import { GeneralRegister, isGeneralRegister, getGrOrThrow, grToBytecode } from "./registerAccessor"
+import { GeneralRegister, isGeneralRegister, getGrOrThrow, grToBytecode, advancePR } from "./registerAccessor"
 
 const numFmt = /[0-9]+/
 function isNumeric(s: string): boolean {
@@ -48,7 +48,10 @@ export function makeLAD(
       view.setUint16(2, address, false)
       return {
         bytecode,
-        proc: () => distGR.store(address)
+        proc: (PR: GeneralRegister) => {
+          distGR.store(address)
+          advancePR(PR, wordLength)
+        }
       }
     }
   }

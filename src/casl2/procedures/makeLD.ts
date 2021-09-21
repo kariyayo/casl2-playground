@@ -1,7 +1,7 @@
 import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
-import { GeneralRegister, isGeneralRegister, getGrOrThrow, grToBytecode } from "./registerAccessor"
+import { GeneralRegister, isGeneralRegister, getGrOrThrow, grToBytecode, advancePR } from "./registerAccessor"
 
 export function makeLD(
   tokens: Tokens,
@@ -34,7 +34,10 @@ export function makeLD(
         byteArray[1] = (grToBytecode(distGR) << 4) + grToBytecode(srcGR)
         return {
           bytecode,
-          proc: () => distGR.store(srcGR.lookup())
+          proc: (PR: GeneralRegister) => {
+            distGR.store(srcGR.lookup())
+            advancePR(PR, wordLength)
+          }
         }
       }
     }
@@ -67,7 +70,10 @@ export function makeLD(
         view.setUint16(2, address, false)
         return {
           bytecode,
-          proc: () => distGR.store(memory.lookup(address))
+          proc: (PR: GeneralRegister) => {
+            distGR.store(memory.lookup(address))
+            advancePR(PR, wordLength)
+          }
         }
       }
     }

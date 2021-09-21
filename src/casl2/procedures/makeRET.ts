@@ -1,5 +1,6 @@
 import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
+import { advancePR, GeneralRegister } from "./registerAccessor"
 
 export function makeRET(
   tokens: Tokens,
@@ -17,8 +18,10 @@ export function makeRET(
       view.setUint8(1, 0)
       return {
         bytecode,
-        proc: () => {
+        proc: (PR: GeneralRegister) => {
           // TODO
+          const v = PR.lookup()
+          PR.store(0xEEEE)
         }
       }
     }

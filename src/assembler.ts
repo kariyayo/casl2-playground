@@ -11,14 +11,19 @@ type Label = {
 
 export type AssembleResult = Array<{
     memAddress: number,
+    bytecode: ArrayBuffer | null,
+    tokens: Tokens,
+}>
+
+export type ProcMap = Map<number, {
     bytecode: ArrayBuffer,
-    tokens: Tokens
+    proc: (PR: GeneralRegister) => void
 }>
 
 export function display(result: AssembleResult): string {
   return result.map(row => {
     let v: any = ""
-    if (row.bytecode.byteLength != 0) {
+    if (row.bytecode != null) {
       const view = new DataView(row.bytecode)
       if (row.bytecode.byteLength >= 2) {
         v = view.getUint8(0).toString(16).padStart(2, "0")
@@ -40,10 +45,10 @@ export function assemble(
   FR: FlagRegister,
   grMap: Map<string, GeneralRegister>,
   memory: Memory
-): AssembleResult {
+): { assembleResult: AssembleResult, procMap: ProcMap } {
   if (text == null || text.length == 0) {
     // NOP
-    return []
+    return { assembleResult: [], procMap: new Map() }
   }
 
   const aggregated = aggregateByLabel(text)
@@ -57,7 +62,6 @@ export function assemble(
 
   const labelInstructionMap: Map<Label, Array<Instruction>> = new Map()
 
-  const assembleResult: AssembleResult = []
   let memAddress = startAddress
   aggregated.forEach((lines, labelText) => {
     const label = labels.get(labelText)
@@ -85,13 +89,21 @@ export function assemble(
     labelInstructionMap.set(label, instructions)
   })
 
+  const assembleResult: AssembleResult = []
+  const procMap: ProcMap = new Map()
   labelInstructionMap.forEach((insts, label) => {
     let memAddress = label.memAddress
     insts.forEach(inst => {
-      const { bytecode, proc } = inst.gen(memAddress)
-      assembleResult.push({ memAddress, bytecode, tokens: inst.tokens })
-      memAddress = memAddress + inst.wordLength
+      const generated = inst.gen(memAddress)
+      if (generated == null) {
+        assembleResult.push({ memAddress, bytecode: null, tokens: inst.tokens })
+      } else {
+        const { bytecode, proc } = generated
+        assembleResult.push({ memAddress, bytecode, tokens: inst.tokens })
+        procMap.set(memAddress, { bytecode, proc })
+        memAddress = memAddress + inst.wordLength
+      }
     })
   })
-  return assembleResult
+  return { assembleResult, procMap }
 }

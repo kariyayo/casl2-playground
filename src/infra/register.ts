@@ -10,11 +10,11 @@ export class GeneralRegister {
   }
 
   lookup(): number {
-    return this.content.getInt16(0)
+    return this.content.getUint16(0)
   }
 
   store(value: number) {
-    this.content.setInt16(0, value)
+    this.content.setUint16(0, value)
   }
 }
 
