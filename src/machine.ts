@@ -32,7 +32,7 @@ export class Commet2 {
 
   step(): boolean {
     const next = this.PR.lookup()
-    if (next == 0xEEEE) {
+    if (next == -32768) {
       return false
     }
     const row = this.procMap.get(next)

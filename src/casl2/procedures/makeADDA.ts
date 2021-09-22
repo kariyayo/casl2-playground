@@ -39,8 +39,8 @@ export function makeADDA(
           bytecode,
           proc: (PR: GeneralRegister) => {
             const v = operand1GR.lookup() + operand2GR.lookup()
-            setFragRegister(flagRegister, v)
             operand1GR.store(v)
+            flagRegister.set(v)
             advancePR(PR, wordLength)
           }
         }
@@ -77,30 +77,12 @@ export function makeADDA(
               address = address + indexGR.lookup()
             }
             const v = operand1GR.lookup() + memory.lookup(address)
-            setFragRegister(flagRegister, v)
             operand1GR.store(v)
+            flagRegister.set(v)
             advancePR(PR, wordLength)
           }
         }
       }
     }
-  }
-}
-
-function setFragRegister(flagRegister: FlagRegister, appliedValue: number) {
-  if (-32768 <= appliedValue && appliedValue <= 32767) {
-    flagRegister.overflowFlag = false
-  } else {
-    flagRegister.overflowFlag = true
-  }
-  if (appliedValue < 0) {
-    flagRegister.signFlag = true
-  } else {
-    flagRegister.signFlag = false
-  }
-  if (appliedValue == 0) {
-    flagRegister.zeroFlag = true
-  } else {
-    flagRegister.zeroFlag = false
   }
 }

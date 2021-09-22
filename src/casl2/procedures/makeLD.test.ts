@@ -1,7 +1,7 @@
 import { Memory } from "../../infra/memory"
 import { Label } from "../types"
 import { makeLD } from "./makeLD"
-import { GeneralRegister } from "./registerAccessor"
+import { FlagRegister, GeneralRegister } from "./registerAccessor"
 
 describe(`makeLD`, () => {
   describe(`GR <- memory`, () => {
@@ -14,6 +14,7 @@ describe(`makeLD`, () => {
     }
     const labels = new Map<string, Label>()
     labels.set("AA", {label: "AA", memAddress: 2000})
+    const flagRegister = new FlagRegister()
     const grMap = new Map<string, GeneralRegister>()
     for (let i = 0; i <= 7; i++) {
       const name = `GR${i}`
@@ -22,7 +23,7 @@ describe(`makeLD`, () => {
     const memory = new Memory()
     memory.store(5000, 123)
 
-    const res = makeLD(tokens, labels, grMap, memory)
+    const res = makeLD(tokens, labels, flagRegister, grMap, memory)
     test(`makeLD() returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(2)
@@ -47,6 +48,7 @@ describe(`makeLD`, () => {
     }
     const labels = new Map<string, Label>()
     labels.set("AA", {label: "AA", memAddress: 2000})
+    const flagRegister = new FlagRegister()
     const grMap = new Map<string, GeneralRegister>()
     for (let i = 0; i <= 7; i++) {
       const name = `GR${i}`
@@ -56,7 +58,7 @@ describe(`makeLD`, () => {
     const memory = new Memory()
     memory.store(5000 + (grMap.get("GR3")?.lookup() || 0), 123)
 
-    const res = makeLD(tokens, labels, grMap, memory)
+    const res = makeLD(tokens, labels, flagRegister, grMap, memory)
     test(`makeLD() returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(2)
@@ -80,6 +82,7 @@ describe(`makeLD`, () => {
       operand: "GR1,GR2",
     }
     const labels = new Map<string, Label>()
+    const flagRegister = new FlagRegister()
     const grMap = new Map<string, GeneralRegister>()
     for (let i = 0; i <= 7; i++) {
       const name = `GR${i}`
@@ -88,7 +91,7 @@ describe(`makeLD`, () => {
     grMap.get("GR2")?.store(123)
     const memory = new Memory()
 
-    const res = makeLD(tokens, labels, grMap, memory)
+    const res = makeLD(tokens, labels, flagRegister, grMap, memory)
     test(`makeLD() returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(1)

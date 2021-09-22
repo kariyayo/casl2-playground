@@ -1,11 +1,12 @@
 import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
-import { GeneralRegister, isGeneralRegister, getGrOrThrow, grToBytecode, advancePR } from "./registerAccessor"
+import { GeneralRegister, isGeneralRegister, getGrOrThrow, grToBytecode, advancePR, FlagRegister } from "./registerAccessor"
 
 export function makeLD(
   tokens: Tokens,
   labels: Map<string, Label>,
+  flagRegister: FlagRegister,
   grMap: Map<string, GeneralRegister>,
   memory: Memory
 ): Instruction {
@@ -35,7 +36,9 @@ export function makeLD(
         return {
           bytecode,
           proc: (PR: GeneralRegister) => {
-            distGR.store(srcGR.lookup())
+            const value = srcGR.lookup()
+            distGR.store(value)
+            flagRegister.set(value)
             advancePR(PR, wordLength)
           }
         }
@@ -72,7 +75,9 @@ export function makeLD(
             if (indexGR != null) {
               address = address + indexGR.lookup()
             }
-            distGR.store(memory.lookup(address))
+            const value = memory.lookup(address)
+            distGR.store(value)
+            flagRegister.set(value)
             advancePR(PR, wordLength)
           }
         }

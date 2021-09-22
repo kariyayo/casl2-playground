@@ -21,7 +21,7 @@ export function makeRET(
         proc: (PR: GeneralRegister) => {
           // TODO
           const v = PR.lookup()
-          PR.store(0xEEEE)
+          PR.store(-32678)
         }
       }
     }

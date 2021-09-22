@@ -35,7 +35,7 @@ export function makeProcedure(
     case "RPOP":
       break
     case "LD":
-      return makeLD(tokens, labels, grMap, memory)
+      return makeLD(tokens, labels, flagRegister, grMap, memory)
     case "ST":
       break
     case "LAD":
