@@ -11,6 +11,11 @@ import { execEND } from "./procedures/execEND"
 import { makeRET } from "./procedures/makeRET"
 import { makeSUBA } from "./procedures/makeSUBA"
 import { makeJUMP } from "./procedures/makeJUMP"
+import { makeJPL } from "./procedures/makeJPL"
+import { makeJMI } from "./procedures/makeJMI"
+import { makeJZE } from "./procedures/makeJZE"
+import { makeJNZ } from "./procedures/makeJNZ"
+import { makeJOV } from "./procedures/makeJOV"
 
 export function makeProcedure(
   tokens: Tokens,
@@ -48,6 +53,16 @@ export function makeProcedure(
       return makeSUBA(tokens, labels, flagRegister, grMap, memory)
     case "JUMP":
       return makeJUMP(tokens, grMap)
+    case "JPL":
+      return makeJPL(tokens, flagRegister, grMap)
+    case "JMI":
+      return makeJMI(tokens, flagRegister, grMap)
+    case "JZE":
+      return makeJZE(tokens, flagRegister, grMap)
+    case "JNZ":
+      return makeJNZ(tokens, flagRegister, grMap)
+    case "JOV":
+      return makeJOV(tokens, flagRegister, grMap)
     case "ADDL":
       break
     case "SUBL":
