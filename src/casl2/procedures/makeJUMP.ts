@@ -1,6 +1,6 @@
 import { Instruction, Tokens } from "../types"
 import { GeneralRegister, getGrOrThrow, grToBytecode, setPR } from "./registerAccessor"
-import { isNumeric } from "./strings"
+import { isDigits } from "./strings"
 
 export function makeJUMP(
   tokens: Tokens,
@@ -14,8 +14,8 @@ export function makeJUMP(
   const wordLength = 2
 
   let targetAddress = 0
-  if (!isNumeric(operand)) {
-    throw new Error(`operand should be number: ${tokens}`)
+  if (!isDigits(operand)) {
+    throw new Error(`operand should be positive number: ${tokens}`)
   }
   targetAddress = Number(operand)
 

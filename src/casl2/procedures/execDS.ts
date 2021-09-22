@@ -2,11 +2,7 @@ import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
 import { advancePR, GeneralRegister } from "./registerAccessor"
-
-const numFmt = /[0-9]+/
-function isNumeric(s: string): boolean {
-  return numFmt.test(s)
-}
+import { isDigits } from "./strings"
 
 export function execDS(
   tokens: Tokens,
@@ -15,8 +11,8 @@ export function execDS(
 ): Instruction {
   const operand = tokens.operand
   const labelText = tokens.label
-  if (!isNumeric(operand)) {
-      throw new Error(`operand should be number: ${tokens}`)
+  if (!isDigits(operand)) {
+      throw new Error(`operand should be positive number: ${tokens}`)
   }
   const reservedSpace = Number(operand)
   const wordLength = reservedSpace

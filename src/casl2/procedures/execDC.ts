@@ -2,11 +2,7 @@ import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
 import { advancePR, GeneralRegister } from "./registerAccessor"
-
-const numFmt = /[0-9]+/
-function isNumeric(s: string): boolean {
-  return numFmt.test(s)
-}
+import { isNumeric } from "./strings"
 
 export function execDC(
   tokens: Tokens,
@@ -16,7 +12,7 @@ export function execDC(
   const operand = tokens.operand
   const labelText = tokens.label
   if (!isNumeric(operand)) {
-    throw new Error(`operand should be number: ${tokens}`)
+    throw new Error(`operand should be positive number: ${tokens.operand}`)
   }
   const wordLength = 1
   return {

@@ -1,3 +1,5 @@
+import { isNumeric } from "../casl2/procedures/strings"
+
 export class Memory {
   content: DataView = new DataView(new ArrayBuffer(WORD_LENGTH * 65536))
 
@@ -25,8 +27,3 @@ export class Memory {
 
 const WORD_LENGTH = 2 // byte
 const INT16_MAX = 32767
-
-const numFmt = /[0-9]+/
-function isNumeric(s: string): boolean {
-  return numFmt.test(s)
-}

@@ -2,11 +2,7 @@ import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
 import { GeneralRegister, FlagRegister, isGeneralRegister, getGrOrThrow, grToBytecode, advancePR } from "./registerAccessor"
-
-const numFmt = /[0-9]+/
-function isNumeric(s: string): boolean {
-  return numFmt.test(s)
-}
+import { isNumeric } from "./strings"
 
 export function makeADDA(
   tokens: Tokens,
