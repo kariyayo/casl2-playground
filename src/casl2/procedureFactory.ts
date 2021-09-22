@@ -10,6 +10,7 @@ import { execSTART } from "./procedures/execSTART"
 import { execEND } from "./procedures/execEND"
 import { makeRET } from "./procedures/makeRET"
 import { makeSUBA } from "./procedures/makeSUBA"
+import { makeJUMP } from "./procedures/makeJUMP"
 
 export function makeProcedure(
   tokens: Tokens,
@@ -45,6 +46,8 @@ export function makeProcedure(
       return makeADDA(tokens, labels, flagRegister, grMap, memory)
     case "SUBA":
       return makeSUBA(tokens, labels, flagRegister, grMap, memory)
+    case "JUMP":
+      return makeJUMP(tokens, grMap)
     case "ADDL":
       break
     case "SUBL":

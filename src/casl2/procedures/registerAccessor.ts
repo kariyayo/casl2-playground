@@ -33,3 +33,7 @@ export function advancePR(PR: GeneralRegister, words: number) {
   const v = PR.lookup()
   PR.store(v+words)
 }
+
+export function setPR(PR: GeneralRegister, address: number) {
+  PR.store(address)
+}
