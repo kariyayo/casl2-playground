@@ -13,8 +13,16 @@ export class GeneralRegister {
     return this.content.getInt16(0)
   }
 
+  lookupLogical(): number {
+    return this.content.getUint16(0)
+  }
+
   store(value: number) {
     this.content.setInt16(0, value)
+  }
+
+  storeLogical(value: number) {
+    this.content.setUint16(0, value)
   }
 }
 
@@ -36,20 +44,35 @@ export class FlagRegister {
   }
 
   set(v: number) {
-    if (v < 0) {
-      this.signFlag = true
-      this.zeroFlag = false
-    } else if (v > 0) {
-      this.signFlag = false
-      this.zeroFlag = false
-    } else {
-      this.signFlag = false
-      this.zeroFlag = true
-    }
     if (-32768 <= v && v <= 32767) {
       this.overflowFlag = false
     } else {
       this.overflowFlag = true
+    }
+    this.setSfZf(v)
+  }
+
+  setLogical(v: number) {
+    if (0 <= v && v <= 65535) {
+      this.overflowFlag = false
+    } else {
+      this.overflowFlag = true
+    }
+    this.setSfZf(v)
+  }
+
+  private setSfZf(v: number) {
+    if ((v & 0x8000) !== 0) {
+      // negative
+      this.signFlag = true
+    } else {
+      this.signFlag = false
+    }
+    if ((v & 0xffff) !== 0) {
+      // not zero
+      this.zeroFlag = false
+    } else {
+      this.zeroFlag = true
     }
   }
 
