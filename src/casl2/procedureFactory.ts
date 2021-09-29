@@ -16,6 +16,8 @@ import { makeJMI } from "./procedures/makeJMI"
 import { makeJZE } from "./procedures/makeJZE"
 import { makeJNZ } from "./procedures/makeJNZ"
 import { makeJOV } from "./procedures/makeJOV"
+import { makeADDL } from "./procedures/makeADDL"
+import { makeSUBL } from "./procedures/makeSUBL"
 
 export function makeProcedure(
   tokens: Tokens,
@@ -51,6 +53,10 @@ export function makeProcedure(
       return makeADDA(tokens, labels, flagRegister, grMap, memory)
     case "SUBA":
       return makeSUBA(tokens, labels, flagRegister, grMap, memory)
+    case "ADDL":
+      return makeADDL(tokens, labels, flagRegister, grMap, memory)
+    case "SUBA":
+      return makeSUBL(tokens, labels, flagRegister, grMap, memory)
     case "JUMP":
       return makeJUMP(tokens, grMap)
     case "JPL":
