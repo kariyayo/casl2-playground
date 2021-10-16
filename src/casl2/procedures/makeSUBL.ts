@@ -43,7 +43,7 @@ export function makeSUBL(
       }
     }
   } else {
-    // GR1+10 -> GR1
+    // GR1-10 -> GR1
     const opCode = 0x23
     const wordLength = 2
     const operand1GR = getGrOrThrow(operand1, grMap)
@@ -58,7 +58,7 @@ export function makeSUBL(
       wordLength,
       tokens,
       gen: () => {
-        // e.g. ADD GR1,adr
+        // e.g. SUBL GR1,adr
         const operandAddress = getAddress()
         const bytecode = new ArrayBuffer(4)
         const view = new DataView(bytecode)
@@ -82,4 +82,3 @@ export function makeSUBL(
     }
   }
 }
-

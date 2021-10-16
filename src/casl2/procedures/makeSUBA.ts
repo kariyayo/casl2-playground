@@ -30,7 +30,7 @@ export function makeSUBA(
       wordLength,
       tokens,
       gen: () => {
-        // e.g. ADDA GR1,GR2
+        // e.g. SUBA GR1,GR2
         const bytecode = new ArrayBuffer(2)
         const byteArray = new Uint8Array(bytecode, 0, 2)
         byteArray[0] = opCode
@@ -62,7 +62,7 @@ export function makeSUBA(
       wordLength,
       tokens,
       gen: () => {
-        // e.g. ADDA GR1,adr
+        // e.g. SUBA GR1,adr
         const operandAddress = getAddress()
         const bytecode = new ArrayBuffer(4)
         const view = new DataView(bytecode)
@@ -86,4 +86,3 @@ export function makeSUBA(
     }
   }
 }
-

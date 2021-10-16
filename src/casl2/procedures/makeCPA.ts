@@ -4,7 +4,6 @@ import { getLabelOrThrow } from "./labelAccessor"
 import { GeneralRegister, FlagRegister, isGeneralRegister, getGrOrThrow, grToBytecode, advancePR } from "./registerAccessor"
 import { isNumeric } from "./strings"
 
-// TODO
 export function makeCPA(
   tokens: Tokens,
   labels: Map<string, Label>,
