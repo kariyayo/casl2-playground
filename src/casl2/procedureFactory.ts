@@ -18,6 +18,8 @@ import { makeJNZ } from "./procedures/makeJNZ"
 import { makeJOV } from "./procedures/makeJOV"
 import { makeADDL } from "./procedures/makeADDL"
 import { makeSUBL } from "./procedures/makeSUBL"
+import { makeCPA } from "./procedures/makeCPA"
+import { makeCPL } from "./procedures/makeCPL"
 
 export function makeProcedure(
   tokens: Tokens,
@@ -55,8 +57,12 @@ export function makeProcedure(
       return makeSUBA(tokens, labels, flagRegister, grMap, memory)
     case "ADDL":
       return makeADDL(tokens, labels, flagRegister, grMap, memory)
-    case "SUBA":
+    case "SUBL":
       return makeSUBL(tokens, labels, flagRegister, grMap, memory)
+    case "CPA":
+      return makeCPA(tokens, labels, flagRegister, grMap, memory)
+    case "CPL":
+      return makeCPL(tokens, labels, flagRegister, grMap, memory)
     case "JUMP":
       return makeJUMP(tokens, grMap)
     case "JPL":
@@ -70,8 +76,6 @@ export function makeProcedure(
     case "JOV":
       return makeJOV(tokens, flagRegister, grMap)
     case "ADDL":
-      break
-    case "SUBL":
       break
     case "RET":
       return makeRET(tokens, labels, memory)
