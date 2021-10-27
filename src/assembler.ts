@@ -44,7 +44,8 @@ export function assemble(
   labels: Map<string, Label>,
   FR: FlagRegister,
   grMap: Map<string, GeneralRegister>,
-  memory: Memory
+  memory: Memory,
+  SP: GeneralRegister,
 ): { assembleResult: AssembleResult, procMap: ProcMap } {
   if (text == null || text.length == 0) {
     // NOP
@@ -78,7 +79,8 @@ export function assemble(
         labels,
         FR,
         grMap,
-        memory
+        memory,
+        SP,
       )
       if (inst != null) {
         instructions.push(inst)

@@ -20,6 +20,9 @@ import { makeADDL } from "./procedures/makeADDL"
 import { makeSUBL } from "./procedures/makeSUBL"
 import { makeCPA } from "./procedures/makeCPA"
 import { makeCPL } from "./procedures/makeCPL"
+import { makePUSH } from "./procedures/makePUSH"
+import { tokenize } from "./tokenizer"
+import { makePOP } from "./procedures/makePOP"
 
 export function makeProcedure(
   tokens: Tokens,
@@ -27,6 +30,7 @@ export function makeProcedure(
   flagRegister: FlagRegister,
   grMap: Map<string, GeneralRegister>,
   memory: Memory,
+  SP: GeneralRegister,
 ): Instruction | null {
   switch (tokens.operator) {
     case "START":
@@ -37,14 +41,6 @@ export function makeProcedure(
       return execDC(tokens, labels, memory)
     case "DS":
       return execDS(tokens, labels, memory)
-    case "IN":
-      break
-    case "OUT":
-      break
-    case "RPUSH":
-      break
-    case "RPOP":
-      break
     case "LD":
       return makeLD(tokens, labels, flagRegister, grMap, memory)
     case "ST":
@@ -75,8 +71,10 @@ export function makeProcedure(
       return makeJNZ(tokens, flagRegister, grMap)
     case "JOV":
       return makeJOV(tokens, flagRegister, grMap)
-    case "ADDL":
-      break
+    case "PUSH":
+      return makePUSH(tokens, grMap, memory, SP)
+    case "POP":
+      return makePOP(tokens, grMap, memory, SP)
     case "RET":
       return makeRET(tokens, labels, memory)
     default:

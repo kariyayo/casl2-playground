@@ -25,7 +25,7 @@ export class Commet2 {
       this.grMap.set(name, new GeneralRegister(name))
     }
     this.PR.store(startMemAddress)
-    const { assembleResult, procMap } = assemble(startMemAddress, input, this.labels, this.FR, this.grMap, this.memory)
+    const { assembleResult, procMap } = assemble(startMemAddress, input, this.labels, this.FR, this.grMap, this.memory, this.SP)
     this.assembleResult = assembleResult
     this.procMap = procMap
   }

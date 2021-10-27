@@ -24,7 +24,7 @@ describe(`assemble`, () => {
 AAA	DC		1
 			DC		3
 			END`
-    const { assembleResult, procMap } = assemble(startAddress, program, labels, FR, grMap, memory)
+    const { assembleResult, procMap } = assemble(startAddress, program, labels, FR, grMap, memory, SP)
     test(`1L`, () => {
       expect(assembleResult[0].memAddress).toEqual(0x1000)
       expect(assembleResult[0].bytecode).toEqual(null)
