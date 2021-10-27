@@ -1,11 +1,11 @@
 import { Memory } from "../../infra/memory"
-import { Instruction, Label, Tokens } from "../types"
-import { advancePR, GeneralRegister } from "./registerAccessor"
+import { Instruction, Tokens } from "../types"
+import { GeneralRegister, END_ADDRESS } from "./registerAccessor"
 
 export function makeRET(
   tokens: Tokens,
-  labels: Map<string, Label>,
-  memory: Memory
+  memory: Memory,
+  SP: GeneralRegister,
 ): Instruction {
   const opCode = 0x81
   return {
@@ -19,9 +19,14 @@ export function makeRET(
       return {
         bytecode,
         proc: (PR: GeneralRegister) => {
-          // TODO
-          const v = PR.lookup()
-          PR.store(-32678)
+          const sp = SP.lookupLogical()
+          if (sp != END_ADDRESS) {
+            const address = memory.lookupLogical(sp)
+            PR.storeLogical(address)
+            SP.storeLogical(sp+1)
+          } else {
+            PR.store(-32678)
+          }
         }
       }
     }

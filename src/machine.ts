@@ -1,5 +1,5 @@
 import { Memory } from "./infra/memory";
-import { FlagRegister, GeneralRegister } from "./infra/register";
+import { FlagRegister, GeneralRegister, END_ADDRESS } from "./infra/register";
 import { Label } from "./casl2/types";
 import { assemble, AssembleResult, ProcMap } from "./assembler";
 
@@ -9,11 +9,11 @@ export function makeMachine(input: string, startMemAddress: number): Commet2 {
 
 export class Commet2 {
   FR: FlagRegister = new FlagRegister()
-  SP: GeneralRegister = new GeneralRegister("SP")
   grMap: Map<string, GeneralRegister> = new Map()
   PR: GeneralRegister = new GeneralRegister("PR")
 
   memory = new Memory()
+  SP: GeneralRegister = new GeneralRegister("SP")
 
   labels: Map<string, Label> = new Map()
   assembleResult: AssembleResult = []
@@ -28,6 +28,9 @@ export class Commet2 {
     const { assembleResult, procMap } = assemble(startMemAddress, input, this.labels, this.FR, this.grMap, this.memory, this.SP)
     this.assembleResult = assembleResult
     this.procMap = procMap
+
+    this.SP.storeLogical(0x9001)
+    this.memory.store(0x9001, END_ADDRESS)
   }
 
   step(): boolean {

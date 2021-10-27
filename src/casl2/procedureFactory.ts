@@ -76,7 +76,7 @@ export function makeProcedure(
     case "POP":
       return makePOP(tokens, grMap, memory, SP)
     case "RET":
-      return makeRET(tokens, labels, memory)
+      return makeRET(tokens, memory, SP)
     default:
       throw Error("")
   }

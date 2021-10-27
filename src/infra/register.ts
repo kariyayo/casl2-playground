@@ -83,3 +83,5 @@ export class FlagRegister {
     return of + sf + zf
   }
 }
+
+export const END_ADDRESS = -32678
