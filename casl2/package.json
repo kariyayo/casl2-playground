@@ -1,8 +1,7 @@
 {
-  "name": "casl2-web",
+  "name": "casl2",
   "version": "0.1.0",
   "description": "",
-  "main": "src/hello.js",
   "dependencies": {},
   "devDependencies": {
     "@types/jest": "^27.0.1",
