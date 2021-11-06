@@ -78,7 +78,7 @@ export function makeProcedure(
     case "RET":
       return makeRET(tokens, memory, SP)
     default:
-      throw Error("")
+      throw Error(`${tokens.operator} is unknown`)
   }
   return null
 }

@@ -14,7 +14,8 @@
   "type": "module",
   "scripts": {
     "test": "jest --runInBand",
-    "dev": "ts-node src/hello.ts"
+    "dev": "ts-node src/hello.ts",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "bati11",
