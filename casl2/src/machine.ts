@@ -34,15 +34,15 @@ export class Commet2 {
   }
 
   step(): boolean {
-    const next = this.PR.lookup()
-    if (next == -32768) {
-      return false
-    }
-    const row = this.procMap.get(next)
+    const row = this.procMap.get(this.PR.lookup())
     if (row == null) {
       return false
     }
     row.proc(this.PR)
+    const next = this.PR.lookup()
+    if (next == -32678) {
+      return false
+    }
     return true
   }
 }
