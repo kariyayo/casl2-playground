@@ -51,7 +51,11 @@ const COLOR = {
 }
 
 function component() {
-  let assembled = {
+  const globalConf = {
+    startAddress: 2000,
+  }
+
+  const assembled = {
     machine: null,
     inputText: "",
   }
@@ -60,7 +64,7 @@ function component() {
     console.log("=== ASSEMBLE START ===")
     assembled.inputText = inputText
     try {
-      assembled.machine = makeMachine(inputText.replaceAll("  ", "\t"), 2000)
+      assembled.machine = makeMachine(inputText.replaceAll("  ", "\t"), globalConf.startAddress)
     } catch (e) {
       alert(e)
       throw e
@@ -209,15 +213,50 @@ C				DS		1
     }
     container.appendChild(grTable)
 
-    grTable.appendChild(TR(
+    const frTable = document.createElement("table")
+    frTable.appendChild(TR(
       TH("FR"),
-      TD(assembled.machine.FR.toString()),
+      TD(assembled.machine.FR.of() ? "OF: 1" : "OF: 0"),
+      TD(assembled.machine.FR.sf() ? "SF: 1" : "SF: 0"),
+      TD(assembled.machine.FR.zf() ? "ZF: 1" : "ZF: 0"),
     ))
+    container.appendChild(frTable)
 
-    grTable.appendChild(TR(
+    const spTable = document.createElement("table")
+    spTable.appendChild(TR(
       TH("SP"),
       TD(assembled.machine.SP.lookupLogical()),
     ))
+    container.appendChild(spTable)
+
+    const memoryTable = document.createElement("table")
+    memoryTable.appendChild(TR(
+      TH("#"),
+      TH(""),
+      TH(""),
+      TH(""),
+      TH(""),
+      TH(""),
+      TH(""),
+      TH(""),
+      TH(""),
+    ))
+    let i = globalConf.startAddress;
+    const end = i + 8*16
+    while (i < end) {
+      memoryTable.appendChild(TR(
+        TH(i.toString()),
+        TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
+        TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
+        TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
+        TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
+        TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
+        TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
+        TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
+        TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
+      ))
+    }
+    container.appendChild(memoryTable)
   }
 
   return {
