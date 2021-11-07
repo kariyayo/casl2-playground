@@ -45,22 +45,26 @@ function displayOpecode(bytecode) {
     const view = new DataView(bytecode)
     if (bytecode.byteLength >= 2) {
       v = view.getUint8(0).toString(16).padStart(2, "0")
-      v = v + view.getUint8(1).toString(16).padStart(2, "0")
+      v = "0x" + v + view.getUint8(1).toString(16).padStart(2, "0")
     }
     if (bytecode.byteLength >= 4) {
       v = v + " "
-      v = v + view.getUint16(2).toString(16).padStart(4, "0")
+      v = v + "0x" + view.getUint16(2).toString(16).padStart(4, "0")
     }
   }
   return v
 }
 
 const COLOR = {
-  main: "#f5d942",
+  main: "#d9de2f",
   sub: "#a7865a",
-  accent: "#d9de2f",
+  accent: "#f5d942",
   danger: "#dc932a",
   white: "#ffffff",
+}
+
+function toHexString(x) {
+  return "0x" + x.toString(16).padStart(4, "0")
 }
 
 function component() {
@@ -93,15 +97,15 @@ function component() {
   }
 
   const sample = `SAMPLE	START
-				LD		GR1,A
-				LD		GR2,B
-				ADDA	GR1,GR2
-				ST		GR1,C
-				RET
-A				DC		3
-B				DC		5
-C				DS		1
-				END`
+	LD	GR1,A
+	LD	GR2,B
+	ADDA	GR1,GR2
+	ST	GR1,C
+	RET
+A	DC	3
+B	DC	5
+C	DS	1
+	END`
 
   const renderInputArea = (container, assembleResultArea, machineStateArea) => {
     container.appendChild(H2("Input source code"))
@@ -109,6 +113,15 @@ C				DS		1
     const sourceCodeEditor = document.createElement("textarea")
     sourceCodeEditor.cols = 80
     sourceCodeEditor.rows = 20
+    sourceCodeEditor.onkeydown = (event) => {
+      if (event.keyCode != 9 || event.key != "Tab") return
+      event.preventDefault()
+      const pos = sourceCodeEditor.selectionStart
+      const left = sourceCodeEditor.value.substr(0, pos)
+      const right = sourceCodeEditor.value.substr(pos, sourceCodeEditor.value.length)
+      sourceCodeEditor.value = left + "\t" + right
+      sourceCodeEditor.selectionEnd = pos+1
+    }
     sourceCodeEditor.innerHTML = sample
     container.appendChild(sourceCodeEditor)
 
@@ -222,20 +235,24 @@ C				DS		1
     container.innerHTML = ""
 
     container.appendChild(H2("Machine states"))
-    const grTable = document.createElement("table")
+    const statesBox = document.createElement("div")
+    statesBox.id = "machine_states"
+    statesBox.style.display = "flex"
+    statesBox.style.justifyContent = "space-between"
 
+    const leftBox = document.createElement("div")
+    const grTable = document.createElement("table")
     grTable.appendChild(TR(
       TH("PR"),
       TD(assembled.machine.PR.lookupLogical()),
     ))
-
     for (let gr of ["GR0", "GR1", "GR2", "GR3", "GR4", "GR5", "GR6", "GR7"]) {
       grTable.appendChild(TR(
         TH(gr),
         TD(assembled.machine.grMap.get(gr).lookupLogical()),
       ))
     }
-    container.appendChild(grTable)
+    leftBox.appendChild(grTable)
 
     const frTable = document.createElement("table")
     frTable.appendChild(TR(
@@ -244,14 +261,15 @@ C				DS		1
       TD(assembled.machine.FR.sf() ? "SF: 1" : "SF: 0"),
       TD(assembled.machine.FR.zf() ? "ZF: 1" : "ZF: 0"),
     ))
-    container.appendChild(frTable)
+    leftBox.appendChild(frTable)
 
     const spTable = document.createElement("table")
     spTable.appendChild(TR(
       TH("SP"),
       TD(assembled.machine.SP.lookupLogical()),
     ))
-    container.appendChild(spTable)
+    leftBox.appendChild(spTable)
+    statesBox.appendChild(leftBox)
 
     const memoryBox = document.createElement("div")
     const [displayAddressLabel, displayAddressInput] = INPUT_ADDRESS("Display from : ", "display_address")
@@ -286,20 +304,21 @@ C				DS		1
       while (i < end) {
         memoryTable.appendChild(TR(
           TH(i.toString()),
-          TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
-          TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
-          TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
-          TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
-          TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
-          TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
-          TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
-          TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
+          TD(toHexString(assembled.machine.memory.lookupLogical(i++))),
+          TD(toHexString(assembled.machine.memory.lookupLogical(i++))),
+          TD(toHexString(assembled.machine.memory.lookupLogical(i++))),
+          TD(toHexString(assembled.machine.memory.lookupLogical(i++))),
+          TD(toHexString(assembled.machine.memory.lookupLogical(i++))),
+          TD(toHexString(assembled.machine.memory.lookupLogical(i++))),
+          TD(toHexString(assembled.machine.memory.lookupLogical(i++))),
+          TD(toHexString(assembled.machine.memory.lookupLogical(i++))),
         ))
       }
       memoryBox.appendChild(memoryTable)
     }
     renderMemoryTable(globalConf.startAddress)
-    container.appendChild(memoryBox)
+    statesBox.appendChild(memoryBox)
+    container.appendChild(statesBox)
   }
 
   return {

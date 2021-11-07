@@ -1,12 +1,54 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8" />
-<title>Getting Started</title>
+<meta charset="utf-8">
+<title>CASL2 Web</title>
+<link href="https://fonts.googleapis.com/css?family=Titillium+Web" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet">
 <style>
+body {
+  color: #333;
+  font-family: "Titillium Web", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+  margin: 0;
+}
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+#container {
+  width: 1080px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+h1 {
+  color: #d9de2f;
+  text-align: center;
+  font-weight: bold;
+  font-style: italic;
+  font-size: 4rem;
+}
+h2 {
+  border-bottom: dashed 1px #ccc;
+  padding-top: 40px;
+}
+input[type=number] {
+  margin-bottom: 4px;
+}
+textarea {
+  font-family: 'Source Code Pro', monospace;
+  color: white;
+  background-color: black;
+  font-size: 1.2rem;
+  padding: 20px;
+  width: 100%;
+}
 table {
   border-collapse: collapse;
-  margin-bottom: 20px;
+  margin: 0 0 20px 0;
+  display: block;
 }
 th, td {
   border-top: solid 1px #eee;
@@ -17,11 +59,37 @@ th, td {
 th {
   background-color: #eee;
 }
+footer {
+  margin-top: auto;
+  padding: 8px 0;
+}
+ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+li {
+  display: inline-block;
+  padding-right: 16px;
+}
+
+a, a:visited {
+  color: #a7865a;
+}
+
 </style>
 </head>
 <body>
-  <h1>Web CASL2</h1>
+<div id="container">
+  <h1>CASL2 Web</h1>
   <div id="app"></div>
   <script src="js/main.js"></script>
+  <footer>
+    <ul>
+      <li><a href="https://github.com/bati11/casl2-web/blob/main/README.md">Document</a></li>
+      <li><a href="https://github.com/bati11/casl2-web">GitHub</a></li>
+    </ul>
+  </footer>
+</div>
 </body>
 </html>
