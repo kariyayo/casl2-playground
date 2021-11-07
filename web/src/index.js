@@ -26,6 +26,19 @@ function TR(...elms) {
   return row
 }
 
+function INPUT_ADDRESS(labelText, id) {
+  const label = document.createElement("label")
+  label.innerText = labelText
+  label.htmlFor = id
+  const input = document.createElement("input")
+  input.id = id
+  input.type = "number"
+  input.min = 0
+  input.max = 9000
+  input.step = 8
+  return [label, input]
+}
+
 function displayOpecode(bytecode) {
   let v = ""
   if (bytecode != null) {
@@ -62,6 +75,7 @@ function component() {
 
   function assemble(inputText) {
     console.log("=== ASSEMBLE START ===")
+    console.log("startAddress: ", globalConf.startAddress)
     assembled.inputText = inputText
     try {
       assembled.machine = makeMachine(inputText.replaceAll("  ", "\t"), globalConf.startAddress)
@@ -92,16 +106,26 @@ C				DS		1
   const renderInputArea = (container, assembleResultArea, machineStateArea) => {
     container.appendChild(H2("Input source code"))
 
-    const input = document.createElement("textarea")
-    input.cols = 80
-    input.rows = 20
-    input.innerHTML = sample
-    container.appendChild(input)
+    const sourceCodeEditor = document.createElement("textarea")
+    sourceCodeEditor.cols = 80
+    sourceCodeEditor.rows = 20
+    sourceCodeEditor.innerHTML = sample
+    container.appendChild(sourceCodeEditor)
+
+    const globalConfBox = document.createElement("div")
+    const [startAddressLabel, startAddressInput] = INPUT_ADDRESS("Start address : ", "input_text_start_address")
+    startAddressInput.value = globalConf.startAddress
+    startAddressInput.oninput = () => {
+      globalConf.startAddress = Number(startAddressInput.value)
+    }
+    globalConfBox.appendChild(startAddressLabel)
+    globalConfBox.appendChild(startAddressInput)
+    container.appendChild(globalConfBox)
 
     const assembleButton = document.createElement("button")
     assembleButton.textContent = "Assemble"
     assembleButton.onclick = () => {
-      assemble(input.value)
+      assemble(sourceCodeEditor.value)
       renderAssembleResultArea(assembleResultArea, machineStateArea)
       renderMachineState(machineStateArea)
     }
@@ -229,34 +253,53 @@ C				DS		1
     ))
     container.appendChild(spTable)
 
-    const memoryTable = document.createElement("table")
-    memoryTable.appendChild(TR(
-      TH("#"),
-      TH(""),
-      TH(""),
-      TH(""),
-      TH(""),
-      TH(""),
-      TH(""),
-      TH(""),
-      TH(""),
-    ))
-    let i = globalConf.startAddress;
-    const end = i + 8*16
-    while (i < end) {
-      memoryTable.appendChild(TR(
-        TH(i.toString()),
-        TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
-        TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
-        TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
-        TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
-        TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
-        TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
-        TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
-        TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
-      ))
+    const memoryBox = document.createElement("div")
+    const [displayAddressLabel, displayAddressInput] = INPUT_ADDRESS("Display from : ", "display_address")
+    displayAddressInput.value = globalConf.startAddress
+    displayAddressInput.onchange = () => {
+      console.log(Number(displayAddressInput.value))
+      renderMemoryTable(Number(displayAddressInput.value))
     }
-    container.appendChild(memoryTable)
+    memoryBox.appendChild(displayAddressLabel)
+    memoryBox.appendChild(displayAddressInput)
+    function renderMemoryTable(startAddress) {
+      const id = "memory_table"
+      const target = document.getElementById(id)
+      if (target) {
+        memoryBox.removeChild(target)
+      }
+      const memoryTable = document.createElement("table")
+      memoryTable.id = id
+      memoryTable.appendChild(TR(
+        TH("address"),
+        TH(""),
+        TH(""),
+        TH(""),
+        TH(""),
+        TH(""),
+        TH(""),
+        TH(""),
+        TH(""),
+      ))
+      let i = startAddress;
+      const end = i + 8*16
+      while (i < end) {
+        memoryTable.appendChild(TR(
+          TH(i.toString()),
+          TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
+          TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
+          TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
+          TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
+          TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
+          TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
+          TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
+          TD(assembled.machine.memory.lookupLogical(i++).toString(16).padStart(4, "0")),
+        ))
+      }
+      memoryBox.appendChild(memoryTable)
+    }
+    renderMemoryTable(globalConf.startAddress)
+    container.appendChild(memoryBox)
   }
 
   return {
