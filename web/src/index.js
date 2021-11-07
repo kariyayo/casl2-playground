@@ -1,4 +1,4 @@
-import { Commet2, makeMachine } from "../lib/machine"
+import { makeMachine } from "../lib/machine"
 
 function H2(text) {
   const header = document.createElement("h2")
@@ -42,32 +42,36 @@ function displayOpecode(bytecode) {
   return v
 }
 
+const COLOR = {
+  main: "#f5d942",
+  sub: "#a7865a",
+  accent: "#d9de2f",
+  danger: "#dc932a",
+  white: "#ffffff",
+}
+
 function component() {
-  let machine = null
+  let assembled = {
+    machine: null,
+    inputText: "",
+  }
 
-  const assemble = (inputText) => {
+  function assemble(inputText) {
     console.log("=== ASSEMBLE START ===")
-    machine = makeMachine(inputText.replaceAll("  ", "\t"), 2000)
+    assembled.inputText = inputText
+    try {
+      assembled.machine = makeMachine(inputText.replaceAll("  ", "\t"), 2000)
+    } catch (e) {
+      alert(e)
+      throw e
+    }
     console.log("=== ASSEMBLE END ===")
+    console.log(assembled.machine.assembleResult)
   }
 
-  const step = () => {
-    const ok = machine.step()
-    if (ok) {
-      console.log(machine)
-    }
-  }
-
-  const run = (inputText) => {
-    console.log("=== START ===")
-    const machine = makeMachine(inputText.replaceAll("  ", "\t"), 2000)
-    console.log(machine.assembleResult)
-    console.log(machine)
-    while(machine.step()) {
-      console.log(machine)
-    }
-    console.log("=== END ===")
-    return machine
+  function step() {
+    const hasNext = assembled.machine.step()
+    return hasNext
   }
 
   const sample = `SAMPLE	START
@@ -101,25 +105,25 @@ C				DS		1
   }
 
   const renderAssembleResultArea = (container, machineStateArea) => {
-    console.log(machine.assembleResult)
     container.innerHTML = ""
 
     container.appendChild(H2("Assemble result"))
 
     const assembleResult = document.createElement("table")
+    assembleResult.id = "assemble_result"
     assembleResult.appendChild(TR(
       TH("#"),
-      TH("address"),
       TH("opecode"),
+      TH("address"),
       TH(""),
       TH(""),
       TH(""),
     ))
-    for (let line of machine.assembleResult) {
+    for (let line of assembled.machine.assembleResult) {
       assembleResult.appendChild(TR(
         TD(line.tokens.lineNum),
-        TD(line.memAddress),
         TD(displayOpecode(line.bytecode)),
+        TD(line.tokens.lineNum == 0 ? "" : line.memAddress),
         TD(line.tokens.label),
         TD(line.tokens.operator),
         TD(line.tokens.operand),
@@ -127,17 +131,66 @@ C				DS		1
     }
     container.appendChild(assembleResult)
 
+    function coloring() {
+      const rows = document.querySelectorAll("#assemble_result tr")
+      rows.forEach((row, i) => {
+        if (i == 0) return
+        const address = row.querySelectorAll("td").item(2).innerText
+        if (assembled.machine.PR.lookupLogical() == address) {
+          row.style.backgroundColor = COLOR.accent
+        } else {
+          row.style.backgroundColor = null
+        }
+      })
+    }
+
+    const resetButton = document.createElement("button")
+    resetButton.textContent = "Reset"
+    resetButton.onclick = () => {
+      assemble(assembled.inputText)
+      renderAssembleResultArea(container, machineStateArea)
+      renderMachineState(machineStateArea)
+    }
+
+    const stepOverButton = document.createElement("button")
+    stepOverButton.textContent = "Step over"
+    stepOverButton.onclick = () => {
+      const hasNext = step()
+      if (hasNext) {
+        coloring()
+        renderMachineState(machineStateArea)
+      } else {
+        stepOverButton.disabled = true
+        runButton.disabled = true
+      }
+    }
+
     const runButton = document.createElement("button")
     runButton.textContent = "Run"
     runButton.onclick = () => {
-      step()
-      renderMachineState(machineStateArea)
+      let hasNext = true
+      const intervalId = setInterval(() => {
+        hasNext = step()
+        if (hasNext) {
+          coloring()
+          renderMachineState(machineStateArea)
+        } else {
+          clearInterval(intervalId)
+        }
+      }, 500)
+      stepOverButton.disabled = true
+      runButton.disabled = true
     }
+
+    container.appendChild(stepOverButton)
     container.appendChild(runButton)
+    container.appendChild(resetButton)
+
+    coloring()
   }
 
   const renderMachineState = (container) => {
-    console.log(machine)
+    console.log(assembled.machine)
     container.innerHTML = ""
 
     container.appendChild(H2("Machine states"))
@@ -145,25 +198,25 @@ C				DS		1
 
     grTable.appendChild(TR(
       TH("PR"),
-      TD(machine.PR.lookupLogical()),
+      TD(assembled.machine.PR.lookupLogical()),
     ))
 
     for (let gr of ["GR0", "GR1", "GR2", "GR3", "GR4", "GR5", "GR6", "GR7"]) {
       grTable.appendChild(TR(
         TH(gr),
-        TD(machine.grMap.get(gr).lookupLogical()),
+        TD(assembled.machine.grMap.get(gr).lookupLogical()),
       ))
     }
     container.appendChild(grTable)
 
     grTable.appendChild(TR(
       TH("FR"),
-      TD(machine.FR.toString()),
+      TD(assembled.machine.FR.toString()),
     ))
 
     grTable.appendChild(TR(
       TH("SP"),
-      TD(machine.SP.lookupLogical()),
+      TD(assembled.machine.SP.lookupLogical()),
     ))
   }
 
