@@ -44,6 +44,8 @@ AAA	DC		1
       expect(assembleResult[1].tokens.label).toEqual("")
       expect(assembleResult[1].tokens.operator).toEqual("LAD")
       expect(assembleResult[1].tokens.operand).toEqual("GR1,8")
+      expect(memory.lookupLogical(0x1000)).toEqual(0x1210)
+      expect(memory.lookupLogical(0x1001)).toEqual(0x0008)
     })
 
     test(`3L`, () => {
@@ -55,6 +57,8 @@ AAA	DC		1
       expect(assembleResult[2].tokens.label).toEqual("")
       expect(assembleResult[2].tokens.operator).toEqual("LD")
       expect(assembleResult[2].tokens.operand).toEqual("GR2,AAA")
+      expect(memory.lookupLogical(0x1002)).toEqual(0x1020)
+      expect(memory.lookupLogical(0x1003)).toEqual(0x1007)
     })
 
     test(`4L`, () => {
@@ -66,6 +70,8 @@ AAA	DC		1
       expect(assembleResult[3].tokens.label).toEqual("")
       expect(assembleResult[3].tokens.operator).toEqual("ADDA")
       expect(assembleResult[3].tokens.operand).toEqual("GR1,AAA,GR2")
+      expect(memory.lookupLogical(0x1004)).toEqual(0x2012)
+      expect(memory.lookupLogical(0x1005)).toEqual(0x1007)
     })
 
     test(`5L`, () => {
@@ -77,6 +83,7 @@ AAA	DC		1
       expect(assembleResult[4].tokens.label).toEqual("")
       expect(assembleResult[4].tokens.operator).toEqual("RET")
       expect(assembleResult[4].tokens.operand).toEqual("")
+      expect(memory.lookupLogical(0x1006)).toEqual(0x8100)
     })
 
     test(`6L`, () => {
@@ -88,6 +95,7 @@ AAA	DC		1
       expect(assembleResult[5].tokens.label).toEqual("AAA")
       expect(assembleResult[5].tokens.operator).toEqual("DC")
       expect(assembleResult[5].tokens.operand).toEqual("1")
+      expect(memory.lookupLogical(0x1007)).toEqual(0x0001)
     })
 
     test(`7L`, () => {
@@ -99,6 +107,7 @@ AAA	DC		1
       expect(assembleResult[6].tokens.label).toEqual("")
       expect(assembleResult[6].tokens.operator).toEqual("DC")
       expect(assembleResult[6].tokens.operand).toEqual("3")
+      expect(memory.lookupLogical(0x1008)).toEqual(0x0003)
     })
 
     test(`8L`, () => {

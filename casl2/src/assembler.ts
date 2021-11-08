@@ -101,6 +101,11 @@ export function assemble(
         assembleResult.push({ memAddress, bytecode: null, tokens: inst.tokens })
       } else {
         const { bytecode, proc } = generated
+        const bs = new Uint8Array(bytecode)
+        memory.storeLogical(memAddress, (bs[0] << 8) + bs[1])
+        if (inst.wordLength == 2) {
+          memory.storeLogical(memAddress+1, (bs[2] << 8) + bs[3])
+        }
         assembleResult.push({ memAddress, bytecode, tokens: inst.tokens })
         procMap.set(memAddress, { bytecode, proc })
         memAddress = memAddress + inst.wordLength

@@ -191,7 +191,7 @@ BBB		DC		1
       expect(machine.FR.zf()).toEqual(false)
 
       // RET
-      expect(machine.step()).toEqual(true)
+      expect(machine.step()).toEqual(false)
       expect(machine.PR.lookup()).toEqual(-32678)
       expect(machine.step()).toEqual(false)
     })
