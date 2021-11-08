@@ -23,6 +23,7 @@ import { makeCPL } from "./procedures/makeCPL"
 import { makePUSH } from "./procedures/makePUSH"
 import { tokenize } from "./tokenizer"
 import { makePOP } from "./procedures/makePOP"
+import { makeST } from "./procedures/makeST"
 
 export function makeProcedure(
   tokens: Tokens,
@@ -44,7 +45,7 @@ export function makeProcedure(
     case "LD":
       return makeLD(tokens, labels, flagRegister, grMap, memory)
     case "ST":
-      break
+      return makeST(tokens, labels, grMap, memory)
     case "LAD":
       return makeLAD(tokens, labels, grMap, memory)
     case "ADDA":
