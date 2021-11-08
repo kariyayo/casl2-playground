@@ -123,6 +123,9 @@ C	DS	1
       sourceCodeEditor.selectionEnd = pos+1
     }
     sourceCodeEditor.innerHTML = sample
+    sourceCodeEditor.autofocus = true
+    sourceCodeEditor.selectionStart = sourceCodeEditor.value.length
+    sourceCodeEditor.selectionEnd = sourceCodeEditor.selectionStart
     container.appendChild(sourceCodeEditor)
 
     const globalConfBox = document.createElement("div")
