@@ -2,6 +2,7 @@ import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
 import { GeneralRegister, isGeneralRegister, getGrOrThrow, grToBytecode, advancePR } from "./registerAccessor"
+import { isAddress } from "./strings"
 
 export function makeST(
   tokens: Tokens,
@@ -25,8 +26,7 @@ export function makeST(
     gen: () => {
       // e.g. ST GR1,adr => [0x1110, address]
       let operandAddress = 0
-      const r = /#?[0-9]+/
-      if (r.test(value)) {
+      if (isAddress(value)) {
         operandAddress = Number(value.replace("#", ""))
       } else {
         const label = getLabelOrThrow(value, labels)

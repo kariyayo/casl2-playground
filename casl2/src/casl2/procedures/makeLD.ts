@@ -2,6 +2,7 @@ import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
 import { GeneralRegister, isGeneralRegister, getGrOrThrow, grToBytecode, advancePR, FlagRegister } from "./registerAccessor"
+import { isAddress } from "./strings"
 
 export function makeLD(
   tokens: Tokens,
@@ -49,8 +50,7 @@ export function makeLD(
     const opCode = 0x10
     const wordLength = 2
     let getAddress = () => 0
-    const r = /#?[0-9]+/
-    if (r.test(value)) {
+    if (isAddress(value)) {
       getAddress = () => Number(value.replace("#", ""))
     } else {
       const label = getLabelOrThrow(value, labels)

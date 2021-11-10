@@ -1,6 +1,7 @@
 import { Memory } from "../../infra/memory"
 import { Instruction, Tokens } from "../types"
 import { GeneralRegister, getGrOrThrow, grToBytecode, advancePR } from "./registerAccessor"
+import { isAddress } from "./strings"
 
 export function makePUSH(
   tokens: Tokens,
@@ -14,9 +15,8 @@ export function makePUSH(
 
   const opCode = 0x70
   const wordLength = 2
-  const r = /#?[0-9]+/
-  if (!r.test(value)) {
-    throw new Error(`operand should be number: ${tokens}`)
+  if (!isAddress(value)) {
+    throw new Error(`operand should be address: ${tokens}`)
   }
   const operandAddress = Number(value.replace("#", ""))
   const indexGR = grx == null ? null : getGrOrThrow(grx, grMap)

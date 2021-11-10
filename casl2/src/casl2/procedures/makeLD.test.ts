@@ -10,10 +10,10 @@ describe(`makeLD`, () => {
       instructionNum: 4,
       label: "AA",
       operator: "LD",
-      operand: "GR1,#5000",
+      operand: "GR1,A5000",
     }
     const labels = new Map<string, Label>()
-    labels.set("AA", {label: "AA", memAddress: 2000})
+    labels.set("A5000", {label: "A5000", memAddress: 5000})
     const flagRegister = new FlagRegister()
     const grMap = new Map<string, GeneralRegister>()
     for (let i = 0; i <= 7; i++) {
