@@ -252,7 +252,7 @@ C	DS	1
     for (let gr of ["GR0", "GR1", "GR2", "GR3", "GR4", "GR5", "GR6", "GR7"]) {
       grTable.appendChild(TR(
         TH(gr),
-        TD(assembled.machine.grMap.get(gr).lookupLogical()),
+        TD(assembled.machine.grMap.get(gr).lookup()),
       ))
     }
     leftBox.appendChild(grTable)
