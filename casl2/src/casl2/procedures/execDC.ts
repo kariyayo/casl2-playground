@@ -2,7 +2,7 @@ import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
 import { advancePR, GeneralRegister } from "./registerAccessor"
-import { isNumeric } from "./strings"
+import { isHexadecimal, isNumeric } from "./strings"
 
 export function execDC(
   tokens: Tokens,
@@ -11,8 +11,18 @@ export function execDC(
 ): Instruction {
   const operand = tokens.operand
   const labelText = tokens.label
-  if (!isNumeric(operand)) {
+  let operandValue = 0
+  if (isNumeric(operand)) {
+    operandValue = Number(operand)
+  } else if (isHexadecimal(operand)) {
+    operandValue = parseInt(operand.replace("#", ""), 16)
+  } else {
     throw new Error(`operand should be positive number: ${tokens.operand}`)
+  }
+  if (operandValue < -32768) {
+    throw new Error(`operand should be greater than -32769: ${tokens.operand}`)
+  } else if (operandValue > 65535) {
+    throw new Error(`operand should be less than 65536: ${tokens.operand}`)
   }
   const wordLength = 1
   return {
@@ -25,11 +35,15 @@ export function execDC(
         throw Error(`address is null.`)
       }
       // load constant value in memory
-      memory.store(address, operand)
+      if (operandValue > 32767) {
+        memory.storeLogical(address, operandValue)
+      } else {
+        memory.store(address, operandValue)
+      }
 
       const bytecode = new ArrayBuffer(2)
       const view = new DataView(bytecode)
-      view.setInt16(0, Number(operand))
+      view.setInt16(0, operandValue)
       return {
         bytecode,
         proc: (PR: GeneralRegister) => {

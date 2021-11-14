@@ -8,6 +8,11 @@ export function isNumeric(s: string): boolean {
 }
 const numFmt = /^-?[1-9]?[0-9]+$/
 
+export function isHexadecimal(s: string): boolean {
+  return hexFmt.test(s)
+}
+const hexFmt = /^#[0-9A-Fa-f]{4}$/
+
 export function isAddress(s: string): boolean {
   return addressFmt.test(s)
 }
