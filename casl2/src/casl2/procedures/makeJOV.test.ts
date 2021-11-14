@@ -1,4 +1,4 @@
-import { Tokens } from "../types"
+import { Label, Tokens } from "../types"
 import { makeJOV } from "./makeJOV"
 import { getGrOrThrow, GeneralRegister, FlagRegister } from "./registerAccessor"
 
@@ -14,7 +14,7 @@ describe(`makeJOV`, () => {
         expected: { wordLength: 2, bytecode: [0x66, 0x00, 500], PR: 500 }
     },
     {
-        params: { frOverflow: false, tokens: create({ label: "BB", operator: "JOV", operand: "500,GR3" })},
+        params: { frOverflow: false, tokens: create({ label: "BB", operator: "JOV", operand: "AA,GR3" })},
         expected: { wordLength: 2, bytecode: [0x66, 0x03, 500], PR: 2 }
     },
     {
@@ -25,6 +25,9 @@ describe(`makeJOV`, () => {
     // given
     const flagRegister = new FlagRegister()
     flagRegister.overflowFlag = params.frOverflow
+
+    const labels = new Map<string, Label>()
+    labels.set("AA", {label: "AA", memAddress: 500})
 
     const grMap = new Map<string, GeneralRegister>()
     for (let i = 0; i <= 7; i++) {
@@ -37,8 +40,8 @@ describe(`makeJOV`, () => {
 
     // when, then
 
-    const res = makeJOV(params.tokens, flagRegister, grMap)
-    test(`makeJMI returns Instruction`, () => {
+    const res = makeJOV(params.tokens, labels, flagRegister, grMap)
+    test(`makeJOV returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
       expect(new DataView(res?.gen()!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])

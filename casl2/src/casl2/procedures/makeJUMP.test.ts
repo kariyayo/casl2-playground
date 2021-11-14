@@ -1,4 +1,4 @@
-import { Tokens } from "../types"
+import { Label, Tokens } from "../types"
 import { makeJUMP } from "./makeJUMP"
 import { getGrOrThrow, GeneralRegister } from "./registerAccessor"
 
@@ -13,8 +13,15 @@ describe(`makeJUMP`, () => {
         tokens: create({ label: "BB", operator: "JUMP", operand: "500,GR3" }),
         expected: { wordLength: 2, bytecode: [0x64, 0x03, 500], PR: 520 }
     },
+    {
+        tokens: create({ label: "BB", operator: "JUMP", operand: "AA,GR3" }),
+        expected: { wordLength: 2, bytecode: [0x64, 0x03, 500], PR: 520 }
+    },
   ])(`$# :: $tokens`, ({tokens, expected}) => {
     // given
+    const labels = new Map<string, Label>()
+    labels.set("AA", {label: "AA", memAddress: 500})
+
     const grMap = new Map<string, GeneralRegister>()
     for (let i = 0; i <= 7; i++) {
       const name = `GR${i}`
@@ -26,7 +33,7 @@ describe(`makeJUMP`, () => {
 
     // when, then
 
-    const res = makeJUMP(tokens, grMap)
+    const res = makeJUMP(tokens, labels, grMap)
     test(`makeJUMP returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
@@ -45,6 +52,9 @@ describe(`makeJUMP`, () => {
     { tokens: create({ label: "BB", operator: "JUMP", operand: "#a500" }) },
   ])(`$# :: $tokens`, ({tokens}) => {
     // given
+    const labels = new Map<string, Label>()
+    labels.set("AA", {label: "AA", memAddress: 500})
+
     const grMap = new Map<string, GeneralRegister>()
     for (let i = 0; i <= 7; i++) {
       const name = `GR${i}`
@@ -54,7 +64,7 @@ describe(`makeJUMP`, () => {
 
     // when, then
     test(`makeJUMP throw Error`, () => {
-      expect(() => makeJUMP(tokens, grMap)).toThrow()
+      expect(() => makeJUMP(tokens, labels, grMap)).toThrow()
     })
   })
 })

@@ -1,4 +1,4 @@
-import { Tokens } from "../types"
+import { Label, Tokens } from "../types"
 import { makeJNZ } from "./makeJNZ"
 import { getGrOrThrow, GeneralRegister, FlagRegister } from "./registerAccessor"
 
@@ -14,7 +14,7 @@ describe(`makeJNZ`, () => {
         expected: { wordLength: 2, bytecode: [0x62, 0x00, 500], PR: 2 }
     },
     {
-        params: { frZero: false, tokens: create({ label: "BB", operator: "JNZ", operand: "500,GR3" })},
+        params: { frZero: false, tokens: create({ label: "BB", operator: "JNZ", operand: "AA,GR3" })},
         expected: { wordLength: 2, bytecode: [0x62, 0x03, 500], PR: 520 }
     },
     {
@@ -25,6 +25,9 @@ describe(`makeJNZ`, () => {
     // given
     const flagRegister = new FlagRegister()
     flagRegister.zeroFlag = params.frZero
+
+    const labels = new Map<string, Label>()
+    labels.set("AA", {label: "AA", memAddress: 500})
 
     const grMap = new Map<string, GeneralRegister>()
     for (let i = 0; i <= 7; i++) {
@@ -37,8 +40,8 @@ describe(`makeJNZ`, () => {
 
     // when, then
 
-    const res = makeJNZ(params.tokens, flagRegister, grMap)
-    test(`makeJMI returns Instruction`, () => {
+    const res = makeJNZ(params.tokens, labels, flagRegister, grMap)
+    test(`makeJNZ returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
       expect(new DataView(res?.gen()!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])

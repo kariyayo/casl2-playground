@@ -1,4 +1,4 @@
-import { Tokens } from "../types"
+import { Label, Tokens } from "../types"
 import { makeJMI } from "./makeJMI"
 import { getGrOrThrow, GeneralRegister, FlagRegister } from "./registerAccessor"
 
@@ -14,7 +14,7 @@ describe(`makeJMI`, () => {
         expected: { wordLength: 2, bytecode: [0x61, 0x00, 500], PR: 500 }
     },
     {
-        params: { frNegative: false, tokens: create({ label: "BB", operator: "JMI", operand: "500,GR3" })},
+        params: { frNegative: false, tokens: create({ label: "BB", operator: "JMI", operand: "AA,GR3" })},
         expected: { wordLength: 2, bytecode: [0x61, 0x03, 500], PR: 2 }
     },
     {
@@ -25,6 +25,9 @@ describe(`makeJMI`, () => {
     // given
     const flagRegister = new FlagRegister()
     flagRegister.signFlag = params.frNegative
+
+    const labels = new Map<string, Label>()
+    labels.set("AA", {label: "AA", memAddress: 500})
 
     const grMap = new Map<string, GeneralRegister>()
     for (let i = 0; i <= 7; i++) {
@@ -37,7 +40,7 @@ describe(`makeJMI`, () => {
 
     // when, then
 
-    const res = makeJMI(params.tokens, flagRegister, grMap)
+    const res = makeJMI(params.tokens, labels, flagRegister, grMap)
     test(`makeJMI returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)

@@ -61,17 +61,17 @@ export function makeProcedure(
     case "CPL":
       return makeCPL(tokens, labels, flagRegister, grMap, memory)
     case "JUMP":
-      return makeJUMP(tokens, grMap)
+      return makeJUMP(tokens, labels, grMap)
     case "JPL":
-      return makeJPL(tokens, flagRegister, grMap)
+      return makeJPL(tokens, labels, flagRegister, grMap)
     case "JMI":
-      return makeJMI(tokens, flagRegister, grMap)
+      return makeJMI(tokens, labels, flagRegister, grMap)
     case "JZE":
-      return makeJZE(tokens, flagRegister, grMap)
+      return makeJZE(tokens, labels, flagRegister, grMap)
     case "JNZ":
-      return makeJNZ(tokens, flagRegister, grMap)
+      return makeJNZ(tokens, labels, flagRegister, grMap)
     case "JOV":
-      return makeJOV(tokens, flagRegister, grMap)
+      return makeJOV(tokens, labels, flagRegister, grMap)
     case "PUSH":
       return makePUSH(tokens, grMap, memory, SP)
     case "POP":
