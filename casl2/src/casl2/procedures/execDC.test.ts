@@ -13,7 +13,14 @@ describe(`makeDC`, () => {
         tokens: { lineNum: 0, instructionNum: 2, label: "AA", operator: "DC", operand: "30" },
         currentMemAddress: 1010,
       },
-      expected: 30
+      expected: { value1: 30, value2: null, wordLength: 1 }
+    },
+    {
+      params: {
+        tokens: { lineNum: 0, instructionNum: 2, label: "AA", operator: "DC", operand: "30,#000A,-1" },
+        currentMemAddress: 1010,
+      },
+      expected: { value1: 30, value2: 10, value3: -1, wordLength: 3 }
     },
   ])(`$# :: $params`, ({params, expected}) => {
     // given
@@ -24,11 +31,17 @@ describe(`makeDC`, () => {
     const res = execDC(params.tokens, labels, memory)
     test(`makeDC() returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
-      expect(res?.wordLength).toBe(1)
+      expect(res?.wordLength).toBe(expected.wordLength)
     })
     res?.gen(params.currentMemAddress)
     test(`Label "${params.tokens.label}" should be loaded address`, () => {
-      expect(memory.lookup(getLabelOrThrow(params.tokens.label, labels).memAddress)).toEqual(expected)
+      expect(memory.lookup(getLabelOrThrow(params.tokens.label, labels).memAddress)).toEqual(expected.value1)
+      if (expected.value2 != null) {
+        expect(memory.lookup(getLabelOrThrow(params.tokens.label, labels).memAddress + 1)).toEqual(expected.value2)
+      }
+      if (expected.value3 != null) {
+        expect(memory.lookup(getLabelOrThrow(params.tokens.label, labels).memAddress + 2)).toEqual(expected.value3)
+      }
     })
   })
 
