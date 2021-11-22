@@ -76,6 +76,38 @@ export class FlagRegister {
     }
   }
 
+  setByCPA(v: number) {
+    this.overflowFlag = false
+    if (v < 0) {
+      // negative
+      this.signFlag = true
+    } else {
+      this.signFlag = false
+    }
+    if (v == 0) {
+      this.zeroFlag = true
+    } else {
+      // not zero
+      this.zeroFlag = false
+    }
+  }
+
+  setLogicalByCPL(v: number) {
+    this.overflowFlag = false
+    if (v < 0) {
+      // negative
+      this.signFlag = true
+    } else {
+      this.signFlag = false
+    }
+    if (v == 0) {
+      this.zeroFlag = true
+    } else {
+      // not zero
+      this.zeroFlag = false
+    }
+  }
+
   toString() {
     const of = this.overflowFlag ? "1" : "0"
     const sf = this.signFlag ? "1" : "0"

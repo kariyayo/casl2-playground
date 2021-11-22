@@ -34,7 +34,7 @@ export function makeCPL(
           bytecode,
           proc: (PR: GeneralRegister) => {
             const v = operand1GR.lookupLogical() - operand2GR.lookupLogical()
-            flagRegister.setLogical(v)
+            flagRegister.setLogicalByCPL(v)
             advancePR(PR, wordLength)
           }
         }
@@ -70,7 +70,7 @@ export function makeCPL(
               address = address + indexGR.lookup()
             }
             const v = operand1GR.lookupLogical() - memory.lookupLogical(address)
-            flagRegister.setLogical(v)
+            flagRegister.setLogicalByCPL(v)
             advancePR(PR, wordLength)
           }
         }

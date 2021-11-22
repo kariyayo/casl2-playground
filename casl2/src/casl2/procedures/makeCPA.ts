@@ -34,7 +34,7 @@ export function makeCPA(
           bytecode,
           proc: (PR: GeneralRegister) => {
             const v = operand1GR.lookup() - operand2GR.lookup()
-            flagRegister.set(v)
+            flagRegister.setByCPA(v)
             advancePR(PR, wordLength)
           }
         }
@@ -70,7 +70,7 @@ export function makeCPA(
               address = address + indexGR.lookup()
             }
             const v = operand1GR.lookup() - memory.lookup(address)
-            flagRegister.set(v)
+            flagRegister.setByCPA(v)
             advancePR(PR, wordLength)
           }
         }

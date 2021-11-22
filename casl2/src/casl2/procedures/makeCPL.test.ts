@@ -7,7 +7,7 @@ describe(`makeCPL`, () => {
   describe.each([
     {
         tokens: create({operator: "CPL", operand: "GR1,GR2"}),
-        expected: { wordLength: 1, bytecode: [0x45, 0x12], GR1: 100, FR: "110"}
+        expected: { wordLength: 1, bytecode: [0x45, 0x12], GR1: 100, FR: "010"}
     },
     {
         tokens: create({ operator: "CPL", operand: "GR1,AA" }),
@@ -90,12 +90,22 @@ describe(`makeCPL`, () => {
     {
       name: "CPL GR,GR -> 32768",
       tokens: create({ operator: "CPL", operand: "GR3,GR1" }),
-      expected: { wordLength: 1, bytecode:[0x45, 0x31], GR3: 32769, FR: "010"}
+      expected: { wordLength: 1, bytecode:[0x45, 0x31], GR3: 32769, FR: "000"}
+    },
+    {
+      name: "CPL GR,GR -> -32768",
+      tokens: create({ operator: "CPL", operand: "GR1,GR3" }),
+      expected: { wordLength: 1, bytecode:[0x45, 0x13], GR3: 32769, FR: "010"}
     },
     {
       name: "CPL GR,memAddress -> 32768",
       tokens: create({ operator: "CPL", operand: "GR3,BB" }),
-      expected: { wordLength: 2, bytecode:[0x41, 0x30, 1016], GR3: 32769, FR: "010"}
+      expected: { wordLength: 2, bytecode:[0x41, 0x30, 1016], GR3: 32769, FR: "000"}
+    },
+    {
+      name: "CPL GR,memAddress -> -1",
+      tokens: create({ operator: "CPL", operand: "GR1,AA" }),
+      expected: { wordLength: 2, bytecode:[0x41, 0x10, 1000], GR3: 32769, FR: "010"}
     },
   ])(`$# :: $name`, ({name, tokens, expected}) => {
     // given
