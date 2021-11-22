@@ -2,7 +2,7 @@ import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
 import { GeneralRegister, getGrOrThrow, grToBytecode, advancePR } from "./registerAccessor"
-import { isNumeric } from "./strings"
+import { isHexadecimal, isNumeric } from "./strings"
 
 export function makeLAD(
   tokens: Tokens,
@@ -22,6 +22,8 @@ export function makeLAD(
   let getAddress = () => 0
   if (isNumeric(value)) {
     getAddress = () => Number(value)
+  } else if (isHexadecimal(value)) {
+    getAddress = () => Number(parseInt(value.replace("#", ""), 16))
   } else {
     const label = getLabelOrThrow(value, labels)
     getAddress = () => label.memAddress
