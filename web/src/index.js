@@ -109,13 +109,14 @@ C	DS	1
     sourceCodeEditor.cols = 80
     sourceCodeEditor.rows = 20
     sourceCodeEditor.onkeydown = (event) => {
-      if (event.keyCode != 9 || event.key != "Tab") return
-      event.preventDefault()
-      const pos = sourceCodeEditor.selectionStart
-      const left = sourceCodeEditor.value.substr(0, pos)
-      const right = sourceCodeEditor.value.substr(pos, sourceCodeEditor.value.length)
-      sourceCodeEditor.value = left + "\t" + right
-      sourceCodeEditor.selectionEnd = pos+1
+      if (event.keyCode == 9 || event.key == "Tab" || event.keyCode == 32 || event.key == "") {
+        event.preventDefault()
+        const pos = sourceCodeEditor.selectionStart
+        const left = sourceCodeEditor.value.substr(0, pos)
+        const right = sourceCodeEditor.value.substr(pos, sourceCodeEditor.value.length)
+        sourceCodeEditor.value = left + "\t" + right
+        sourceCodeEditor.selectionEnd = pos+1
+      }
     }
     sourceCodeEditor.innerHTML = sample
     sourceCodeEditor.autofocus = true
