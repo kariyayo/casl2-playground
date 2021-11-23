@@ -24,6 +24,9 @@ import { makePUSH } from "./procedures/makePUSH"
 import { tokenize } from "./tokenizer"
 import { makePOP } from "./procedures/makePOP"
 import { makeST } from "./procedures/makeST"
+import { makeOR } from "./procedures/makeOR"
+import { makeAND } from "./procedures/makeAND"
+import { makeXOR } from "./procedures/makeXOR"
 
 export function makeProcedure(
   tokens: Tokens,
@@ -72,6 +75,12 @@ export function makeProcedure(
       return makeJNZ(tokens, labels, flagRegister, grMap)
     case "JOV":
       return makeJOV(tokens, labels, flagRegister, grMap)
+    case "OR":
+      return makeOR(tokens, labels, flagRegister, grMap, memory)
+    case "AND":
+      return makeAND(tokens, labels, flagRegister, grMap, memory)
+    case "XOR":
+      return makeXOR(tokens, labels, flagRegister, grMap, memory)
     case "PUSH":
       return makePUSH(tokens, grMap, memory, SP)
     case "POP":
