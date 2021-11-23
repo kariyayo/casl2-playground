@@ -27,6 +27,10 @@ import { makeST } from "./procedures/makeST"
 import { makeOR } from "./procedures/makeOR"
 import { makeAND } from "./procedures/makeAND"
 import { makeXOR } from "./procedures/makeXOR"
+import { makeSLA } from "./procedures/makeSLA"
+import { makeSRA } from "./procedures/makeSRA"
+import { makeSLL } from "./procedures/makeSLL"
+import { makeSRL } from "./procedures/makeSRL"
 
 export function makeProcedure(
   tokens: Tokens,
@@ -81,6 +85,14 @@ export function makeProcedure(
       return makeAND(tokens, labels, flagRegister, grMap, memory)
     case "XOR":
       return makeXOR(tokens, labels, flagRegister, grMap, memory)
+    case "SLL":
+      return makeSLL(tokens, labels, flagRegister, grMap, memory)
+    case "SRL":
+      return makeSRL(tokens, labels, flagRegister, grMap, memory)
+    case "SLA":
+      return makeSLA(tokens, labels, flagRegister, grMap, memory)
+    case "SRA":
+      return makeSRA(tokens, labels, flagRegister, grMap, memory)
     case "PUSH":
       return makePUSH(tokens, grMap, memory, SP)
     case "POP":
