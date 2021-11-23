@@ -10,11 +10,11 @@ export function tokenize(line: string, lineNum: number, instructionNum: number):
 	if (result.length != 3) {
 		return new Error(`invalid token num. L${lineNum+1} line:"${line}"`)
 	}
-	return {
+	return new Tokens(
 		lineNum,
 		instructionNum,
-		label: result[0],
-		operator: result[1],
-		operand: result[2],
-	}
+		result[0],
+		result[1],
+		result[2],
+	)
 }
