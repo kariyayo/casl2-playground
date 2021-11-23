@@ -81,12 +81,7 @@ function component() {
     console.log("=== ASSEMBLE START ===")
     console.log("startAddress: ", globalConf.startAddress)
     assembled.inputText = inputText
-    try {
-      assembled.machine = makeMachine(inputText.replaceAll("  ", "\t"), globalConf.startAddress)
-    } catch (e) {
-      alert(e)
-      throw e
-    }
+    assembled.machine = makeMachine(inputText.replaceAll("  ", "\t"), globalConf.startAddress)
     console.log("=== ASSEMBLE END ===")
     console.log(assembled.machine.assembleResult)
   }
@@ -138,10 +133,23 @@ C	DS	1
     globalConfBox.appendChild(startAddressInput)
     container.appendChild(globalConfBox)
 
+    const assembleErrorMessage = document.createElement("p")
+    assembleErrorMessage.style.fontSize = "1.2rem"
+    assembleErrorMessage.style.fontWeight = "bold"
+    assembleErrorMessage.style.color = COLOR.danger
+    container.appendChild(assembleErrorMessage)
+
     const assembleButton = document.createElement("button")
     assembleButton.textContent = "Assemble"
     assembleButton.onclick = () => {
-      assemble(sourceCodeEditor.value)
+      try {
+        assembleErrorMessage.innerText = ""
+        assemble(sourceCodeEditor.value)
+      } catch(e) {
+        assembleErrorMessage.innerText = e.message
+        alert(e)
+        throw e
+      }
       renderAssembleResultArea(assembleResultArea, machineStateArea)
       renderMachineState(machineStateArea)
     }
