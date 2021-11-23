@@ -147,8 +147,12 @@ C	DS	1
         assembleErrorMessage.innerText = ""
         assemble(sourceCodeEditor.value)
       } catch(e) {
-        assembleErrorMessage.innerText = e.message
-        alert(e)
+        let errorMessage = e.message
+        if (e.tokens) {
+          errorMessage = "L" + (e.tokens.lineNum + 1) + ": " + e.message
+        }
+        assembleErrorMessage.innerText = errorMessage
+        alert(errorMessage)
         throw e
       }
       renderAssembleResultArea(assembleResultArea, machineStateArea)
