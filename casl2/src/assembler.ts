@@ -3,6 +3,7 @@ import { FlagRegister, GeneralRegister } from "./infra/register";
 import { aggregateByLabel } from "./casl2/parser";
 import { makeProcedure } from "./casl2/procedureFactory";
 import { Instruction, Tokens } from "./casl2/types";
+import { AssembleError } from "./AssembleError";
 
 type Label = {
   label: string
@@ -74,18 +75,26 @@ export function assemble(
     // set instructions by label
     const instructions = new Array<Instruction>()
     lines.forEach((tokens) => {
-      const inst = makeProcedure(
-        tokens,
-        labels,
-        FR,
-        grMap,
-        memory,
-        SP,
-      )
-      if (inst != null) {
-        instructions.push(inst)
-        const wordLength = inst.wordLength
-        memAddress = memAddress + wordLength
+      try {
+        const inst = makeProcedure(
+          tokens,
+          labels,
+          FR,
+          grMap,
+          memory,
+          SP,
+        )
+        if (inst != null) {
+          instructions.push(inst)
+          const wordLength = inst.wordLength
+          memAddress = memAddress + wordLength
+        }
+      } catch(e) {
+        if (e instanceof Error) {
+          throw new AssembleError(tokens, e)
+        } else {
+          throw e
+        }
       }
     })
     labelInstructionMap.set(label, instructions)
