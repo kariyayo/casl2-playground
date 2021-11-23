@@ -46,8 +46,12 @@ export function makeSRL(
             b = b + indexGR.lookup()
           }
           const v = operand1GR.lookupLogical() >>> b
+          let overflowFlag = false
+          if (((operand1GR.lookupLogical() >> (b - 1)) & 1) !== 0) {
+            overflowFlag = true
+          }
           operand1GR.store(v)
-          flagRegister.set(v)
+          flagRegister.setWithOverflowFlag(v, overflowFlag)
           advancePR(PR, wordLength)
         }
       }

@@ -52,8 +52,12 @@ export function makeSLA(
           } else {
             v = v & ~(1<<15)
           }
+          let overflowFlag = false
+          if (((operand1GR.lookupLogical() >> (16 -1 - b)) & 1) !== 0) {
+            overflowFlag = true
+          }
           operand1GR.store(v)
-          flagRegister.set(v)
+          flagRegister.setWithOverflowFlag(v, overflowFlag)
           advancePR(PR, wordLength)
         }
       }

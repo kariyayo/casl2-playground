@@ -52,6 +52,11 @@ export class FlagRegister {
     this.setSfZf(v)
   }
 
+  setWithOverflowFlag(v: number, overflowFlag: boolean) {
+    this.overflowFlag = overflowFlag
+    this.setSfZf(v)
+  }
+
   setLogical(v: number) {
     if (0 <= v && v <= 65535) {
       this.overflowFlag = false

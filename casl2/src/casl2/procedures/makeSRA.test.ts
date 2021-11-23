@@ -8,15 +8,15 @@ describe(`makeSRA`, () => {
   describe.each([
     {
         tokens: create({ operator: "SRA", operand: "GR1,2" }),
-        expected: { wordLength: 2, bytecode: [0x51, 0x10, 2], GR: 0b0001, FR: "000" }
+        expected: { wordLength: 2, bytecode: [0x51, 0x10, 2], afterGR1: 0b0001, FR: "000" }
     },
     {
         tokens: create({ operator: "SRA", operand: "GR1,3" }),
-        expected: { wordLength: 2, bytecode: [0x51, 0x10, 3], GR: 0b0000, FR: "001" }
+        expected: { wordLength: 2, bytecode: [0x51, 0x10, 3], afterGR1: 0b0000, FR: "101" }
     },
     {
         tokens: create({ operator: "SRA", operand: "GR1,1,GR3" }),
-        expected: { wordLength: 2, bytecode: [0x51, 0x13, 1], GR: 0b0001, FR: "000" }
+        expected: { wordLength: 2, bytecode: [0x51, 0x13, 1], afterGR1: 0b0001, FR: "000" }
     },
   ])(`$# :: $tokens`, ({tokens, expected}) => {
     // given
@@ -45,7 +45,7 @@ describe(`makeSRA`, () => {
     })
     res?.gen()!.proc(new GeneralRegister("PR"))
     test(`GR1 should be added value`, () => {
-      expect(grMap.get("GR1")?.lookup()).toEqual(expected.GR)
+      expect(grMap.get("GR1")?.lookup()).toEqual(expected.afterGR1)
     })
     test(`FR should be applied`, () => {
       expect(flagRegister.toString()).toEqual(expected.FR)
@@ -61,7 +61,7 @@ describe(`makeSRA`, () => {
     {
         beforeGR2: 0b0111000000000001,
         tokens: create({ operator: "SRA", operand: "GR2,1" }),
-        expected: { bytecode: [0x51, 0x20, 1], afterGR2: 0b0011100000000000, FR: "000" }
+        expected: { bytecode: [0x51, 0x20, 1], afterGR2: 0b0011100000000000, FR: "100" }
     },
   ])(`$# :: $tokens`, ({tokens, beforeGR2, expected}) => {
     // given
