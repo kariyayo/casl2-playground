@@ -31,6 +31,7 @@ import { makeSLA } from "./procedures/makeSLA"
 import { makeSRA } from "./procedures/makeSRA"
 import { makeSLL } from "./procedures/makeSLL"
 import { makeSRL } from "./procedures/makeSRL"
+import { makeCALL } from "./procedures/makeCALL"
 
 export function makeProcedure(
   tokens: Tokens,
@@ -97,6 +98,8 @@ export function makeProcedure(
       return makePUSH(tokens, grMap, memory, SP)
     case "POP":
       return makePOP(tokens, grMap, memory, SP)
+    case "CALL":
+      return makeCALL(tokens, labels, grMap, memory, SP)
     case "RET":
       return makeRET(tokens, memory, SP)
     default:

@@ -1,5 +1,5 @@
 import { Memory } from "../../infra/memory"
-import { Tokens } from "../types"
+import { Label, Tokens } from "../types"
 import { makeCALL } from "./makeCALL"
 import { GeneralRegister } from "./registerAccessor"
 
@@ -17,7 +17,13 @@ describe(`makeCALL`, () => {
         tokens: create({ label: "AA", operator: "CALL", operand: "#1388,GR3" }),
         expected: { wordLength: 2, bytecode: [0x80, 0x03, 5000], changedPR: 5002 }
     },
+    {
+        tokens: create({ label: "AA", operator: "CALL", operand: "AA" }),
+        expected: { wordLength: 2, bytecode: [0x80, 0x00, 2000], changedPR: 2000 }
+    },
   ])(`$# :: $tokens`, ({tokens, expected}) => {
+    const labels = new Map<string, Label>()
+    labels.set("AA", {label: "AA", memAddress: 2000})
     const grMap = new Map<string, GeneralRegister>()
     for (let i = 0; i <= 7; i++) {
       const name = `GR${i}`
@@ -30,7 +36,7 @@ describe(`makeCALL`, () => {
     const SP = new GeneralRegister("SP")
     SP.storeLogical(0x9000)
 
-    const res = makeCALL(tokens, grMap, memory, SP)
+    const res = makeCALL(tokens, labels, grMap, memory, SP)
     test(`makeCALL() returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
@@ -46,7 +52,7 @@ describe(`makeCALL`, () => {
       expect(SP.lookupLogical()).toEqual(0x8FFF)
     })
     test(`memory(SP) should be loaded PR before change`, () => {
-      expect(memory.lookupLogical(SP.lookupLogical())).toEqual(0x2000)
+      expect(memory.lookupLogical(SP.lookupLogical())).toEqual(0x2002)
     })
     test(`PR is changed`, () => {
       expect(PR.lookupLogical()).toEqual(expected.changedPR)
