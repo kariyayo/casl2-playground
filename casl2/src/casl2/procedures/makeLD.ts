@@ -2,7 +2,7 @@ import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
 import { GeneralRegister, isGeneralRegister, getGrOrThrow, grToBytecode, advancePR, FlagRegister } from "./registerAccessor"
-import { isAddress } from "./strings"
+import { isAddress, normalizeAddress } from "./strings"
 
 export function makeLD(
   tokens: Tokens,
@@ -51,7 +51,7 @@ export function makeLD(
     const wordLength = 2
     let getAddress = () => 0
     if (isAddress(value)) {
-      getAddress = () => Number(value.replace("#", ""))
+      getAddress = () => normalizeAddress(value)
     } else {
       const label = getLabelOrThrow(value, labels)
       getAddress = () => label.memAddress

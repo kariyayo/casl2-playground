@@ -17,3 +17,11 @@ export function isAddress(s: string): boolean {
   return addressFmt.test(s)
 }
 const addressFmt = /^#?[0-9]+$/
+
+export function normalizeAddress(s: string): number {
+  if (s.startsWith("#")) {
+    return parseInt(s.substring(1), 16)
+  } else {
+    return parseInt(s, 10)
+  }
+}

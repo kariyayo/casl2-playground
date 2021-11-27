@@ -1,7 +1,7 @@
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
 import { GeneralRegister, getGrOrThrow, grToBytecode, setPR } from "./registerAccessor"
-import { isAddress } from "./strings"
+import { isAddress, normalizeAddress } from "./strings"
 
 export function makeJUMP(
   tokens: Tokens,
@@ -17,7 +17,7 @@ export function makeJUMP(
 
   let getAddress = () => 0
   if (isAddress(operand)) {
-    getAddress = () => Number(operand.replace("#", ""))
+    getAddress = () => normalizeAddress(operand)
   } else {
     const label = getLabelOrThrow(operand, labels)
     getAddress = () => label.memAddress

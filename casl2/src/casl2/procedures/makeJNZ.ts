@@ -1,7 +1,7 @@
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
 import { advancePR, FlagRegister, GeneralRegister, getGrOrThrow, grToBytecode, setPR } from "./registerAccessor"
-import { isAddress } from "./strings"
+import { isAddress, normalizeAddress } from "./strings"
 
 export function makeJNZ(
   tokens: Tokens,
@@ -18,7 +18,7 @@ export function makeJNZ(
 
   let getAddress = () => 0
   if (isAddress(operand)) {
-    getAddress = () => Number(operand.replace("#", ""))
+    getAddress = () => normalizeAddress(operand)
   } else {
     const label = getLabelOrThrow(operand, labels)
     getAddress = () => label.memAddress

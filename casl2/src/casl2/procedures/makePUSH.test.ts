@@ -6,11 +6,15 @@ import { GeneralRegister } from "./registerAccessor"
 describe(`makePUSH`, () => {
   describe.each([
     {
-        tokens: create({ label: "AA", operator: "PUSH", operand: "#5000" }),
+        tokens: create({ label: "AA", operator: "PUSH", operand: "5000" }),
         expected: { wordLength: 2, bytecode: [0x70, 0x00, 5000], value: 5000 }
     },
     {
-        tokens: create({ label: "AA", operator: "PUSH", operand: "#5000,GR3" }),
+        tokens: create({ label: "AA", operator: "PUSH", operand: "5000,GR3" }),
+        expected: { wordLength: 2, bytecode: [0x70, 0x03, 5000], value: 5002 }
+    },
+    {
+        tokens: create({ label: "AA", operator: "PUSH", operand: "#1388,GR3" }),
         expected: { wordLength: 2, bytecode: [0x70, 0x03, 5000], value: 5002 }
     },
   ])(`$# :: $tokens`, ({tokens, expected}) => {
