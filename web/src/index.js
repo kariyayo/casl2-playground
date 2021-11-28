@@ -177,10 +177,11 @@ C	DS	1
       TH(""),
     ))
     for (let line of assembled.machine.assembleResult) {
+      const operator = line.tokens.operator
       assembleResult.appendChild(TR(
         TD(line.tokens.lineNum),
         TD(displayOpecode(line.bytecode)),
-        TD(line.tokens.lineNum == 0 ? "" : line.memAddress),
+        TD(operator.startsWith("START") || operator.startsWith("END") ? "" : line.memAddress),
         TD(line.tokens.label),
         TD(line.tokens.operator),
         TD(line.tokens.operand),
