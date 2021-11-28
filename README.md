@@ -1,5 +1,4 @@
-# CASL2-Web
-
+# CASL2 Playground
 ```
 $ cd <PROJECT_ROOT>/casl2
 $ npm build # output to <PROJECT_ROOT>/web/lib/
