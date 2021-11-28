@@ -22,6 +22,13 @@ describe(`makeDC`, () => {
       },
       expected: { value1: 30, value2: 10, value3: -1, wordLength: 3 }
     },
+    {
+      params: {
+        tokens: { lineNum: 0, instructionNum: 2, label: "AA", operator: "DC", operand: "'ABC'" },
+        currentMemAddress: 1010,
+      },
+      expected: { value1: 65, value2: 66, value3: 67, wordLength: 3 }
+    },
   ])(`$# :: $params`, ({params, expected}) => {
     // given
     const memory = new Memory()

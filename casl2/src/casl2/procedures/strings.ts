@@ -13,6 +13,11 @@ export function isHexadecimal(s: string): boolean {
 }
 const hexFmt = /^#[0-9A-Fa-f]{4}$/
 
+export function isJisX0201(s: string): boolean {
+  return jisX0201Fmt.test(s)
+}
+const jisX0201Fmt = /^[\s!"#$%&'()*+,-./0-9:;<=>?@A-Z\[¥\]^_`a-z{|}~]+$/
+
 export function isAddress(s: string): boolean {
   return addressFmt.test(s)
 }

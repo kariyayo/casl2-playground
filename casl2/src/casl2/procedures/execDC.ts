@@ -2,7 +2,7 @@ import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
 import { advancePR, GeneralRegister } from "./registerAccessor"
-import { isHexadecimal, isNumeric } from "./strings"
+import { isHexadecimal, isJisX0201, isNumeric } from "./strings"
 
 export function execDC(
   tokens: Tokens,
@@ -11,22 +11,34 @@ export function execDC(
 ): Instruction {
   const labelText = tokens.label
   const operand = tokens.operand
-  const values = operand.split(",").map(v => {
-    let intVal = 0
-    if (isNumeric(v)) {
-      intVal = Number(v)
-    } else if (isHexadecimal(v)) {
-      intVal = parseInt(v.replace("#", ""), 16)
-    } else {
-      throw new Error(`operand should be positive number: ${tokens.operand}`)
+  let values: Array<number> = []
+  if (operand.startsWith("'")) {
+    if (!operand.endsWith("'")) {
+      throw new Error(`operand starts with "'", but not ends with "'": ${tokens.operand}`)
     }
-    if (intVal < -32768) {
-      throw new Error(`operand should be greater than -32769: ${tokens.operand}`)
-    } else if (intVal > 65535) {
-      throw new Error(`operand should be less than 65536: ${tokens.operand}`)
+    const s = operand.substring(1, operand.length - 1)
+    if (!isJisX0201(s)) {
+      throw new Error(`operand is string, then should be character set of JIS X 0201: ${tokens.operand}`)
     }
-    return intVal
-  })
+    values = s.split("").map(c => c.charCodeAt(0))
+  } else {
+    values = operand.split(",").map(v => {
+      let intVal = 0
+      if (isNumeric(v)) {
+        intVal = Number(v)
+      } else if (isHexadecimal(v)) {
+        intVal = parseInt(v.replace("#", ""), 16)
+      } else {
+        throw new Error(`operand should be positive number: ${tokens.operand}`)
+      }
+      if (intVal < -32768) {
+        throw new Error(`operand should be greater than -32769: ${tokens.operand}`)
+      } else if (intVal > 65535) {
+        throw new Error(`operand should be less than 65536: ${tokens.operand}`)
+      }
+      return intVal
+    })
+  }
   const wordLength = values.length
   return {
     wordLength,
