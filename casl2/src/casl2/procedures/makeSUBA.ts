@@ -9,7 +9,6 @@ export function makeSUBA(
   labels: Map<string, Label>,
   flagRegister: FlagRegister,
   grMap: Map<string, GeneralRegister>,
-  memory: Memory
 ): Instruction {
   const ts = tokens.operand.split(",")
   const operand1 = ts[0]
@@ -57,7 +56,7 @@ export function makeSUBA(
     return {
       wordLength,
       tokens,
-      gen: () => {
+      gen: (memory: Memory) => {
         // e.g. SUBA GR1,adr
         const operandAddress = getAddress()
         const bytecode = new ArrayBuffer(4)

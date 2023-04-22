@@ -33,17 +33,17 @@ describe(`makeSLA`, () => {
 
     // when, then
 
-    const res = makeSLA(tokens, labels, flagRegister, grMap, memory)
+    const res = makeSLA(tokens, labels, flagRegister, grMap)
     test(`makeSLA returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
-      expect(new DataView(res?.gen()!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
-      expect(new DataView(res?.gen()!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
+      expect(new DataView(res?.gen(memory)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
+      expect(new DataView(res?.gen(memory)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
       if (expected.wordLength == 2) {
-        expect(new DataView(res?.gen()!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
+        expect(new DataView(res?.gen(memory)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
       }
     })
-    res?.gen()!.proc(new GeneralRegister("PR"))
+    res?.gen(memory)!.proc(new GeneralRegister("PR"))
     test(`GR1 should be added value`, () => {
       expect(grMap.get("GR1")?.lookup()).toEqual(expected.afterGR1)
     })
@@ -77,8 +77,8 @@ describe(`makeSLA`, () => {
 
     // when, then
 
-    const res = makeSLA(tokens, labels, flagRegister, grMap, memory)
-    res?.gen()!.proc(new GeneralRegister("PR"))
+    const res = makeSLA(tokens, labels, flagRegister, grMap)
+    res?.gen(memory)!.proc(new GeneralRegister("PR"))
     test(`GR2 should be added value`, () => {
       expect(grMap.get("GR2")?.lookup()).toEqual(expected.afterGR2)
     })

@@ -5,7 +5,6 @@ import { GeneralRegister, getGrOrThrow, grToBytecode, advancePR } from "./regist
 export function makePOP(
   tokens: Tokens,
   grMap: Map<string, GeneralRegister>,
-  memory: Memory,
   SP: GeneralRegister
 ): Instruction {
   const ts = tokens.operand.split(",")
@@ -17,7 +16,7 @@ export function makePOP(
   return {
     wordLength,
     tokens,
-    gen: () => {
+    gen: (memory: Memory) => {
       const bytecode = new ArrayBuffer(4)
       const view = new DataView(bytecode)
       view.setUint8(0, opCode)

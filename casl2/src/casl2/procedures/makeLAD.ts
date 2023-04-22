@@ -8,7 +8,6 @@ export function makeLAD(
   tokens: Tokens,
   labels: Map<string, Label>,
   grMap: Map<string, GeneralRegister>,
-  memory: Memory
 ): Instruction {
   const ts = tokens.operand.split(",")
   const target = ts[0]
@@ -32,7 +31,7 @@ export function makeLAD(
   return {
     wordLength,
     tokens,
-    gen: () => {
+    gen: (memory: Memory) => {
       // e.g. LAD GR1,adr => [0x1210, address]
       const operandAddress = getAddress()
       const bytecode = new ArrayBuffer(4)

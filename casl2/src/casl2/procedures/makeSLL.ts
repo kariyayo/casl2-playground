@@ -1,4 +1,3 @@
-import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
 import { GeneralRegister, FlagRegister, isGeneralRegister, getGrOrThrow, grToBytecode, advancePR } from "./registerAccessor"
@@ -9,7 +8,6 @@ export function makeSLL(
   labels: Map<string, Label>,
   flagRegister: FlagRegister,
   grMap: Map<string, GeneralRegister>,
-  memory: Memory
 ): Instruction {
   const ts = tokens.operand.split(",")
   const operand1 = ts[0]

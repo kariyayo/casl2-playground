@@ -81,7 +81,6 @@ export function assemble(
           labels,
           FR,
           grMap,
-          memory,
           SP,
         )
         if (inst != null) {
@@ -105,7 +104,7 @@ export function assemble(
   labelInstructionMap.forEach((insts, label) => {
     let memAddress = label.memAddress
     insts.forEach(inst => {
-      const generated = inst.gen(memAddress)
+      const generated = inst.gen(memory, memAddress)
       if (generated == null) {
         assembleResult.push({ memAddress, bytecode: null, tokens: inst.tokens })
       } else {

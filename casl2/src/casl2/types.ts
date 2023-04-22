@@ -1,3 +1,4 @@
+import { Memory } from "../infra/memory"
 import { GeneralRegister } from "../infra/register"
 
 export type Label = {
@@ -8,7 +9,7 @@ export type Label = {
 export type Instruction = {
   wordLength: number
   tokens: Tokens
-  gen: (currentMemAddress?: number) => null | {
+  gen: (memory: Memory, currentMemAddress?: number) => null | {
     bytecode: ArrayBuffer
     proc: (PR: GeneralRegister) => void
   }

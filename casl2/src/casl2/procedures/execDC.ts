@@ -7,7 +7,6 @@ import { isHexadecimal, isJisX0201, isNumeric } from "./strings"
 export function execDC(
   tokens: Tokens,
   labels: Map<string, Label>,
-  memory: Memory
 ): Instruction {
   const labelText = tokens.label
   const operand = tokens.operand
@@ -43,7 +42,7 @@ export function execDC(
   return {
     wordLength,
     tokens,
-    gen: (currentMemAddress) => {
+    gen: (memory: Memory, currentMemAddress?: number) => {
       const address =
         labelText == "" ? currentMemAddress : getLabelOrThrow(labelText, labels).memAddress
       if (address == null) {

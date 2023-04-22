@@ -4,14 +4,13 @@ import { GeneralRegister, END_ADDRESS } from "./registerAccessor"
 
 export function makeRET(
   tokens: Tokens,
-  memory: Memory,
   SP: GeneralRegister,
 ): Instruction {
   const opCode = 0x81
   return {
     wordLength: 1,
     tokens,
-    gen: () => {
+    gen: (memory: Memory) => {
       const bytecode = new ArrayBuffer(2)
       const view = new DataView(bytecode)
       view.setUint8(0, opCode)

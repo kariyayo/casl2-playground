@@ -1,5 +1,4 @@
 import { FlagRegister, GeneralRegister } from "../infra/register"
-import { Memory } from "../infra/memory"
 import { Instruction, Label, Tokens } from "./types"
 import { execDC } from "./procedures/execDC"
 import { makeLD } from "./procedures/makeLD"
@@ -38,36 +37,35 @@ export function makeProcedure(
   labels: Map<string, Label>,
   flagRegister: FlagRegister,
   grMap: Map<string, GeneralRegister>,
-  memory: Memory,
   SP: GeneralRegister,
 ): Instruction | null {
   switch (tokens.operator) {
     case "START":
-      return execSTART(tokens, labels, memory)
+      return execSTART(tokens, labels)
     case "END":
-      return execEND(tokens, labels, memory)
+      return execEND(tokens, labels)
     case "DC":
-      return execDC(tokens, labels, memory)
+      return execDC(tokens, labels)
     case "DS":
-      return execDS(tokens, labels, memory)
+      return execDS(tokens, labels)
     case "LD":
-      return makeLD(tokens, labels, flagRegister, grMap, memory)
+      return makeLD(tokens, labels, flagRegister, grMap)
     case "ST":
-      return makeST(tokens, labels, grMap, memory)
+      return makeST(tokens, labels, grMap)
     case "LAD":
-      return makeLAD(tokens, labels, grMap, memory)
+      return makeLAD(tokens, labels, grMap)
     case "ADDA":
-      return makeADDA(tokens, labels, flagRegister, grMap, memory)
+      return makeADDA(tokens, labels, flagRegister, grMap)
     case "SUBA":
-      return makeSUBA(tokens, labels, flagRegister, grMap, memory)
+      return makeSUBA(tokens, labels, flagRegister, grMap)
     case "ADDL":
-      return makeADDL(tokens, labels, flagRegister, grMap, memory)
+      return makeADDL(tokens, labels, flagRegister, grMap)
     case "SUBL":
-      return makeSUBL(tokens, labels, flagRegister, grMap, memory)
+      return makeSUBL(tokens, labels, flagRegister, grMap)
     case "CPA":
-      return makeCPA(tokens, labels, flagRegister, grMap, memory)
+      return makeCPA(tokens, labels, flagRegister, grMap)
     case "CPL":
-      return makeCPL(tokens, labels, flagRegister, grMap, memory)
+      return makeCPL(tokens, labels, flagRegister, grMap)
     case "JUMP":
       return makeJUMP(tokens, labels, grMap)
     case "JPL":
@@ -81,27 +79,27 @@ export function makeProcedure(
     case "JOV":
       return makeJOV(tokens, labels, flagRegister, grMap)
     case "OR":
-      return makeOR(tokens, labels, flagRegister, grMap, memory)
+      return makeOR(tokens, labels, flagRegister, grMap)
     case "AND":
-      return makeAND(tokens, labels, flagRegister, grMap, memory)
+      return makeAND(tokens, labels, flagRegister, grMap)
     case "XOR":
-      return makeXOR(tokens, labels, flagRegister, grMap, memory)
+      return makeXOR(tokens, labels, flagRegister, grMap)
     case "SLL":
-      return makeSLL(tokens, labels, flagRegister, grMap, memory)
+      return makeSLL(tokens, labels, flagRegister, grMap)
     case "SRL":
-      return makeSRL(tokens, labels, flagRegister, grMap, memory)
+      return makeSRL(tokens, labels, flagRegister, grMap)
     case "SLA":
-      return makeSLA(tokens, labels, flagRegister, grMap, memory)
+      return makeSLA(tokens, labels, flagRegister, grMap)
     case "SRA":
-      return makeSRA(tokens, labels, flagRegister, grMap, memory)
+      return makeSRA(tokens, labels, flagRegister, grMap)
     case "PUSH":
-      return makePUSH(tokens, grMap, memory, SP)
+      return makePUSH(tokens, grMap, SP)
     case "POP":
-      return makePOP(tokens, grMap, memory, SP)
+      return makePOP(tokens, grMap, SP)
     case "CALL":
-      return makeCALL(tokens, labels, grMap, memory, SP)
+      return makeCALL(tokens, labels, grMap, SP)
     case "RET":
-      return makeRET(tokens, memory, SP)
+      return makeRET(tokens, SP)
     default:
       throw Error(`${tokens.operator} is unknown`)
   }

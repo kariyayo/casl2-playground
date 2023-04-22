@@ -9,7 +9,6 @@ export function makeXOR(
   labels: Map<string, Label>,
   flagRegister: FlagRegister,
   grMap: Map<string, GeneralRegister>,
-  memory: Memory
 ): Instruction {
   const ts = tokens.operand.split(",")
   const operand1 = ts[0]
@@ -57,7 +56,7 @@ export function makeXOR(
     return {
       wordLength,
       tokens,
-      gen: () => {
+      gen: (memory: Memory) => {
         // e.g. XOR GR1,adr
         const operandAddress = getAddress()
         const bytecode = new ArrayBuffer(4)

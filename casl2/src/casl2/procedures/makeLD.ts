@@ -9,7 +9,6 @@ export function makeLD(
   labels: Map<string, Label>,
   flagRegister: FlagRegister,
   grMap: Map<string, GeneralRegister>,
-  memory: Memory
 ): Instruction {
   const ts = tokens.operand.split(",")
   const target = ts[0]
@@ -60,7 +59,7 @@ export function makeLD(
     return {
       wordLength,
       tokens,
-      gen: () => {
+      gen: (memory: Memory) => {
         // e.g. LD GR1,adr => [0x1010, address]
         const operandAddress = getAddress()
         const bytecode = new ArrayBuffer(4)

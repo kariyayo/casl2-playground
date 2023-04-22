@@ -8,7 +8,6 @@ export function makeCALL(
   tokens: Tokens,
   labels: Map<string, Label>,
   grMap: Map<string, GeneralRegister>,
-  memory: Memory,
   SP: GeneralRegister
 ): Instruction {
   const ts = tokens.operand.split(",")
@@ -28,7 +27,7 @@ export function makeCALL(
   return {
     wordLength,
     tokens,
-    gen: () => {
+    gen: (memory: Memory) => {
       const operandAddress = getAddress()
       const bytecode = new ArrayBuffer(4)
       const view = new DataView(bytecode)

@@ -7,7 +7,6 @@ import { isDigits } from "./strings"
 export function execDS(
   tokens: Tokens,
   labels: Map<string, Label>,
-  memory: Memory
 ): Instruction {
   const operand = tokens.operand
   const labelText = tokens.label
@@ -19,7 +18,7 @@ export function execDS(
   return {
     wordLength,
     tokens,
-    gen: (currentMemAddress) => {
+    gen: (memory: Memory, currentMemAddress) => {
       const address =
         labelText == "" ? currentMemAddress : getLabelOrThrow(labelText, labels).memAddress
       if (address == null) {

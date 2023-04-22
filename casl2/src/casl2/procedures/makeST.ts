@@ -8,7 +8,6 @@ export function makeST(
   tokens: Tokens,
   labels: Map<string, Label>,
   grMap: Map<string, GeneralRegister>,
-  memory: Memory
 ): Instruction {
   const ts = tokens.operand.split(",")
   const src = ts[0]
@@ -23,7 +22,7 @@ export function makeST(
   return {
     wordLength,
     tokens,
-    gen: () => {
+    gen: (memory: Memory) => {
       // e.g. ST GR1,adr => [0x1110, address]
       let operandAddress = 0
       if (isAddress(value)) {

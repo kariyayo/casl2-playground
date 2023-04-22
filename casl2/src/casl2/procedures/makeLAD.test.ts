@@ -32,15 +32,15 @@ describe(`makeLAD`, () => {
 
     // when, then
 
-    const res = makeLAD(tokens, labels, grMap, memory)
+    const res = makeLAD(tokens, labels, grMap)
     test(`makeLAD returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
-      expect(new DataView(res?.gen()!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
-      expect(new DataView(res?.gen()!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
-      expect(new DataView(res?.gen()!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
+      expect(new DataView(res?.gen(memory)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
+      expect(new DataView(res?.gen(memory)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
+      expect(new DataView(res?.gen(memory)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
     })
-    res?.gen()!.proc(new GeneralRegister("PR"))
+    res?.gen(memory)!.proc(new GeneralRegister("PR"))
     test(`GR1 should be loaded address`, () => {
       expect(grMap.get("GR1")?.lookup()).toEqual(expected.GR)
     })
@@ -61,7 +61,7 @@ describe(`makeLAD`, () => {
 
     // when, then
     test(`makeLAD throw Error`, () => {
-      expect(() => makeLAD(tokens, labels, grMap, memory)).toThrow()
+      expect(() => makeLAD(tokens, labels, grMap)).toThrow()
     })
   })
 })
