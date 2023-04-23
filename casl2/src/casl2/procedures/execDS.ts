@@ -4,10 +4,7 @@ import { getLabelOrThrow } from "./labelAccessor"
 import { advancePR, GeneralRegister } from "./registerAccessor"
 import { isDigits } from "./strings"
 
-export function execDS(
-  tokens: Tokens,
-  labels: Map<string, Label>,
-): Instruction {
+export function execDS(tokens: Tokens): Instruction {
   const operand = tokens.operand
   const labelText = tokens.label
   if (!isDigits(operand)) {
@@ -18,7 +15,11 @@ export function execDS(
   return {
     wordLength,
     tokens,
-    gen: (memory: Memory, currentMemAddress) => {
+    gen: (
+      memory: Memory,
+      labels: Map<string, Label>,
+      currentMemAddress?: number
+    ) => {
       const address =
         labelText == "" ? currentMemAddress : getLabelOrThrow(labelText, labels).memAddress
       if (address == null) {

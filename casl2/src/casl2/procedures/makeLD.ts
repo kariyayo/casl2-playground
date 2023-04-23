@@ -6,7 +6,6 @@ import { isAddress, normalizeAddress } from "./strings"
 
 export function makeLD(
   tokens: Tokens,
-  labels: Map<string, Label>,
   flagRegister: FlagRegister,
   grMap: Map<string, GeneralRegister>,
 ): Instruction {
@@ -48,20 +47,23 @@ export function makeLD(
     // memory -> GR
     const opCode = 0x10
     const wordLength = 2
-    let getAddress = () => 0
-    if (isAddress(value)) {
-      getAddress = () => normalizeAddress(value)
-    } else {
-      const label = getLabelOrThrow(value, labels)
-      getAddress = () => label.memAddress
-    }
     const indexGR = grx == null ? null : getGrOrThrow(grx, grMap)
     return {
       wordLength,
       tokens,
-      gen: (memory: Memory) => {
+      gen: (
+        memory: Memory,
+        labels: Map<string, Label>,
+        currentMemAddress?: number
+      ) => {
         // e.g. LD GR1,adr => [0x1010, address]
-        const operandAddress = getAddress()
+        let operandAddress = 0
+        if (isAddress(value)) {
+          operandAddress = normalizeAddress(value)
+        } else {
+          const label = getLabelOrThrow(value, labels)
+          label.memAddress
+        }
         const bytecode = new ArrayBuffer(4)
         const view = new DataView(bytecode)
         view.setUint8(0, opCode)

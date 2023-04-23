@@ -78,7 +78,6 @@ export function assemble(
       try {
         const inst = makeProcedure(
           tokens,
-          labels,
           FR,
           grMap,
           SP,
@@ -104,7 +103,7 @@ export function assemble(
   labelInstructionMap.forEach((insts, label) => {
     let memAddress = label.memAddress
     insts.forEach(inst => {
-      const generated = inst.gen(memory, memAddress)
+      const generated = inst.gen(memory, labels, memAddress)
       if (generated == null) {
         assembleResult.push({ memAddress, bytecode: null, tokens: inst.tokens })
       } else {

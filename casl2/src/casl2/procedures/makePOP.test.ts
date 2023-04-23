@@ -1,5 +1,5 @@
 import { Memory } from "../../infra/memory"
-import { Tokens } from "../types"
+import { Label, Tokens } from "../types"
 import { makePOP } from "./makePOP"
 import { GeneralRegister } from "./registerAccessor"
 
@@ -20,6 +20,7 @@ describe(`makePOP`, () => {
       grMap.set(name, new GeneralRegister(name))
     }
 
+    const labels = new Map<string, Label>()
     const memory = new Memory()
     memory.storeLogical(0x8FFF, 5000)
 
@@ -30,11 +31,11 @@ describe(`makePOP`, () => {
     test(`makePOP() returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
-      expect(new DataView(res?.gen(memory)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
-      expect(new DataView(res?.gen(memory)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
+      expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
+      expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
     })
 
-    res?.gen(memory)!.proc(new GeneralRegister("PR"))
+    res?.gen(memory, labels)!.proc(new GeneralRegister("PR"))
     test(`SP was incremented`, () => {
       expect(SP.lookupLogical()).toEqual(0x9000)
     })

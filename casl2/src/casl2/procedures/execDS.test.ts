@@ -14,7 +14,7 @@ describe(`execDS`, () => {
     const memory = new Memory()
 
     // when, then
-    const res = execDS(tokens, labels)
+    const res = execDS(tokens)
     test(``, () => {
       expect(res?.wordLength).toEqual(3)
     })
@@ -32,7 +32,7 @@ describe(`execDS`, () => {
 
     // when, then
     test(``, () => {
-      expect(() => execDS(tokens, labels)).toThrow()
+      expect(() => execDS(tokens).gen(memory, labels)).toThrow()
     })
   })
 })

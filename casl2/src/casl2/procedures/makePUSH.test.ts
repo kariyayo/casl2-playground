@@ -1,5 +1,5 @@
 import { Memory } from "../../infra/memory"
-import { Tokens } from "../types"
+import { Label, Tokens } from "../types"
 import { makePUSH } from "./makePUSH"
 import { GeneralRegister } from "./registerAccessor"
 
@@ -25,6 +25,7 @@ describe(`makePUSH`, () => {
     }
     grMap.get("GR3")?.store(2)
 
+    const labels = new Map<string, Label>()
     const memory = new Memory()
     memory.store(5000, 123)
 
@@ -35,12 +36,12 @@ describe(`makePUSH`, () => {
     test(`makePUSH() returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
-      expect(new DataView(res?.gen(memory)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
-      expect(new DataView(res?.gen(memory)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
-      expect(new DataView(res?.gen(memory)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
+      expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
+      expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
+      expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
     })
 
-    res?.gen(memory)!.proc(new GeneralRegister("PR"))
+    res?.gen(memory, labels)!.proc(new GeneralRegister("PR"))
     test(`SP was decremented`, () => {
       expect(SP.lookupLogical()).toEqual(0x8FFF)
     })

@@ -6,7 +6,6 @@ import { isAddress, normalizeAddress } from "./strings"
 
 export function makeCALL(
   tokens: Tokens,
-  labels: Map<string, Label>,
   grMap: Map<string, GeneralRegister>,
   SP: GeneralRegister
 ): Instruction {
@@ -16,19 +15,22 @@ export function makeCALL(
 
   const opCode = 0x80
   const wordLength = 2
-  let getAddress = () => 0
-  if (isAddress(value)) {
-    getAddress = () => normalizeAddress(value)
-  } else {
-    const label = getLabelOrThrow(value, labels)
-    getAddress = () => label.memAddress
-  }
   const indexGR = grx == null ? null : getGrOrThrow(grx, grMap)
   return {
     wordLength,
     tokens,
-    gen: (memory: Memory) => {
-      const operandAddress = getAddress()
+    gen: (
+      memory: Memory,
+      labels: Map<string, Label>,
+      currentMemAddress?: number
+    ) => {
+      let operandAddress = 0
+      if (isAddress(value)) {
+        operandAddress = normalizeAddress(value)
+      } else {
+        const label = getLabelOrThrow(value, labels)
+        operandAddress = label.memAddress
+      }
       const bytecode = new ArrayBuffer(4)
       const view = new DataView(bytecode)
       view.setUint8(0, opCode)

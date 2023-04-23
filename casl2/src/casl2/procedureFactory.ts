@@ -34,70 +34,69 @@ import { makeCALL } from "./procedures/makeCALL"
 
 export function makeProcedure(
   tokens: Tokens,
-  labels: Map<string, Label>,
   flagRegister: FlagRegister,
   grMap: Map<string, GeneralRegister>,
   SP: GeneralRegister,
 ): Instruction | null {
   switch (tokens.operator) {
     case "START":
-      return execSTART(tokens, labels)
+      return execSTART(tokens)
     case "END":
-      return execEND(tokens, labels)
+      return execEND(tokens)
     case "DC":
-      return execDC(tokens, labels)
+      return execDC(tokens)
     case "DS":
-      return execDS(tokens, labels)
+      return execDS(tokens)
     case "LD":
-      return makeLD(tokens, labels, flagRegister, grMap)
+      return makeLD(tokens, flagRegister, grMap)
     case "ST":
-      return makeST(tokens, labels, grMap)
+      return makeST(tokens, grMap)
     case "LAD":
-      return makeLAD(tokens, labels, grMap)
+      return makeLAD(tokens, grMap)
     case "ADDA":
-      return makeADDA(tokens, labels, flagRegister, grMap)
+      return makeADDA(tokens, flagRegister, grMap)
     case "SUBA":
-      return makeSUBA(tokens, labels, flagRegister, grMap)
+      return makeSUBA(tokens, flagRegister, grMap)
     case "ADDL":
-      return makeADDL(tokens, labels, flagRegister, grMap)
+      return makeADDL(tokens, flagRegister, grMap)
     case "SUBL":
-      return makeSUBL(tokens, labels, flagRegister, grMap)
+      return makeSUBL(tokens, flagRegister, grMap)
     case "CPA":
-      return makeCPA(tokens, labels, flagRegister, grMap)
+      return makeCPA(tokens, flagRegister, grMap)
     case "CPL":
-      return makeCPL(tokens, labels, flagRegister, grMap)
+      return makeCPL(tokens, flagRegister, grMap)
     case "JUMP":
-      return makeJUMP(tokens, labels, grMap)
+      return makeJUMP(tokens, grMap)
     case "JPL":
-      return makeJPL(tokens, labels, flagRegister, grMap)
+      return makeJPL(tokens, flagRegister, grMap)
     case "JMI":
-      return makeJMI(tokens, labels, flagRegister, grMap)
+      return makeJMI(tokens, flagRegister, grMap)
     case "JZE":
-      return makeJZE(tokens, labels, flagRegister, grMap)
+      return makeJZE(tokens, flagRegister, grMap)
     case "JNZ":
-      return makeJNZ(tokens, labels, flagRegister, grMap)
+      return makeJNZ(tokens, flagRegister, grMap)
     case "JOV":
-      return makeJOV(tokens, labels, flagRegister, grMap)
+      return makeJOV(tokens, flagRegister, grMap)
     case "OR":
-      return makeOR(tokens, labels, flagRegister, grMap)
+      return makeOR(tokens, flagRegister, grMap)
     case "AND":
-      return makeAND(tokens, labels, flagRegister, grMap)
+      return makeAND(tokens, flagRegister, grMap)
     case "XOR":
-      return makeXOR(tokens, labels, flagRegister, grMap)
+      return makeXOR(tokens, flagRegister, grMap)
     case "SLL":
-      return makeSLL(tokens, labels, flagRegister, grMap)
+      return makeSLL(tokens, flagRegister, grMap)
     case "SRL":
-      return makeSRL(tokens, labels, flagRegister, grMap)
+      return makeSRL(tokens, flagRegister, grMap)
     case "SLA":
-      return makeSLA(tokens, labels, flagRegister, grMap)
+      return makeSLA(tokens, flagRegister, grMap)
     case "SRA":
-      return makeSRA(tokens, labels, flagRegister, grMap)
+      return makeSRA(tokens, flagRegister, grMap)
     case "PUSH":
       return makePUSH(tokens, grMap, SP)
     case "POP":
       return makePOP(tokens, grMap, SP)
     case "CALL":
-      return makeCALL(tokens, labels, grMap, SP)
+      return makeCALL(tokens, grMap, SP)
     case "RET":
       return makeRET(tokens, SP)
     default:

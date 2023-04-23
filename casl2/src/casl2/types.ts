@@ -9,7 +9,11 @@ export type Label = {
 export type Instruction = {
   wordLength: number
   tokens: Tokens
-  gen: (memory: Memory, currentMemAddress?: number) => null | {
+  gen: (
+    memory: Memory,
+    labels: Map<string, Label>,
+    currentMemAddress?: number
+  ) => null | {
     bytecode: ArrayBuffer
     proc: (PR: GeneralRegister) => void
   }

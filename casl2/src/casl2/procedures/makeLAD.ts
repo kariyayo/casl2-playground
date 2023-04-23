@@ -6,7 +6,6 @@ import { isHexadecimal, isNumeric } from "./strings"
 
 export function makeLAD(
   tokens: Tokens,
-  labels: Map<string, Label>,
   grMap: Map<string, GeneralRegister>,
 ): Instruction {
   const ts = tokens.operand.split(",")
@@ -18,22 +17,25 @@ export function makeLAD(
   const opCode = 0x12
   const wordLength = 2
 
-  let getAddress = () => 0
-  if (isNumeric(value)) {
-    getAddress = () => Number(value)
-  } else if (isHexadecimal(value)) {
-    getAddress = () => Number(parseInt(value.replace("#", ""), 16))
-  } else {
-    const label = getLabelOrThrow(value, labels)
-    getAddress = () => label.memAddress
-  }
   const indexGR = grx == null ? null : getGrOrThrow(grx, grMap)
   return {
     wordLength,
     tokens,
-    gen: (memory: Memory) => {
+    gen: (
+      memory: Memory,
+      labels: Map<string, Label>,
+      currentMemAddress?: number
+    ) => {
       // e.g. LAD GR1,adr => [0x1210, address]
-      const operandAddress = getAddress()
+      let operandAddress = 0
+      if (isNumeric(value)) {
+        operandAddress = Number(value)
+      } else if (isHexadecimal(value)) {
+        operandAddress = Number(parseInt(value.replace("#", ""), 16))
+      } else {
+        const label = getLabelOrThrow(value, labels)
+        operandAddress = label.memAddress
+      }
       const bytecode = new ArrayBuffer(4)
       const view = new DataView(bytecode)
       view.setUint8(0, opCode)

@@ -4,10 +4,7 @@ import { getLabelOrThrow } from "./labelAccessor"
 import { advancePR, GeneralRegister } from "./registerAccessor"
 import { isHexadecimal, isJisX0201, isNumeric } from "./strings"
 
-export function execDC(
-  tokens: Tokens,
-  labels: Map<string, Label>,
-): Instruction {
+export function execDC(tokens: Tokens): Instruction {
   const labelText = tokens.label
   const operand = tokens.operand
   let values: Array<number> = []
@@ -42,7 +39,11 @@ export function execDC(
   return {
     wordLength,
     tokens,
-    gen: (memory: Memory, currentMemAddress?: number) => {
+    gen: (
+      memory: Memory,
+      labels: Map<string, Label>,
+      currentMemAddress?: number
+    ) => {
       const address =
         labelText == "" ? currentMemAddress : getLabelOrThrow(labelText, labels).memAddress
       if (address == null) {

@@ -1,3 +1,4 @@
+import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
 import { advancePR, FlagRegister, GeneralRegister, getGrOrThrow, grToBytecode, setPR } from "./registerAccessor"
@@ -5,7 +6,6 @@ import { isAddress, normalizeAddress } from "./strings"
 
 export function makeJPL(
   tokens: Tokens,
-  labels: Map<string, Label>,
   flagRegister: FlagRegister,
   grMap: Map<string, GeneralRegister>
 ): Instruction {
@@ -16,20 +16,22 @@ export function makeJPL(
   const opCode = 0x65
   const wordLength = 2
 
-  let getAddress = () => 0
-  if (isAddress(operand)) {
-    getAddress = () => normalizeAddress(operand)
-  } else {
-    const label = getLabelOrThrow(operand, labels)
-    getAddress = () => label.memAddress
-  }
-
   const indexGR = grx == null ? null : getGrOrThrow(grx, grMap)
   return {
     wordLength,
     tokens,
-    gen: () => {
-      const operandAddress = getAddress()
+    gen: (
+      memory: Memory,
+      labels: Map<string, Label>,
+      currentMemAddress?: number
+    ) => {
+      let operandAddress = 0
+      if (isAddress(operand)) {
+        operandAddress = normalizeAddress(operand)
+      } else {
+        const label = getLabelOrThrow(operand, labels)
+        operandAddress = label.memAddress
+      }
       const bytecode = new ArrayBuffer(4)
       const view = new DataView(bytecode)
       view.setUint8(0, opCode)

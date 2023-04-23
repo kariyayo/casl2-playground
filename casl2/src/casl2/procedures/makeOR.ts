@@ -6,7 +6,6 @@ import { isNumeric } from "./strings"
 
 export function makeOR(
   tokens: Tokens,
-  labels: Map<string, Label>,
   flagRegister: FlagRegister,
   grMap: Map<string, GeneralRegister>,
 ): Instruction {
@@ -46,19 +45,22 @@ export function makeOR(
     const opCode = 0x31
     const wordLength = 2
     const operand1GR = getGrOrThrow(operand1, grMap)
-    let getAddress = () => 0
-    if (isNumeric(target)) {
-      getAddress = () => Number(target)
-    } else {
-      getAddress = () => getLabelOrThrow(target, labels).memAddress
-    }
     const indexGR = grx == null ? null : getGrOrThrow(grx, grMap)
     return {
       wordLength,
       tokens,
-      gen: (memory: Memory) => {
+      gen: (
+        memory: Memory,
+        labels: Map<string, Label>,
+        currentMemAddress?: number
+      ) => {
         // e.g. OR GR1,adr
-        const operandAddress = getAddress()
+        let operandAddress = 0
+        if (isNumeric(target)) {
+          operandAddress = Number(target)
+        } else {
+          operandAddress = getLabelOrThrow(target, labels).memAddress
+        }
         const bytecode = new ArrayBuffer(4)
         const view = new DataView(bytecode)
         view.setUint8(0, opCode)

@@ -43,15 +43,15 @@ describe(`makeJOV`, () => {
 
     // when, then
 
-    const res = makeJOV(params.tokens, labels, flagRegister, grMap)
+    const res = makeJOV(params.tokens, flagRegister, grMap)
     test(`makeJOV returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
-      expect(new DataView(res?.gen(memory)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
-      expect(new DataView(res?.gen(memory)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
-      expect(new DataView(res?.gen(memory)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
+      expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
+      expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
+      expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
     })
-    res?.gen(memory)!.proc(PR)
+    res?.gen(memory, labels)!.proc(PR)
     test(`PR should be stored`, () => {
       expect(PR.lookup()).toEqual(expected.PR)
     })

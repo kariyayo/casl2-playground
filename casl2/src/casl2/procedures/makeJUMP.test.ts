@@ -36,15 +36,15 @@ describe(`makeJUMP`, () => {
 
     // when, then
 
-    const res = makeJUMP(tokens, labels, grMap)
+    const res = makeJUMP(tokens, grMap)
     test(`makeJUMP returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
-      expect(new DataView(res?.gen(memory)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
-      expect(new DataView(res?.gen(memory)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
-      expect(new DataView(res?.gen(memory)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
+      expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
+      expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
+      expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
     })
-    res?.gen(memory)!.proc(PR)
+    res?.gen(memory, labels)!.proc(PR)
     test(`PR should be stored`, () => {
       expect(PR.lookup()).toEqual(expected.PR)
     })
@@ -57,6 +57,7 @@ describe(`makeJUMP`, () => {
     // given
     const labels = new Map<string, Label>()
     labels.set("AA", {label: "AA", memAddress: 500})
+    const memory = new Memory()
 
     const grMap = new Map<string, GeneralRegister>()
     for (let i = 0; i <= 7; i++) {
@@ -67,7 +68,7 @@ describe(`makeJUMP`, () => {
 
     // when, then
     test(`makeJUMP throw Error`, () => {
-      expect(() => makeJUMP(tokens, labels, grMap)).toThrow()
+      expect(() => makeJUMP(tokens, grMap).gen(memory, labels)).toThrow()
     })
   })
 })

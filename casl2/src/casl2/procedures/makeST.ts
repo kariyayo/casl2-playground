@@ -6,7 +6,6 @@ import { isAddress, normalizeAddress } from "./strings"
 
 export function makeST(
   tokens: Tokens,
-  labels: Map<string, Label>,
   grMap: Map<string, GeneralRegister>,
 ): Instruction {
   const ts = tokens.operand.split(",")
@@ -22,7 +21,11 @@ export function makeST(
   return {
     wordLength,
     tokens,
-    gen: (memory: Memory) => {
+    gen: (
+      memory: Memory,
+      labels: Map<string, Label>,
+      currentMemAddress?: number,
+    ) => {
       // e.g. ST GR1,adr => [0x1110, address]
       let operandAddress = 0
       if (isAddress(value)) {
