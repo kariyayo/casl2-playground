@@ -32,7 +32,7 @@ import { makeSLL } from "./procedures/makeSLL"
 import { makeSRL } from "./procedures/makeSRL"
 import { makeCALL } from "./procedures/makeCALL"
 
-export function makeProcedure(tokens: Tokens): Instruction | null {
+export function makeProcedure(tokens: Tokens): Instruction {
   switch (tokens.operator) {
     case "START":
       return execSTART(tokens)

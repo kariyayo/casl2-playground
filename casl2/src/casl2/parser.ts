@@ -1,13 +1,20 @@
 import { tokenize } from "./tokenizer"
-import { Tokens } from "./types"
+import { Instruction, Label, Tokens } from "./types"
+import { makeProcedure } from "./procedureFactory"
+import { AssembleError } from "../AssembleError"
 
 const r = /^\s*;.*$/
 
-export function aggregateByLabel(text: string): Map<string, Array<Tokens>> | Error {
-  const result = new Map<string, Array<Tokens>>()
+export function aggregateByLabel(
+  text: string,
+  startAddress: number,
+  labelUpdateAction: (newLabel: Label) => void
+): Map<string, [Label, Array<Instruction>]> | Error {
+  let currentAddress = startAddress
+  const result = new Map<string, [Label, Array<Instruction>]>()
   const lines = text.split("\n")
-  let currentLabel = ""
-  let currentTokens: Array<Tokens> = []
+  let currentLabel: Label | null = null
+  let currentInstructions: Array<Instruction> = []
   let instructionNum = 0
   for (let lineNum = 0; lineNum < lines.length; lineNum++) {
     const line = lines[lineNum]
@@ -15,28 +22,55 @@ export function aggregateByLabel(text: string): Map<string, Array<Tokens>> | Err
       // Comment Line
       continue
     }
+
     // line -> tokens
     const tokenized = tokenize(line, lineNum, instructionNum)
     if (tokenized instanceof Error) {
       return tokenized
     }
     instructionNum++
-    const label = tokenized.label
-    if (label != "") {
-      if (currentLabel != "") {
-        result.set(currentLabel, currentTokens)
+
+    // update LABEL
+    const newLabel = tokenized.label
+    if (newLabel != "") {
+      if (currentLabel != null) {
+        result.set(currentLabel.label, [currentLabel, currentInstructions])
       }
-      if (result.has(label)) {
-        return new Error(`duplicated label: ${label}`)
+      if (result.has(newLabel)) {
+        return new Error(`duplicated label: ${newLabel}`)
       }
-      currentLabel = label
-      currentTokens = []
+      currentLabel = { label: newLabel, memAddress: currentAddress }
+      labelUpdateAction(currentLabel)
+      currentInstructions = []
     }
+
+    // tokens -> inst
     tokenized.operand = trimComment(tokenized.operand)
-    currentTokens.push(tokenized)
+    const inst = createInstruction(tokenized)
+    currentInstructions.push(inst)
+
+    // advance address
+    currentAddress = currentAddress + inst.wordLength
   }
-  result.set(currentLabel, currentTokens)
+
+  if (currentLabel != null) {
+    result.set(currentLabel.label, [currentLabel, currentInstructions])
+  }
+
   return result
+}
+
+function createInstruction(tokens: Tokens): Instruction {
+  try {
+    const inst = makeProcedure(tokens)
+    return inst
+  } catch(e) {
+    if (e instanceof Error) {
+      throw new AssembleError(tokens, e)
+    } else {
+      throw e
+    }
+  }
 }
 
 function trimComment(operand: string): string {

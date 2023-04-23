@@ -1,9 +1,7 @@
 import { Memory } from "./infra/memory";
 import { FlagRegister, GeneralRegister } from "./infra/register";
 import { aggregateByLabel } from "./casl2/parser";
-import { makeProcedure } from "./casl2/procedureFactory";
-import { Instruction, Tokens } from "./casl2/types";
-import { AssembleError } from "./AssembleError";
+import { Tokens } from "./casl2/types";
 
 type Label = {
   label: string
@@ -53,49 +51,18 @@ export function assemble(
     return { assembleResult: [], procMap: new Map() }
   }
 
-  const aggregated = aggregateByLabel(text)
-  if (aggregated instanceof Error) {
-    throw aggregated
-  }
-
-  for (let label of aggregated.keys()) {
-    labels.set(label, { label, memAddress: 0})
-  }
-
-  const labelInstructionMap: Map<Label, Array<Instruction>> = new Map()
-
-  let memAddress = startAddress
-  aggregated.forEach((lines, labelText) => {
-    const label = labels.get(labelText)
-    if (label == null) throw Error("")
-
-    // set label address
-    label.memAddress = memAddress
-
-    // set instructions by label
-    const instructions = new Array<Instruction>()
-    lines.forEach((tokens) => {
-      try {
-        const inst = makeProcedure(tokens)
-        if (inst != null) {
-          instructions.push(inst)
-          const wordLength = inst.wordLength
-          memAddress = memAddress + wordLength
-        }
-      } catch(e) {
-        if (e instanceof Error) {
-          throw new AssembleError(tokens, e)
-        } else {
-          throw e
-        }
-      }
-    })
-    labelInstructionMap.set(label, instructions)
+  const result = aggregateByLabel(text, startAddress, (newLabel: Label) => {
+    labels.set(newLabel.label, newLabel)
   })
+
+  if (result instanceof Error) {
+    throw result
+  }
 
   const assembleResult: AssembleResult = []
   const procMap: ProcMap = new Map()
-  labelInstructionMap.forEach((insts, label) => {
+  result.forEach((aggregated) => {
+    const [label, insts] = aggregated
     let memAddress = label.memAddress
     insts.forEach(inst => {
       const generated = inst.gen(grMap, FR, SP, memory, labels, memAddress)
