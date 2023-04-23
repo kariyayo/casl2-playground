@@ -1,30 +1,29 @@
 import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
-import { GeneralRegister, getGrOrThrow, grToBytecode, setPR } from "./registerAccessor"
+import { FlagRegister, GeneralRegister, getGrOrThrow, grToBytecode, setPR } from "./registerAccessor"
 import { isAddress, normalizeAddress } from "./strings"
 
-export function makeJUMP(
-  tokens: Tokens,
-  grMap: Map<string, GeneralRegister>
-): Instruction {
+export function makeJUMP(tokens: Tokens): Instruction {
   const ts = tokens.operand.split(",")
   const operand = ts[0]
-  const grx = ts.length > 1 ? ts[1] : null
 
   const opCode = 0x64
   const wordLength = 2
-
-  const indexGR = grx == null ? null : getGrOrThrow(grx, grMap)
   return {
     wordLength,
     tokens,
     gen: (
+      grMap: Map<string, GeneralRegister>,
+      flagRegister: FlagRegister,
+      SP: GeneralRegister,
       memory: Memory,
       labels: Map<string, Label>,
       currentMemAddress?: number
     ) => {
       // e.g. JUMP adr,GR2 => [0x6402, address]
+      const grx = ts.length > 1 ? ts[1] : null
+      const indexGR = grx == null ? null : getGrOrThrow(grx, grMap)
       let operandAddress = 0
       if (isAddress(operand)) {
         operandAddress = normalizeAddress(operand)

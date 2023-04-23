@@ -76,12 +76,7 @@ export function assemble(
     const instructions = new Array<Instruction>()
     lines.forEach((tokens) => {
       try {
-        const inst = makeProcedure(
-          tokens,
-          FR,
-          grMap,
-          SP,
-        )
+        const inst = makeProcedure(tokens)
         if (inst != null) {
           instructions.push(inst)
           const wordLength = inst.wordLength
@@ -103,7 +98,7 @@ export function assemble(
   labelInstructionMap.forEach((insts, label) => {
     let memAddress = label.memAddress
     insts.forEach(inst => {
-      const generated = inst.gen(memory, labels, memAddress)
+      const generated = inst.gen(grMap, FR, SP, memory, labels, memAddress)
       if (generated == null) {
         assembleResult.push({ memAddress, bytecode: null, tokens: inst.tokens })
       } else {

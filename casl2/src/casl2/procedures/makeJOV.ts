@@ -4,27 +4,25 @@ import { getLabelOrThrow } from "./labelAccessor"
 import { advancePR, FlagRegister, GeneralRegister, getGrOrThrow, grToBytecode, setPR } from "./registerAccessor"
 import { isAddress, normalizeAddress } from "./strings"
 
-export function makeJOV(
-  tokens: Tokens,
-  flagRegister: FlagRegister,
-  grMap: Map<string, GeneralRegister>
-): Instruction {
+export function makeJOV(tokens: Tokens): Instruction {
   const ts = tokens.operand.split(",")
   const operand = ts[0]
-  const grx = ts.length > 1 ? ts[1] : null
 
   const opCode = 0x66
   const wordLength = 2
-
-  const indexGR = grx == null ? null : getGrOrThrow(grx, grMap)
   return {
     wordLength,
     tokens,
     gen: (
+      grMap: Map<string, GeneralRegister>,
+      flagRegister: FlagRegister,
+      SP: GeneralRegister,
       memory: Memory,
       labels: Map<string, Label>,
       currentMemAddress?: number
     ) => {
+      const grx = ts.length > 1 ? ts[1] : null
+      const indexGR = grx == null ? null : getGrOrThrow(grx, grMap)
       let operandAddress = 0
       if (isAddress(operand)) {
         operandAddress = normalizeAddress(operand)

@@ -4,27 +4,28 @@ import { getLabelOrThrow } from "./labelAccessor"
 import { GeneralRegister, FlagRegister, isGeneralRegister, getGrOrThrow, grToBytecode, advancePR } from "./registerAccessor"
 import { isNumeric } from "./strings"
 
-export function makeOR(
-  tokens: Tokens,
-  flagRegister: FlagRegister,
-  grMap: Map<string, GeneralRegister>,
-): Instruction {
+export function makeOR(tokens: Tokens): Instruction {
   const ts = tokens.operand.split(",")
   const operand1 = ts[0]
   const target = ts[1]
-  const grx = ts.length > 2 ? ts[2] : null
-
   if (isGeneralRegister(target)) {
     // GR1 OR GR2 -> GR1
     const opCode = 0x35
     const wordLength = 1
-    const operand1GR = getGrOrThrow(operand1, grMap)
-    const operand2GR = getGrOrThrow(target, grMap)
     return {
       wordLength,
       tokens,
-      gen: () => {
+      gen: (
+        grMap: Map<string, GeneralRegister>,
+        flagRegister: FlagRegister,
+        SP: GeneralRegister,
+        memory: Memory,
+        labels: Map<string, Label>,
+        currentMemAddress?: number
+      ) => {
         // e.g. OR GR1,GR2
+        const operand1GR = getGrOrThrow(operand1, grMap)
+        const operand2GR = getGrOrThrow(target, grMap)
         const bytecode = new ArrayBuffer(2)
         const byteArray = new Uint8Array(bytecode, 0, 2)
         byteArray[0] = opCode
@@ -44,17 +45,21 @@ export function makeOR(
     // GR1 OR 10 -> GR1
     const opCode = 0x31
     const wordLength = 2
-    const operand1GR = getGrOrThrow(operand1, grMap)
-    const indexGR = grx == null ? null : getGrOrThrow(grx, grMap)
     return {
       wordLength,
       tokens,
       gen: (
+        grMap: Map<string, GeneralRegister>,
+        flagRegister: FlagRegister,
+        SP: GeneralRegister,
         memory: Memory,
         labels: Map<string, Label>,
         currentMemAddress?: number
       ) => {
         // e.g. OR GR1,adr
+        const grx = ts.length > 2 ? ts[2] : null
+        const operand1GR = getGrOrThrow(operand1, grMap)
+        const indexGR = grx == null ? null : getGrOrThrow(grx, grMap)
         let operandAddress = 0
         if (isNumeric(target)) {
           operandAddress = Number(target)

@@ -1,5 +1,5 @@
 import { Memory } from "../infra/memory"
-import { GeneralRegister } from "../infra/register"
+import { FlagRegister, GeneralRegister } from "../infra/register"
 
 export type Label = {
   label: string
@@ -10,6 +10,9 @@ export type Instruction = {
   wordLength: number
   tokens: Tokens
   gen: (
+    grMap: Map<string, GeneralRegister>,
+    flagRegister: FlagRegister,
+    SP: GeneralRegister,
     memory: Memory,
     labels: Map<string, Label>,
     currentMemAddress?: number

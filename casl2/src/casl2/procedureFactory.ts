@@ -32,12 +32,7 @@ import { makeSLL } from "./procedures/makeSLL"
 import { makeSRL } from "./procedures/makeSRL"
 import { makeCALL } from "./procedures/makeCALL"
 
-export function makeProcedure(
-  tokens: Tokens,
-  flagRegister: FlagRegister,
-  grMap: Map<string, GeneralRegister>,
-  SP: GeneralRegister,
-): Instruction | null {
+export function makeProcedure(tokens: Tokens): Instruction | null {
   switch (tokens.operator) {
     case "START":
       return execSTART(tokens)
@@ -48,59 +43,58 @@ export function makeProcedure(
     case "DS":
       return execDS(tokens)
     case "LD":
-      return makeLD(tokens, flagRegister, grMap)
+      return makeLD(tokens)
     case "ST":
-      return makeST(tokens, grMap)
+      return makeST(tokens)
     case "LAD":
-      return makeLAD(tokens, grMap)
+      return makeLAD(tokens)
     case "ADDA":
-      return makeADDA(tokens, flagRegister, grMap)
+      return makeADDA(tokens)
     case "SUBA":
-      return makeSUBA(tokens, flagRegister, grMap)
+      return makeSUBA(tokens)
     case "ADDL":
-      return makeADDL(tokens, flagRegister, grMap)
+      return makeADDL(tokens)
     case "SUBL":
-      return makeSUBL(tokens, flagRegister, grMap)
+      return makeSUBL(tokens)
     case "CPA":
-      return makeCPA(tokens, flagRegister, grMap)
+      return makeCPA(tokens)
     case "CPL":
-      return makeCPL(tokens, flagRegister, grMap)
+      return makeCPL(tokens)
     case "JUMP":
-      return makeJUMP(tokens, grMap)
+      return makeJUMP(tokens)
     case "JPL":
-      return makeJPL(tokens, flagRegister, grMap)
+      return makeJPL(tokens)
     case "JMI":
-      return makeJMI(tokens, flagRegister, grMap)
+      return makeJMI(tokens)
     case "JZE":
-      return makeJZE(tokens, flagRegister, grMap)
+      return makeJZE(tokens)
     case "JNZ":
-      return makeJNZ(tokens, flagRegister, grMap)
+      return makeJNZ(tokens)
     case "JOV":
-      return makeJOV(tokens, flagRegister, grMap)
+      return makeJOV(tokens)
     case "OR":
-      return makeOR(tokens, flagRegister, grMap)
+      return makeOR(tokens)
     case "AND":
-      return makeAND(tokens, flagRegister, grMap)
+      return makeAND(tokens)
     case "XOR":
-      return makeXOR(tokens, flagRegister, grMap)
+      return makeXOR(tokens)
     case "SLL":
-      return makeSLL(tokens, flagRegister, grMap)
+      return makeSLL(tokens)
     case "SRL":
-      return makeSRL(tokens, flagRegister, grMap)
+      return makeSRL(tokens)
     case "SLA":
-      return makeSLA(tokens, flagRegister, grMap)
+      return makeSLA(tokens)
     case "SRA":
-      return makeSRA(tokens, flagRegister, grMap)
+      return makeSRA(tokens)
     case "PUSH":
-      return makePUSH(tokens, grMap, SP)
+      return makePUSH(tokens)
     case "POP":
-      return makePOP(tokens, grMap, SP)
+      return makePOP(tokens)
     case "CALL":
-      return makeCALL(tokens, grMap, SP)
+      return makeCALL(tokens)
     case "RET":
-      return makeRET(tokens, SP)
+      return makeRET(tokens)
     default:
       throw Error(`${tokens.operator} is unknown`)
   }
-  return null
 }

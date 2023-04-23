@@ -1,5 +1,6 @@
 import { Memory } from "../../infra/memory"
 import { Label } from "../types"
+import { FlagRegister, GeneralRegister } from "./registerAccessor"
 import { execDS } from "./execDS"
 
 describe(`execDS`, () => {
@@ -28,11 +29,14 @@ describe(`execDS`, () => {
     const currentMemAddress = 2001
 
     // given
+    const grMap = new Map<string, GeneralRegister>()
+    const flagRegister = new FlagRegister()
+    const SP = new GeneralRegister("SP")
     const memory = new Memory()
 
     // when, then
     test(``, () => {
-      expect(() => execDS(tokens).gen(memory, labels)).toThrow()
+      expect(() => execDS(tokens).gen(grMap, flagRegister, SP, memory, labels)).toThrow()
     })
   })
 })

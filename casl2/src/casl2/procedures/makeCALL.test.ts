@@ -1,7 +1,7 @@
 import { Memory } from "../../infra/memory"
 import { Label, Tokens } from "../types"
 import { makeCALL } from "./makeCALL"
-import { GeneralRegister } from "./registerAccessor"
+import { FlagRegister, GeneralRegister } from "./registerAccessor"
 
 describe(`makeCALL`, () => {
   describe.each([
@@ -30,24 +30,25 @@ describe(`makeCALL`, () => {
       grMap.set(name, new GeneralRegister(name))
     }
     grMap.get("GR3")?.store(2)
+    const flagRegister = new FlagRegister()
 
     const memory = new Memory()
 
     const SP = new GeneralRegister("SP")
     SP.storeLogical(0x9000)
 
-    const res = makeCALL(tokens, grMap, SP)
+    const res = makeCALL(tokens)
     test(`makeCALL() returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
-      expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
-      expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
-      expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
+      expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
+      expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
+      expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
     })
 
     const PR = new GeneralRegister("PR")
     PR.storeLogical(0x2000)
-    res?.gen(memory, labels)!.proc(PR)
+    res?.gen(grMap, flagRegister, SP, memory, labels)!.proc(PR)
     test(`SP is decremented`, () => {
       expect(SP.lookupLogical()).toEqual(0x8FFF)
     })

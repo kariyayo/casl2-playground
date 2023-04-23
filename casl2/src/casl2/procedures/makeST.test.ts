@@ -1,7 +1,7 @@
 import { Memory } from "../../infra/memory"
 import { Label, Tokens } from "../types"
 import { makeST } from "./makeST"
-import { GeneralRegister } from "./registerAccessor"
+import { FlagRegister, GeneralRegister } from "./registerAccessor"
 
 describe(`makeST`, () => {
   describe.each([
@@ -27,19 +27,21 @@ describe(`makeST`, () => {
     }
     grMap.get("GR1")?.store(123)
     grMap.get("GR3")?.store(2)
+    const flagRegister = new FlagRegister()
+    const SP = new GeneralRegister("SP")
     const memory = new Memory()
     memory.store(5000, 0)
 
-    const res = makeST(tokens, grMap)
+    const res = makeST(tokens)
     test(`makeST() returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
-      expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
-      expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
-      expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
+      expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
+      expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
+      expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
     })
 
-    res?.gen(memory, labels)!.proc(new GeneralRegister("PR"))
+    res?.gen(grMap, flagRegister, SP, memory, labels)!.proc(new GeneralRegister("PR"))
     test(`memory should be stored data`, () => {
       expect(memory.lookup(expected.stored_mem_address)).toEqual(123)
     })

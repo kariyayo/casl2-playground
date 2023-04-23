@@ -1,33 +1,32 @@
 import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
-import { GeneralRegister, FlagRegister, isGeneralRegister, getGrOrThrow, grToBytecode, advancePR } from "./registerAccessor"
+import { GeneralRegister, FlagRegister, getGrOrThrow, grToBytecode, advancePR } from "./registerAccessor"
 import { isNumeric } from "./strings"
 
-export function makeSLA(
-  tokens: Tokens,
-  flagRegister: FlagRegister,
-  grMap: Map<string, GeneralRegister>,
-): Instruction {
+export function makeSLA(tokens: Tokens): Instruction {
   const ts = tokens.operand.split(",")
   const operand1 = ts[0]
   const target = ts[1]
-  const grx = ts.length > 2 ? ts[2] : null
 
   // GR1 << 2 -> GR1
   const opCode = 0x50
   const wordLength = 2
-  const operand1GR = getGrOrThrow(operand1, grMap)
-  const indexGR = grx == null ? null : getGrOrThrow(grx, grMap)
   return {
     wordLength,
     tokens,
     gen: (
+      grMap: Map<string, GeneralRegister>,
+      flagRegister: FlagRegister,
+      SP: GeneralRegister,
       memory: Memory,
       labels: Map<string, Label>,
       currentMemAddress?: number
     ) => {
       // e.g. SLA GR1,adr
+      const grx = ts.length > 2 ? ts[2] : null
+      const operand1GR = getGrOrThrow(operand1, grMap)
+      const indexGR = grx == null ? null : getGrOrThrow(grx, grMap)
       let operandAddress = 0
       if (isNumeric(target)) {
         operandAddress = Number(target)

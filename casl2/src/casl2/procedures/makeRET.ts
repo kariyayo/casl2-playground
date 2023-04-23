@@ -1,16 +1,20 @@
 import { Memory } from "../../infra/memory"
-import { Instruction, Tokens } from "../types"
-import { GeneralRegister, END_ADDRESS } from "./registerAccessor"
+import { Instruction, Label, Tokens } from "../types"
+import { FlagRegister, GeneralRegister, END_ADDRESS } from "./registerAccessor"
 
-export function makeRET(
-  tokens: Tokens,
-  SP: GeneralRegister,
-): Instruction {
+export function makeRET(tokens: Tokens): Instruction {
   const opCode = 0x81
   return {
     wordLength: 1,
     tokens,
-    gen: (memory: Memory) => {
+    gen: (
+      grMap: Map<string, GeneralRegister>,
+      flagRegister: FlagRegister,
+      SP: GeneralRegister,
+      memory: Memory,
+      labels: Map<string, Label>,
+      currentMemAddress?: number
+    ) => {
       const bytecode = new ArrayBuffer(2)
       const view = new DataView(bytecode)
       view.setUint8(0, opCode)

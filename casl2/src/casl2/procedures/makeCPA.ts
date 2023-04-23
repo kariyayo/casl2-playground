@@ -4,26 +4,27 @@ import { getLabelOrThrow } from "./labelAccessor"
 import { GeneralRegister, FlagRegister, isGeneralRegister, getGrOrThrow, grToBytecode, advancePR } from "./registerAccessor"
 import { isNumeric } from "./strings"
 
-export function makeCPA(
-  tokens: Tokens,
-  flagRegister: FlagRegister,
-  grMap: Map<string, GeneralRegister>,
-): Instruction {
+export function makeCPA(tokens: Tokens): Instruction {
   const ts = tokens.operand.split(",")
   const operand1 = ts[0]
   const target = ts[1]
-  const grx = ts.length > 2 ? ts[2] : null
-
   if (isGeneralRegister(target)) {
     // GR1 > GR2 -> FR
     const opCode = 0x44
     const wordLength = 1
-    const operand1GR = getGrOrThrow(operand1, grMap)
-    const operand2GR = getGrOrThrow(target, grMap)
     return {
       wordLength,
       tokens,
-      gen: () => {
+      gen: (
+        grMap: Map<string, GeneralRegister>,
+        flagRegister: FlagRegister,
+        SP: GeneralRegister,
+        memory: Memory,
+        labels: Map<string, Label>,
+        currentMemAddress?: number
+      ) => {
+        const operand1GR = getGrOrThrow(operand1, grMap)
+        const operand2GR = getGrOrThrow(target, grMap)
         const bytecode = new ArrayBuffer(2)
         const byteArray = new Uint8Array(bytecode, 0, 2)
         byteArray[0] = opCode
@@ -42,16 +43,20 @@ export function makeCPA(
     // GR1 > memory(10) -> FR
     const opCode = 0x40
     const wordLength = 2
-    const operand1GR = getGrOrThrow(operand1, grMap)
-    const indexGR = grx == null ? null : getGrOrThrow(grx, grMap)
     return {
       wordLength,
       tokens,
       gen: (
+        grMap: Map<string, GeneralRegister>,
+        flagRegister: FlagRegister,
+        SP: GeneralRegister,
         memory: Memory,
         labels: Map<string, Label>,
         currentMemAddress?: number
       ) => {
+        const grx = ts.length > 2 ? ts[2] : null
+        const operand1GR = getGrOrThrow(operand1, grMap)
+        const indexGR = grx == null ? null : getGrOrThrow(grx, grMap)
         let operandAddress = 0
         if (isNumeric(target)) {
           operandAddress = Number(target)

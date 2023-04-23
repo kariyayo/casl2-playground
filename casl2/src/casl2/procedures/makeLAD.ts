@@ -1,32 +1,31 @@
 import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
-import { GeneralRegister, getGrOrThrow, grToBytecode, advancePR } from "./registerAccessor"
+import { FlagRegister, GeneralRegister, getGrOrThrow, grToBytecode, advancePR } from "./registerAccessor"
 import { isHexadecimal, isNumeric } from "./strings"
 
-export function makeLAD(
-  tokens: Tokens,
-  grMap: Map<string, GeneralRegister>,
-): Instruction {
+export function makeLAD(tokens: Tokens): Instruction {
   const ts = tokens.operand.split(",")
   const target = ts[0]
   const value = ts[1]
-  const distGR = getGrOrThrow(target, grMap)
-  const grx = ts.length > 2 ? ts[2] : null
 
   const opCode = 0x12
   const wordLength = 2
-
-  const indexGR = grx == null ? null : getGrOrThrow(grx, grMap)
   return {
     wordLength,
     tokens,
     gen: (
+      grMap: Map<string, GeneralRegister>,
+      flagRegister: FlagRegister,
+      SP: GeneralRegister,
       memory: Memory,
       labels: Map<string, Label>,
       currentMemAddress?: number
     ) => {
       // e.g. LAD GR1,adr => [0x1210, address]
+      const distGR = getGrOrThrow(target, grMap)
+      const grx = ts.length > 2 ? ts[2] : null
+      const indexGR = grx == null ? null : getGrOrThrow(grx, grMap)
       let operandAddress = 0
       if (isNumeric(value)) {
         operandAddress = Number(value)

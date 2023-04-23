@@ -1,32 +1,32 @@
 import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
-import { GeneralRegister, isGeneralRegister, getGrOrThrow, grToBytecode, advancePR } from "./registerAccessor"
+import { FlagRegister, GeneralRegister, getGrOrThrow, grToBytecode, advancePR } from "./registerAccessor"
 import { isAddress, normalizeAddress } from "./strings"
 
-export function makeST(
-  tokens: Tokens,
-  grMap: Map<string, GeneralRegister>,
-): Instruction {
+export function makeST(tokens: Tokens): Instruction {
   const ts = tokens.operand.split(",")
   const src = ts[0]
   const value = ts[1]
-  const srcGR = getGrOrThrow(src, grMap)
-  const grx = ts.length > 2 ? ts[2] : null
 
   // GR -> memory
   const opCode = 0x11
   const wordLength = 2
-  const indexGR = grx == null ? null : getGrOrThrow(grx, grMap)
   return {
     wordLength,
     tokens,
     gen: (
+      grMap: Map<string, GeneralRegister>,
+      flagRegister: FlagRegister,
+      SP: GeneralRegister,
       memory: Memory,
       labels: Map<string, Label>,
       currentMemAddress?: number,
     ) => {
       // e.g. ST GR1,adr => [0x1110, address]
+      const srcGR = getGrOrThrow(src, grMap)
+      const grx = ts.length > 2 ? ts[2] : null
+      const indexGR = grx == null ? null : getGrOrThrow(grx, grMap)
       let operandAddress = 0
       if (isAddress(value)) {
         operandAddress = normalizeAddress(value)

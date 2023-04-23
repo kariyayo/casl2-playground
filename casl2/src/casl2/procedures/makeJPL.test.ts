@@ -38,20 +38,20 @@ describe(`makeJPL`, () => {
       grMap.set(name, new GeneralRegister(name))
     }
     getGrOrThrow("GR3", grMap).store(20)
-
+    const SP = new GeneralRegister("SP")
     const PR = new GeneralRegister("PR")
 
     // when, then
 
-    const res = makeJPL(params.tokens, flagRegister, grMap)
+    const res = makeJPL(params.tokens)
     test(`makeJPL returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
-      expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
-      expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
-      expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
+      expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
+      expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
+      expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
     })
-    res?.gen(memory, labels)!.proc(PR)
+    res?.gen(grMap, flagRegister, SP, memory, labels)!.proc(PR)
     test(`PR should be stored`, () => {
       expect(PR.lookup()).toEqual(expected.PR)
     })

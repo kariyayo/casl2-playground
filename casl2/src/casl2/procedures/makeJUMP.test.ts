@@ -1,7 +1,7 @@
 import { Memory } from "../../infra/memory"
 import { Label, Tokens } from "../types"
 import { makeJUMP } from "./makeJUMP"
-import { getGrOrThrow, GeneralRegister } from "./registerAccessor"
+import { getGrOrThrow, FlagRegister, GeneralRegister } from "./registerAccessor"
 
 describe(`makeJUMP`, () => {
 
@@ -31,20 +31,21 @@ describe(`makeJUMP`, () => {
       grMap.set(name, new GeneralRegister(name))
     }
     getGrOrThrow("GR3", grMap).store(20)
-
+    const flagRegister = new FlagRegister()
+    const SP = new GeneralRegister("SP")
     const PR = new GeneralRegister("PR")
 
     // when, then
 
-    const res = makeJUMP(tokens, grMap)
+    const res = makeJUMP(tokens)
     test(`makeJUMP returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
-      expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
-      expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
-      expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
+      expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
+      expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
+      expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
     })
-    res?.gen(memory, labels)!.proc(PR)
+    res?.gen(grMap, flagRegister, SP, memory, labels)!.proc(PR)
     test(`PR should be stored`, () => {
       expect(PR.lookup()).toEqual(expected.PR)
     })
@@ -64,11 +65,12 @@ describe(`makeJUMP`, () => {
       const name = `GR${i}`
       grMap.set(name, new GeneralRegister(name))
     }
-    const PR = new GeneralRegister("PR")
+    const flagRegister = new FlagRegister()
+    const SP = new GeneralRegister("SP")
 
     // when, then
     test(`makeJUMP throw Error`, () => {
-      expect(() => makeJUMP(tokens, grMap).gen(memory, labels)).toThrow()
+      expect(() => makeJUMP(tokens).gen(grMap, flagRegister, SP, memory, labels)).toThrow()
     })
   })
 })

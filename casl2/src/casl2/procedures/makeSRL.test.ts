@@ -28,22 +28,23 @@ describe(`makeSRL`, () => {
     }
     getGrOrThrow("GR1", grMap).store(0b0100)
     getGrOrThrow("GR3", grMap).store(1)
+    const SP = new GeneralRegister("SP")
     const labels = new Map<string, Label>()
     const memory = new Memory()
 
     // when, then
 
-    const res = makeSRL(tokens, flagRegister, grMap)
+    const res = makeSRL(tokens)
     test(`makeSRL returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
-      expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
-      expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
+      expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
+      expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
       if (expected.wordLength == 2) {
-        expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
+        expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
       }
     })
-    res?.gen(memory, labels)!.proc(new GeneralRegister("PR"))
+    res?.gen(grMap, flagRegister, SP, memory, labels)!.proc(new GeneralRegister("PR"))
     test(`GR1 should be added value`, () => {
       expect(grMap.get("GR1")?.lookup()).toEqual(expected.afterGR1)
     })
@@ -72,13 +73,14 @@ describe(`makeSRL`, () => {
       grMap.set(name, new GeneralRegister(name))
     }
     getGrOrThrow("GR2", grMap).store(beforeGR2)
+    const SP = new GeneralRegister("SP")
     const labels = new Map<string, Label>()
     const memory = new Memory()
 
     // when, then
 
-    const res = makeSRL(tokens, flagRegister, grMap)
-    res?.gen(memory, labels)!.proc(new GeneralRegister("PR"))
+    const res = makeSRL(tokens)
+    res?.gen(grMap, flagRegister, SP, memory, labels)!.proc(new GeneralRegister("PR"))
     test(`GR2 should be added value`, () => {
       expect(grMap.get("GR2")?.lookup()).toEqual(expected.afterGR2)
     })

@@ -1,29 +1,28 @@
 import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
-import { GeneralRegister, getGrOrThrow, grToBytecode } from "./registerAccessor"
+import { FlagRegister, GeneralRegister, getGrOrThrow, grToBytecode } from "./registerAccessor"
 import { isAddress, normalizeAddress } from "./strings"
 
-export function makeCALL(
-  tokens: Tokens,
-  grMap: Map<string, GeneralRegister>,
-  SP: GeneralRegister
-): Instruction {
+export function makeCALL(tokens: Tokens): Instruction {
   const ts = tokens.operand.split(",")
   const value = ts[0]
-  const grx = ts.length > 1 ? ts[1] : null
 
   const opCode = 0x80
   const wordLength = 2
-  const indexGR = grx == null ? null : getGrOrThrow(grx, grMap)
   return {
     wordLength,
     tokens,
     gen: (
+      grMap: Map<string, GeneralRegister>,
+      flagRegister: FlagRegister,
+      SP: GeneralRegister,
       memory: Memory,
       labels: Map<string, Label>,
       currentMemAddress?: number
     ) => {
+      const grx = ts.length > 1 ? ts[1] : null
+      const indexGR = grx == null ? null : getGrOrThrow(grx, grMap)
       let operandAddress = 0
       if (isAddress(value)) {
         operandAddress = normalizeAddress(value)

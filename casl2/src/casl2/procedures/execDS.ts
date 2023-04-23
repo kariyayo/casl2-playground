@@ -1,7 +1,7 @@
 import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
-import { advancePR, GeneralRegister } from "./registerAccessor"
+import { FlagRegister, GeneralRegister, advancePR } from "./registerAccessor"
 import { isDigits } from "./strings"
 
 export function execDS(tokens: Tokens): Instruction {
@@ -16,6 +16,9 @@ export function execDS(tokens: Tokens): Instruction {
     wordLength,
     tokens,
     gen: (
+      grMap: Map<string, GeneralRegister>,
+      flagRegister: FlagRegister,
+      SP: GeneralRegister,
       memory: Memory,
       labels: Map<string, Label>,
       currentMemAddress?: number

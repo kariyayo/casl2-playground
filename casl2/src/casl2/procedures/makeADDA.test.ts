@@ -51,23 +51,24 @@ describe(`makeADDA`, () => {
     getGrOrThrow("GR1", grMap).store(100)
     getGrOrThrow("GR2", grMap).store(200)
     getGrOrThrow("GR3", grMap).store(16)
+    const SP = new GeneralRegister("SP")
     const memory = new Memory()
     memory.store(1000, 20)
     memory.store(1016, 30)
 
     // when, then
 
-    const res = makeADDA(tokens, flagRegister, grMap)
+    const res = makeADDA(tokens)
     test(`makeADDA returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
-      expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
-      expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
+      expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
+      expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
       if (expected.wordLength == 2) {
-        expect(new DataView(res?.gen(memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
+        expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
       }
     })
-    res?.gen(memory, labels)!.proc(new GeneralRegister("PR"))
+    res?.gen(grMap, flagRegister, SP, memory, labels)!.proc(new GeneralRegister("PR"))
     test(`GR1 should be added value`, () => {
       expect(grMap.get("GR1")?.lookup()).toEqual(expected.GR)
     })
