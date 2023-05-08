@@ -1,4 +1,5 @@
 import { Memory } from "../../infra/memory"
+import { Interpreter } from "../../interpreter/interpreter"
 import { Label, Tokens } from "../types"
 import { makeADDA } from "./makeADDA"
 import { getGrOrThrow, GeneralRegister, FlagRegister } from "./registerAccessor"
@@ -57,7 +58,6 @@ describe(`makeADDA`, () => {
     memory.store(1016, 30)
 
     // when, then
-
     const res = makeADDA(tokens)
     test(`makeADDA returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
@@ -68,7 +68,14 @@ describe(`makeADDA`, () => {
         expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
       }
     })
-    res?.gen(grMap, flagRegister, SP, memory, labels)!.proc(new GeneralRegister("PR"))
+
+    // given
+    const PR = new GeneralRegister("PR")
+    PR.storeLogical(0)
+
+    // when
+    const bytecode = res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode
+    new Interpreter(grMap, flagRegister, PR, SP, memory, bytecode).step()
     test(`GR1 should be added value`, () => {
       expect(grMap.get("GR1")?.lookup()).toEqual(expected.GR)
     })

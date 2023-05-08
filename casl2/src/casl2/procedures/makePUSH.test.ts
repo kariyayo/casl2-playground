@@ -1,4 +1,5 @@
 import { Memory } from "../../infra/memory"
+import { Interpreter } from "../../interpreter/interpreter"
 import { Label, Tokens } from "../types"
 import { makePUSH } from "./makePUSH"
 import { FlagRegister, GeneralRegister } from "./registerAccessor"
@@ -18,6 +19,7 @@ describe(`makePUSH`, () => {
         expected: { wordLength: 2, bytecode: [0x70, 0x03, 5000], value: 5002 }
     },
   ])(`$# :: $tokens`, ({tokens, expected}) => {
+    // given
     const grMap = new Map<string, GeneralRegister>()
     for (let i = 0; i <= 7; i++) {
       const name = `GR${i}`
@@ -33,6 +35,7 @@ describe(`makePUSH`, () => {
     SP.store(0x9000)
     const flagRegister = new FlagRegister()
 
+    // when, then
     const res = makePUSH(tokens)
     test(`makePUSH() returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
@@ -42,7 +45,16 @@ describe(`makePUSH`, () => {
       expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
     })
 
-    res?.gen(grMap, flagRegister, SP, memory, labels)!.proc(new GeneralRegister("PR"))
+    // given
+    const PR = new GeneralRegister("PR")
+    PR.storeLogical(0)
+
+    // when
+    const bytecode = res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode
+    const interpreter = new Interpreter(grMap, flagRegister, PR, SP, memory, bytecode)
+    interpreter.step()
+
+    // then
     test(`SP was decremented`, () => {
       expect(SP.lookupLogical()).toEqual(0x8FFF)
     })

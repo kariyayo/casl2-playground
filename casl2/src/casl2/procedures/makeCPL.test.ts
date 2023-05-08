@@ -1,4 +1,5 @@
 import { Memory } from "../../infra/memory"
+import { Interpreter } from "../../interpreter/interpreter"
 import { Label, Tokens } from "../types"
 import { makeCPL } from "./makeCPL"
 import { getGrOrThrow, GeneralRegister, FlagRegister } from "./registerAccessor"
@@ -57,7 +58,6 @@ describe(`makeCPL`, () => {
     memory.store(1016, 30)
 
     // when, then
-
     const res = makeCPL(tokens)
     test(`makeCPL returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
@@ -68,7 +68,17 @@ describe(`makeCPL`, () => {
         expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
       }
     })
-    res?.gen(grMap, flagRegister, SP, memory, labels)!.proc(new GeneralRegister("PR"))
+
+    // given
+    const PR = new GeneralRegister("PR")
+    PR.storeLogical(0)
+
+    // when
+    const bytecode = res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode
+    const interpreter = new Interpreter(grMap, flagRegister, PR, SP, memory, bytecode)
+    interpreter.step()
+
+    // then
     test(`GR1 should not be changed`, () => {
       expect(grMap.get("GR1")?.lookup()).toEqual(expected.GR1)
     })

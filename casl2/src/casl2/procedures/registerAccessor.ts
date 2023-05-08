@@ -30,8 +30,8 @@ export function grToBytecode(gr: GeneralRegister | null): number {
 }
 
 export function advancePR(PR: GeneralRegister, words: number) {
-  const v = PR.lookup()
-  PR.store(v+words)
+  const v = PR.lookupLogical()
+  PR.storeLogical(v+words)
 }
 
 export function setPR(PR: GeneralRegister, address: number) {

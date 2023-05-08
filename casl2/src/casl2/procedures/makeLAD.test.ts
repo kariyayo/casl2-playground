@@ -1,4 +1,5 @@
 import { Memory } from "../../infra/memory"
+import { Interpreter } from "../../interpreter/interpreter"
 import { Label, Tokens } from "../types"
 import { makeLAD } from "./makeLAD"
 import { getGrOrThrow, FlagRegister, GeneralRegister } from "./registerAccessor"
@@ -33,7 +34,6 @@ describe(`makeLAD`, () => {
     const SP = new GeneralRegister("SP")
 
     // when, then
-
     const res = makeLAD(tokens)
     test(`makeLAD returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
@@ -42,7 +42,17 @@ describe(`makeLAD`, () => {
       expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
       expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
     })
-    res?.gen(grMap, flagRegister, SP, memory, labels)!.proc(new GeneralRegister("PR"))
+
+    // given
+    const PR = new GeneralRegister("PR")
+    PR.storeLogical(0)
+
+    // when
+    const bytecode = res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode
+    const interpreter = new Interpreter(grMap, flagRegister, PR, SP, memory, bytecode)
+    interpreter.step()
+
+    // then
     test(`GR1 should be loaded address`, () => {
       expect(grMap.get("GR1")?.lookup()).toEqual(expected.GR)
     })

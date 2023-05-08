@@ -1,4 +1,5 @@
 import { Memory } from "../../infra/memory"
+import { Interpreter } from "../../interpreter/interpreter"
 import { Label, Tokens } from "../types"
 import { makeJUMP } from "./makeJUMP"
 import { getGrOrThrow, FlagRegister, GeneralRegister } from "./registerAccessor"
@@ -33,10 +34,8 @@ describe(`makeJUMP`, () => {
     getGrOrThrow("GR3", grMap).store(20)
     const flagRegister = new FlagRegister()
     const SP = new GeneralRegister("SP")
-    const PR = new GeneralRegister("PR")
 
     // when, then
-
     const res = makeJUMP(tokens)
     test(`makeJUMP returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
@@ -45,7 +44,17 @@ describe(`makeJUMP`, () => {
       expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
       expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
     })
-    res?.gen(grMap, flagRegister, SP, memory, labels)!.proc(PR)
+
+    // given
+    const PR = new GeneralRegister("PR")
+    PR.storeLogical(0)
+
+    // when
+    const bytecode = res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode
+    const interpreter = new Interpreter(grMap, flagRegister, PR, SP, memory, bytecode)
+    interpreter.step()
+
+    // then
     test(`PR should be stored`, () => {
       expect(PR.lookup()).toEqual(expected.PR)
     })

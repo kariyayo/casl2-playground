@@ -1,4 +1,5 @@
 import { Memory } from "../../infra/memory"
+import { Interpreter } from "../../interpreter/interpreter"
 import { Label, Tokens } from "../types"
 import { makePOP } from "./makePOP"
 import { FlagRegister, GeneralRegister } from "./registerAccessor"
@@ -14,6 +15,7 @@ describe(`makePOP`, () => {
         expected: { wordLength: 1, bytecode: [0x71, 0x30], targetGR: "GR3", value: 5000 }
     },
   ])(`$# :: $tokens`, ({tokens, expected}) => {
+    // given
     const grMap = new Map<string, GeneralRegister>()
     for (let i = 0; i <= 7; i++) {
       const name = `GR${i}`
@@ -28,6 +30,7 @@ describe(`makePOP`, () => {
     const SP = new GeneralRegister("SP")
     SP.store(0x8FFF)
 
+    // when, then
     const res = makePOP(tokens)
     test(`makePOP() returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
@@ -36,7 +39,16 @@ describe(`makePOP`, () => {
       expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
     })
 
-    res?.gen(grMap, flagRegister, SP, memory, labels)!.proc(new GeneralRegister("PR"))
+    // given
+    const PR = new GeneralRegister("PR")
+    PR.storeLogical(0)
+
+    // when
+    const bytecode = res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode
+    const interpreter = new Interpreter(grMap, flagRegister, PR, SP, memory, bytecode)
+    interpreter.step()
+
+    // then
     test(`SP was incremented`, () => {
       expect(SP.lookupLogical()).toEqual(0x9000)
     })

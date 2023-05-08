@@ -1,4 +1,5 @@
 import { Memory } from "../../infra/memory"
+import { Interpreter } from "../../interpreter/interpreter"
 import { Label, Tokens } from "../types"
 import { makeST } from "./makeST"
 import { FlagRegister, GeneralRegister } from "./registerAccessor"
@@ -18,6 +19,7 @@ describe(`makeST`, () => {
         expected: { wordLength: 2, bytecode: [0x11, 0x13, 5000], stored_mem_address: 5002 }
     },
   ])(`$# :: $tokens`, ({tokens, expected}) => {
+    // given
     const labels = new Map<string, Label>()
     labels.set("AA", {label: "AA", memAddress: 2000})
     const grMap = new Map<string, GeneralRegister>()
@@ -32,6 +34,7 @@ describe(`makeST`, () => {
     const memory = new Memory()
     memory.store(5000, 0)
 
+    // when, then
     const res = makeST(tokens)
     test(`makeST() returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
@@ -41,7 +44,16 @@ describe(`makeST`, () => {
       expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
     })
 
-    res?.gen(grMap, flagRegister, SP, memory, labels)!.proc(new GeneralRegister("PR"))
+    // given
+    const PR = new GeneralRegister("PR")
+    PR.storeLogical(0)
+
+    // when
+    const bytecode = res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode
+    const interpreter = new Interpreter(grMap, flagRegister, PR, SP, memory, bytecode)
+    interpreter.step()
+
+    // then
     test(`memory should be stored data`, () => {
       expect(memory.lookup(expected.stored_mem_address)).toEqual(123)
     })

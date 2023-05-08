@@ -1,4 +1,5 @@
 import { Memory } from "../../infra/memory"
+import { Interpreter } from "../../interpreter/interpreter"
 import { Label, Tokens } from "../types"
 import { makeRET } from "./makeRET"
 import { FlagRegister, GeneralRegister } from "./registerAccessor"
@@ -10,6 +11,7 @@ describe(`makeRET`, () => {
         expected: { wordLength: 1, bytecode: [0x81, 0x00] }
     },
   ])(`$# :: $tokens`, ({tokens, expected}) => {
+    // given
     const grMap = new Map<string, GeneralRegister>()
     for (let i = 0; i <= 7; i++) {
       const name = `GR${i}`
@@ -24,6 +26,7 @@ describe(`makeRET`, () => {
     const SP = new GeneralRegister("SP")
     SP.storeLogical(0x8FFF)
 
+    // when, then
     const res = makeRET(tokens)
     test(`makeRET() returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
@@ -32,8 +35,16 @@ describe(`makeRET`, () => {
       expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
     })
 
+    // given
     const PR = new GeneralRegister("PR")
-    res?.gen(grMap, flagRegister, SP, memory, labels)!.proc(PR)
+    PR.storeLogical(0)
+
+    // when
+    const bytecode = res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode
+    const interpreter = new Interpreter(grMap, flagRegister, PR, SP, memory, bytecode)
+    interpreter.step()
+
+    // then
     test(`SP is incremented`, () => {
       expect(SP.lookupLogical()).toEqual(0x9000)
     })

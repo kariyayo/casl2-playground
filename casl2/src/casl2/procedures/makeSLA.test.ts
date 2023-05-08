@@ -1,4 +1,5 @@
 import { Memory } from "../../infra/memory"
+import { Interpreter } from "../../interpreter/interpreter"
 import { Label, Tokens } from "../types"
 import { makeSLA } from "./makeSLA"
 import { getGrOrThrow, GeneralRegister, FlagRegister } from "./registerAccessor"
@@ -33,7 +34,6 @@ describe(`makeSLA`, () => {
     const memory = new Memory()
 
     // when, then
-
     const res = makeSLA(tokens)
     test(`makeSLA returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
@@ -44,7 +44,17 @@ describe(`makeSLA`, () => {
         expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
       }
     })
-    res?.gen(grMap, flagRegister, SP, memory, labels)!.proc(new GeneralRegister("PR"))
+
+    // given
+    const PR = new GeneralRegister("PR")
+    PR.storeLogical(0)
+
+    // when
+    const bytecode = res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode
+    const interpreter = new Interpreter(grMap, flagRegister, PR, SP, memory, bytecode)
+    interpreter.step()
+
+    // then
     test(`GR1 should be added value`, () => {
       expect(grMap.get("GR1")?.lookup()).toEqual(expected.afterGR1)
     })
@@ -76,11 +86,16 @@ describe(`makeSLA`, () => {
     const SP = new GeneralRegister("SP")
     const labels = new Map<string, Label>()
     const memory = new Memory()
+    const PR = new GeneralRegister("PR")
+    PR.storeLogical(0)
 
-    // when, then
-
+    // when
     const res = makeSLA(tokens)
-    res?.gen(grMap, flagRegister, SP, memory, labels)!.proc(new GeneralRegister("PR"))
+    const bytecode = res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode
+    const interpreter = new Interpreter(grMap, flagRegister, PR, SP, memory, bytecode)
+    interpreter.step()
+
+    // then
     test(`GR2 should be added value`, () => {
       expect(grMap.get("GR2")?.lookup()).toEqual(expected.afterGR2)
     })
