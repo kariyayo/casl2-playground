@@ -43,7 +43,15 @@ export class Memory {
     this.content.setInt16(address * WORD_LENGTH, value)
   }
 
-  private check(address: number, value: number | string) {
+  storeBytecode(bytecode: ArrayBuffer, offset: number) {
+    const dataView = new DataView(bytecode)
+    if (dataView.byteLength < 2) {
+      throw new Error(`invalid bytecode. bytecode=${bytecode}`)
+    }
+    this.storeLogical(offset, dataView.getUint16(0, false))
+    if (dataView.byteLength > 2) {
+      this.storeLogical(offset + 1, dataView.getUint16(2, false))
+    }
   }
 }
 

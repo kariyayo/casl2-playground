@@ -67,11 +67,7 @@ export class Interpreter {
     this.SP = SP
     this.memory = memory
 
-    const dataView = new DataView(code)
-    const startByteOffset = 2*this.PR.lookupLogical()
-    for (let i = 0; i < dataView.byteLength; i++) {
-      this.memory.storeLogical(startByteOffset + i, dataView.getUint8(i))
-    }
+    this.memory.storeBytecode(code)
   }
 
   private divide(byte: number): [number, number] {
@@ -98,8 +94,9 @@ export class Interpreter {
   }
 
   private readWord(): [number, number] {
-    const upperByte = this.memory.lookupLogical(2*this.PR.lookupLogical())
-    const lowerByte = this.memory.lookupLogical(1 + 2*this.PR.lookupLogical())
+    const word = this.memory.lookupLogical(this.PR.lookupLogical())
+    const upperByte = word >> 8
+    const lowerByte = word & 0b11111111
     return [upperByte, lowerByte]
   }
 
