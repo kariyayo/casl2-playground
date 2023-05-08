@@ -1,7 +1,7 @@
 import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
-import { GeneralRegister, FlagRegister, getGrOrThrow, grToBytecode, advancePR } from "./registerAccessor"
+import { GeneralRegister, getGrOrThrow, grToBytecode } from "./registerAccessor"
 import { isNumeric } from "./strings"
 
 export function makeSLA(tokens: Tokens): Instruction {
@@ -17,8 +17,6 @@ export function makeSLA(tokens: Tokens): Instruction {
     tokens,
     gen: (
       grMap: Map<string, GeneralRegister>,
-      flagRegister: FlagRegister,
-      SP: GeneralRegister,
       memory: Memory,
       labels: Map<string, Label>,
       currentMemAddress?: number
@@ -38,29 +36,7 @@ export function makeSLA(tokens: Tokens): Instruction {
       view.setUint8(0, opCode)
       view.setUint8(1, (grToBytecode(operand1GR) << 4) + grToBytecode(indexGR))
       view.setUint16(2, operandAddress, false)
-      return {
-        bytecode,
-        proc: (PR: GeneralRegister) => {
-          let b = operandAddress
-          if (indexGR != null) {
-            b = b + indexGR.lookup()
-          }
-          const isNegative = ((operand1GR.lookup() >> 15) & 1) !== 0
-          let v = operand1GR.lookup() << b
-          if (isNegative) {
-            v = v | (1<<15)
-          } else {
-            v = v & ~(1<<15)
-          }
-          let overflowFlag = false
-          if (((operand1GR.lookupLogical() >> (16 -1 - b)) & 1) !== 0) {
-            overflowFlag = true
-          }
-          operand1GR.store(v)
-          flagRegister.setWithOverflowFlag(v, overflowFlag)
-          advancePR(PR, wordLength)
-        }
-      }
+      return { bytecode }
     }
   }
 }

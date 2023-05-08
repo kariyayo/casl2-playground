@@ -1,7 +1,8 @@
 import { Memory } from "./infra/memory";
 import { FlagRegister, GeneralRegister, END_ADDRESS } from "./infra/register";
 import { Label } from "./casl2/types";
-import { assemble, AssembleResult, ProcMap } from "./assembler";
+import { assemble, AssembleResult } from "./assembler";
+import { Interpreter } from "./interpreter/interpreter";
 
 export function makeMachine(input: string, startMemAddress: number): Commet2 {
   return new Commet2(input, startMemAddress)
@@ -17,7 +18,7 @@ export class Commet2 {
 
   labels: Map<string, Label> = new Map()
   assembleResult: AssembleResult = []
-  procMap: ProcMap = new Map()
+  interpreter: Interpreter
 
   constructor(input: string, startMemAddress: number) {
     for (let i = 0; i <= 7; i++) {
@@ -25,24 +26,14 @@ export class Commet2 {
       this.grMap.set(name, new GeneralRegister(name))
     }
     this.PR.store(startMemAddress)
-    const { assembleResult, procMap } = assemble(startMemAddress, input, this.labels, this.FR, this.grMap, this.memory, this.SP)
-    this.assembleResult = assembleResult
-    this.procMap = procMap
+    this.assembleResult = assemble(startMemAddress, input, this.labels, this.FR, this.grMap, this.memory, this.SP)
+    this.interpreter = new Interpreter(this.grMap, this.FR, this.PR, this.SP, this.memory)
 
     this.SP.storeLogical(0x9001)
     this.memory.store(0x9001, END_ADDRESS)
   }
 
   step(): boolean {
-    const row = this.procMap.get(this.PR.lookup())
-    if (row == null) {
-      return false
-    }
-    row.proc(this.PR)
-    const next = this.PR.lookup()
-    if (next == -32678) {
-      return false
-    }
-    return true
+    return this.interpreter.step()
   }
 }

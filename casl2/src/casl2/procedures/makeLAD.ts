@@ -1,7 +1,7 @@
 import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
-import { FlagRegister, GeneralRegister, getGrOrThrow, grToBytecode, advancePR } from "./registerAccessor"
+import { GeneralRegister, getGrOrThrow, grToBytecode } from "./registerAccessor"
 import { isHexadecimal, isNumeric } from "./strings"
 
 export function makeLAD(tokens: Tokens): Instruction {
@@ -16,8 +16,6 @@ export function makeLAD(tokens: Tokens): Instruction {
     tokens,
     gen: (
       grMap: Map<string, GeneralRegister>,
-      flagRegister: FlagRegister,
-      SP: GeneralRegister,
       memory: Memory,
       labels: Map<string, Label>,
       currentMemAddress?: number
@@ -40,17 +38,7 @@ export function makeLAD(tokens: Tokens): Instruction {
       view.setUint8(0, opCode)
       view.setUint8(1, (grToBytecode(distGR) << 4) + grToBytecode(indexGR))
       view.setUint16(2, operandAddress, false)
-      return {
-        bytecode,
-        proc: (PR: GeneralRegister) => {
-          let address = operandAddress
-          if (indexGR != null) {
-            address = address + indexGR.lookup()
-          }
-          distGR.store(address)
-          advancePR(PR, wordLength)
-        }
-      }
+      return { bytecode }
     }
   }
 }

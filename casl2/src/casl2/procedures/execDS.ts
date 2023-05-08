@@ -1,7 +1,7 @@
 import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
-import { FlagRegister, GeneralRegister, advancePR } from "./registerAccessor"
+import { GeneralRegister } from "./registerAccessor"
 import { isDigits } from "./strings"
 
 export function execDS(tokens: Tokens): Instruction {
@@ -17,8 +17,6 @@ export function execDS(tokens: Tokens): Instruction {
     tokens,
     gen: (
       grMap: Map<string, GeneralRegister>,
-      flagRegister: FlagRegister,
-      SP: GeneralRegister,
       memory: Memory,
       labels: Map<string, Label>,
       currentMemAddress?: number
@@ -28,12 +26,7 @@ export function execDS(tokens: Tokens): Instruction {
       if (address == null) {
         throw Error(`address is null.`)
       }
-      return {
-        bytecode: new ArrayBuffer(0),
-        proc: (PR: GeneralRegister) => {
-          advancePR(PR, wordLength)
-        }
-      }
+      return { bytecode: new ArrayBuffer(2*wordLength) }
     }
   }
 }

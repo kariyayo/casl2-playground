@@ -1,7 +1,7 @@
 import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
-import { FlagRegister, GeneralRegister, advancePR } from "./registerAccessor"
+import { GeneralRegister } from "./registerAccessor"
 import { isHexadecimal, isJisX0201, isNumeric } from "./strings"
 
 export function execDC(tokens: Tokens): Instruction {
@@ -41,8 +41,6 @@ export function execDC(tokens: Tokens): Instruction {
     tokens,
     gen: (
       grMap: Map<string, GeneralRegister>,
-      flagRegister: FlagRegister,
-      SP: GeneralRegister,
       memory: Memory,
       labels: Map<string, Label>,
       currentMemAddress?: number
@@ -63,12 +61,7 @@ export function execDC(tokens: Tokens): Instruction {
         }
         view.setInt16(index*2, v)
       })
-      return {
-        bytecode,
-        proc: (PR: GeneralRegister) => {
-          advancePR(PR, wordLength)
-        }
-      }
+      return { bytecode }
     }
   }
 }

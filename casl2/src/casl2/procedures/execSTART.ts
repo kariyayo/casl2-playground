@@ -1,4 +1,4 @@
-import { Instruction, Label, Tokens } from "../types"
+import { Instruction, Tokens } from "../types"
 
 export function execSTART(tokens: Tokens): Instruction {
   return {

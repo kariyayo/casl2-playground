@@ -59,15 +59,12 @@ export class Interpreter {
     PR: GeneralRegister,
     SP: GeneralRegister,
     memory: Memory,
-    code: ArrayBuffer,
   ) {
     this.grMap = grMap
     this.FR = FR
     this.PR = PR
     this.SP = SP
     this.memory = memory
-
-    this.memory.storeBytecode(code)
   }
 
   private divide(byte: number): [number, number] {
@@ -108,6 +105,9 @@ export class Interpreter {
   }
 
   step(): boolean {
+    if (this.PR.lookup() == END_ADDRESS) {
+      return false
+    }
     const [opcode, operands] = this.readWord()
     advancePR(this.PR, 1)
     switch (opcode) {
@@ -232,7 +232,7 @@ export class Interpreter {
     }
 
     const next = this.PR.lookup()
-    if (next == -32678) {
+    if (next == END_ADDRESS) {
       return false
     }
     return true
@@ -395,7 +395,7 @@ export class Interpreter {
       this.PR.storeLogical(address)
       this.SP.storeLogical(sp+1)
     } else {
-      this.PR.store(-32678)
+      this.PR.store(END_ADDRESS)
     }
   }
 

@@ -1,7 +1,7 @@
 import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
-import { GeneralRegister, FlagRegister, isGeneralRegister, getGrOrThrow, grToBytecode, advancePR } from "./registerAccessor"
+import { GeneralRegister, isGeneralRegister, getGrOrThrow, grToBytecode } from "./registerAccessor"
 import { isNumeric } from "./strings"
 
 export function makeOR(tokens: Tokens): Instruction {
@@ -17,8 +17,6 @@ export function makeOR(tokens: Tokens): Instruction {
       tokens,
       gen: (
         grMap: Map<string, GeneralRegister>,
-        flagRegister: FlagRegister,
-        SP: GeneralRegister,
         memory: Memory,
         labels: Map<string, Label>,
         currentMemAddress?: number
@@ -30,15 +28,7 @@ export function makeOR(tokens: Tokens): Instruction {
         const byteArray = new Uint8Array(bytecode, 0, 2)
         byteArray[0] = opCode
         byteArray[1] = (grToBytecode(operand1GR) << 4) + grToBytecode(operand2GR)
-        return {
-          bytecode,
-          proc: (PR: GeneralRegister) => {
-            const v = operand1GR.lookup() | operand2GR.lookup()
-            operand1GR.store(v)
-            flagRegister.set(v)
-            advancePR(PR, wordLength)
-          }
-        }
+        return { bytecode }
       }
     }
   } else {
@@ -50,8 +40,6 @@ export function makeOR(tokens: Tokens): Instruction {
       tokens,
       gen: (
         grMap: Map<string, GeneralRegister>,
-        flagRegister: FlagRegister,
-        SP: GeneralRegister,
         memory: Memory,
         labels: Map<string, Label>,
         currentMemAddress?: number
@@ -71,19 +59,7 @@ export function makeOR(tokens: Tokens): Instruction {
         view.setUint8(0, opCode)
         view.setUint8(1, (grToBytecode(operand1GR) << 4) + grToBytecode(indexGR))
         view.setUint16(2, operandAddress, false)
-        return {
-          bytecode,
-          proc: (PR: GeneralRegister) => {
-            let address = operandAddress
-            if (indexGR != null) {
-              address = address + indexGR.lookup()
-            }
-            const v = operand1GR.lookup() | memory.lookup(address)
-            operand1GR.store(v)
-            flagRegister.set(v)
-            advancePR(PR, wordLength)
-          }
-        }
+        return { bytecode }
       }
     }
   }

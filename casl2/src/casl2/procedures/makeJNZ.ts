@@ -1,7 +1,7 @@
 import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
-import { advancePR, FlagRegister, GeneralRegister, getGrOrThrow, grToBytecode, setPR } from "./registerAccessor"
+import { GeneralRegister, getGrOrThrow, grToBytecode } from "./registerAccessor"
 import { isAddress, normalizeAddress } from "./strings"
 
 export function makeJNZ(tokens: Tokens): Instruction {
@@ -15,8 +15,6 @@ export function makeJNZ(tokens: Tokens): Instruction {
     tokens,
     gen: (
       grMap: Map<string, GeneralRegister>,
-      flagRegister: FlagRegister,
-      SP: GeneralRegister,
       memory: Memory,
       labels: Map<string, Label>,
       currentMemAddress?: number
@@ -35,20 +33,7 @@ export function makeJNZ(tokens: Tokens): Instruction {
       view.setUint8(0, opCode)
       view.setUint8(1, (0 << 4) + grToBytecode(indexGR))
       view.setUint16(2, operandAddress, false)
-      return {
-        bytecode,
-        proc: (PR: GeneralRegister) => {
-          let address = operandAddress
-          if (indexGR != null) {
-            address = address + indexGR.lookup()
-          }
-          if (flagRegister.zf()) {
-            advancePR(PR, 2)
-          } else {
-            setPR(PR, address)
-          }
-        }
-      }
+      return { bytecode }
     }
   }
 }

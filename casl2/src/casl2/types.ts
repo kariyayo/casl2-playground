@@ -11,14 +11,11 @@ export type Instruction = {
   tokens: Tokens
   gen: (
     grMap: Map<string, GeneralRegister>,
-    flagRegister: FlagRegister,
-    SP: GeneralRegister,
     memory: Memory,
     labels: Map<string, Label>,
     currentMemAddress?: number
   ) => null | {
     bytecode: ArrayBuffer
-    proc: (PR: GeneralRegister) => void
   }
 }
 

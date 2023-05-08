@@ -1,6 +1,6 @@
 import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
-import { FlagRegister, GeneralRegister, getGrOrThrow, grToBytecode, advancePR } from "./registerAccessor"
+import { GeneralRegister, getGrOrThrow, grToBytecode } from "./registerAccessor"
 import { isAddress, normalizeAddress } from "./strings"
 
 export function makePUSH(tokens: Tokens): Instruction {
@@ -14,8 +14,6 @@ export function makePUSH(tokens: Tokens): Instruction {
     tokens,
     gen: (
       grMap: Map<string, GeneralRegister>,
-      flagRegister: FlagRegister,
-      SP: GeneralRegister,
       memory: Memory,
       labels: Map<string, Label>,
       currentMemAddress?: number
@@ -31,19 +29,7 @@ export function makePUSH(tokens: Tokens): Instruction {
       view.setUint8(0, opCode)
       view.setUint8(1, (0 << 4) + grToBytecode(indexGR))
       view.setUint16(2, operandAddress, false)
-      return {
-        bytecode,
-        proc: (PR: GeneralRegister) => {
-          // value -> memory(SP-1)
-          let address = operandAddress
-          if (indexGR != null) {
-            address = address + indexGR.lookup()
-          }
-          SP.storeLogical(SP.lookupLogical()-1)
-          memory.storeLogical(SP.lookupLogical(), address)
-          advancePR(PR, wordLength)
-        }
-      }
+      return { bytecode }
     }
   }
 }

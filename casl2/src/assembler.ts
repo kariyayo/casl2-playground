@@ -14,11 +14,6 @@ export type AssembleResult = Array<{
     tokens: Tokens,
 }>
 
-export type ProcMap = Map<number, {
-    bytecode: ArrayBuffer,
-    proc: (PR: GeneralRegister) => void
-}>
-
 export function display(result: AssembleResult): string {
   return result.map(row => {
     let v: any = ""
@@ -45,10 +40,10 @@ export function assemble(
   grMap: Map<string, GeneralRegister>,
   memory: Memory,
   SP: GeneralRegister,
-): { assembleResult: AssembleResult, procMap: ProcMap } {
+): AssembleResult {
   if (text == null || text.length == 0) {
     // NOP
-    return { assembleResult: [], procMap: new Map() }
+    return []
   }
 
   const result = aggregateByLabel(text, startAddress, (newLabel: Label) => {
@@ -60,26 +55,20 @@ export function assemble(
   }
 
   const assembleResult: AssembleResult = []
-  const procMap: ProcMap = new Map()
   result.forEach((aggregated) => {
     const [label, insts] = aggregated
     let memAddress = label.memAddress
     insts.forEach(inst => {
-      const generated = inst.gen(grMap, FR, SP, memory, labels, memAddress)
+      const generated = inst.gen(grMap, memory, labels, memAddress)
       if (generated == null) {
         assembleResult.push({ memAddress, bytecode: null, tokens: inst.tokens })
       } else {
-        const { bytecode, proc } = generated
-        const bs = new Uint8Array(bytecode)
-        memory.storeLogical(memAddress, (bs[0] << 8) + bs[1])
-        if (inst.wordLength == 2) {
-          memory.storeLogical(memAddress+1, (bs[2] << 8) + bs[3])
-        }
+        const { bytecode } = generated
+        memory.storeBytecode(bytecode, memAddress)
         assembleResult.push({ memAddress, bytecode, tokens: inst.tokens })
-        procMap.set(memAddress, { bytecode, proc })
         memAddress = memAddress + inst.wordLength
       }
     })
   })
-  return { assembleResult, procMap }
+  return assembleResult
 }

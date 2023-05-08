@@ -1,7 +1,7 @@
 import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
-import { GeneralRegister, FlagRegister, isGeneralRegister, getGrOrThrow, grToBytecode, advancePR } from "./registerAccessor"
+import { GeneralRegister, isGeneralRegister, getGrOrThrow, grToBytecode } from "./registerAccessor"
 import { isNumeric } from "./strings"
 
 export function makeCPL(tokens: Tokens): Instruction {
@@ -17,8 +17,6 @@ export function makeCPL(tokens: Tokens): Instruction {
       tokens,
       gen: (
         grMap: Map<string, GeneralRegister>,
-        flagRegister: FlagRegister,
-        SP: GeneralRegister,
         memory: Memory,
         labels: Map<string, Label>,
         currentMemAddress?: number
@@ -29,14 +27,7 @@ export function makeCPL(tokens: Tokens): Instruction {
         const byteArray = new Uint8Array(bytecode, 0, 2)
         byteArray[0] = opCode
         byteArray[1] = (grToBytecode(operand1GR) << 4) + grToBytecode(operand2GR)
-        return {
-          bytecode,
-          proc: (PR: GeneralRegister) => {
-            const v = operand1GR.lookupLogical() - operand2GR.lookupLogical()
-            flagRegister.setLogicalByCPL(v)
-            advancePR(PR, wordLength)
-          }
-        }
+        return { bytecode }
       }
     }
   } else {
@@ -48,8 +39,6 @@ export function makeCPL(tokens: Tokens): Instruction {
       tokens,
       gen: (
         grMap: Map<string, GeneralRegister>,
-        flagRegister: FlagRegister,
-        SP: GeneralRegister,
         memory: Memory,
         labels: Map<string, Label>,
         currentMemAddress?: number
@@ -68,18 +57,7 @@ export function makeCPL(tokens: Tokens): Instruction {
         view.setUint8(0, opCode)
         view.setUint8(1, (grToBytecode(operand1GR) << 4) + grToBytecode(indexGR))
         view.setUint16(2, operandAddress, false)
-        return {
-          bytecode,
-          proc: (PR: GeneralRegister) => {
-            let address = operandAddress
-            if (indexGR != null) {
-              address = address + indexGR.lookup()
-            }
-            const v = operand1GR.lookupLogical() - memory.lookupLogical(address)
-            flagRegister.setLogicalByCPL(v)
-            advancePR(PR, wordLength)
-          }
-        }
+        return { bytecode }
       }
     }
   }

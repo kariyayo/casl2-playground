@@ -1,6 +1,6 @@
 import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
-import { FlagRegister, GeneralRegister, getGrOrThrow, grToBytecode, advancePR } from "./registerAccessor"
+import { GeneralRegister, getGrOrThrow, grToBytecode } from "./registerAccessor"
 
 export function makePOP(tokens: Tokens): Instruction {
   const ts = tokens.operand.split(",")
@@ -13,8 +13,6 @@ export function makePOP(tokens: Tokens): Instruction {
     tokens,
     gen: (
       grMap: Map<string, GeneralRegister>,
-      flagRegister: FlagRegister,
-      SP: GeneralRegister,
       memory: Memory,
       labels: Map<string, Label>,
       currentMemAddress?: number
@@ -24,16 +22,7 @@ export function makePOP(tokens: Tokens): Instruction {
       const view = new DataView(bytecode)
       view.setUint8(0, opCode)
       view.setUint8(1, (grToBytecode(targetGR) << 4) + 0)
-      return {
-        bytecode,
-        proc: (PR: GeneralRegister) => {
-          // memory(SP) -> GR
-          let address = memory.lookupLogical(SP.lookupLogical())
-          targetGR.storeLogical(address)
-          SP.storeLogical(SP.lookupLogical()+1)
-          advancePR(PR, wordLength)
-        }
-      }
+      return { bytecode }
     }
   }
 }

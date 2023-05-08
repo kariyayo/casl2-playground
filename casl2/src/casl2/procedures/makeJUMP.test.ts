@@ -40,9 +40,9 @@ describe(`makeJUMP`, () => {
     test(`makeJUMP returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
-      expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
-      expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
-      expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
+      expect(new DataView(res?.gen(grMap, memory, labels)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
+      expect(new DataView(res?.gen(grMap, memory, labels)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
+      expect(new DataView(res?.gen(grMap, memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
     })
 
     // given
@@ -50,8 +50,9 @@ describe(`makeJUMP`, () => {
     PR.storeLogical(0)
 
     // when
-    const bytecode = res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode
-    const interpreter = new Interpreter(grMap, flagRegister, PR, SP, memory, bytecode)
+    const bytecode = res?.gen(grMap, memory, labels)!.bytecode
+    memory.storeBytecode(bytecode, 0)
+    const interpreter = new Interpreter(grMap, flagRegister, PR, SP, memory)
     interpreter.step()
 
     // then
@@ -79,7 +80,7 @@ describe(`makeJUMP`, () => {
 
     // when, then
     test(`makeJUMP throw Error`, () => {
-      expect(() => makeJUMP(tokens).gen(grMap, flagRegister, SP, memory, labels)).toThrow()
+      expect(() => makeJUMP(tokens).gen(grMap, memory, labels)).toThrow()
     })
   })
 })

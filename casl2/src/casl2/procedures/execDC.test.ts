@@ -1,7 +1,7 @@
 import { Memory } from "../../infra/memory"
 import { Label } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
-import { FlagRegister, GeneralRegister } from "./registerAccessor"
+import { GeneralRegister } from "./registerAccessor"
 import { execDC } from "./execDC"
 
 describe(`makeDC`, () => {
@@ -33,18 +33,21 @@ describe(`makeDC`, () => {
   ])(`$# :: $params`, ({params, expected}) => {
     // given
     const grMap = new Map<string, GeneralRegister>()
-    const flagRegister = new FlagRegister()
-    const SP = new GeneralRegister("SP")
     const memory = new Memory()
 
     // when, then
-
     const res = execDC(params.tokens)
     test(`makeDC() returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
     })
-    res?.gen(grMap, flagRegister, SP, memory, labels, params.currentMemAddress)
+
+    // given
+    const PR = new GeneralRegister("PR")
+    PR.storeLogical(0)
+
+    // when
+    res?.gen(grMap, memory, labels, params.currentMemAddress)
     test(`Label "${params.tokens.label}" should be loaded address`, () => {
       expect(memory.lookup(getLabelOrThrow(params.tokens.label, labels).memAddress)).toEqual(expected.value1)
       if (expected.value2 != null) {
@@ -88,8 +91,6 @@ describe(`makeDC`, () => {
   ])(`$# :: $params`, ({params, expected}) => {
     // given
     const grMap = new Map<string, GeneralRegister>()
-    const flagRegister = new FlagRegister()
-    const SP = new GeneralRegister("SP")
     const memory = new Memory()
 
     // when, then
@@ -99,7 +100,7 @@ describe(`makeDC`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(1)
     })
-    res?.gen(grMap, flagRegister, SP, memory, labels, params.currentMemAddress)
+    res?.gen(grMap, memory, labels, params.currentMemAddress)
     test(`memory#(start+2inst) should be loaded address`, () => {
       expect(memory.lookupLogical(params.currentMemAddress)).toEqual(expected)
     })

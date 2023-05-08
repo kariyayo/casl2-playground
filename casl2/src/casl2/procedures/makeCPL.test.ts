@@ -62,10 +62,10 @@ describe(`makeCPL`, () => {
     test(`makeCPL returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
-      expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
-      expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
+      expect(new DataView(res?.gen(grMap, memory, labels)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
+      expect(new DataView(res?.gen(grMap, memory, labels)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
       if (expected.wordLength == 2) {
-        expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
+        expect(new DataView(res?.gen(grMap, memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
       }
     })
 
@@ -74,8 +74,9 @@ describe(`makeCPL`, () => {
     PR.storeLogical(0)
 
     // when
-    const bytecode = res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode
-    const interpreter = new Interpreter(grMap, flagRegister, PR, SP, memory, bytecode)
+    const bytecode = res?.gen(grMap, memory, labels)!.bytecode
+    memory.storeBytecode(bytecode, 0)
+    const interpreter = new Interpreter(grMap, flagRegister, PR, SP, memory)
     interpreter.step()
 
     // then
@@ -139,18 +140,27 @@ describe(`makeCPL`, () => {
     memory.store(1016, 1)
 
     // when, then
-
     const res = makeCPL(tokens)
     test(`makeCPL returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
-      expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
-      expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
+      expect(new DataView(res?.gen(grMap, memory, labels)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
+      expect(new DataView(res?.gen(grMap, memory, labels)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
       if (expected.wordLength == 2) {
-        expect(new DataView(res?.gen(grMap, flagRegister, SP, memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
+        expect(new DataView(res?.gen(grMap, memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
       }
     })
-    res?.gen(grMap, flagRegister, SP, memory, labels)!.proc(new GeneralRegister("PR"))
+    
+    // given
+    const PR = new GeneralRegister("PR")
+    PR.storeLogical(0)
+
+    // when
+    const bytecode = res?.gen(grMap, memory, labels)!.bytecode
+    memory.storeBytecode(bytecode, 0)
+    new Interpreter(grMap, flagRegister, PR, SP, memory).step()
+
+    // then
     test(`GR3 should not be changed`, () => {
       expect(grMap.get("GR3")?.lookupLogical()).toEqual(expected.GR3)
     })

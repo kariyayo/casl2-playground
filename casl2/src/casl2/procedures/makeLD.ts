@@ -1,7 +1,7 @@
 import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
-import { GeneralRegister, isGeneralRegister, getGrOrThrow, grToBytecode, advancePR, FlagRegister } from "./registerAccessor"
+import { GeneralRegister, isGeneralRegister, getGrOrThrow, grToBytecode } from "./registerAccessor"
 import { isAddress, normalizeAddress } from "./strings"
 
 export function makeLD(tokens: Tokens): Instruction {
@@ -17,8 +17,6 @@ export function makeLD(tokens: Tokens): Instruction {
       tokens,
       gen: (
         grMap: Map<string, GeneralRegister>,
-        flagRegister: FlagRegister,
-        SP: GeneralRegister,
         memory: Memory,
         labels: Map<string, Label>,
         currentMemAddress?: number
@@ -34,15 +32,7 @@ export function makeLD(tokens: Tokens): Instruction {
         const byteArray = new Uint8Array(bytecode, 0, 2)
         byteArray[0] = opCode
         byteArray[1] = (grToBytecode(distGR) << 4) + grToBytecode(srcGR)
-        return {
-          bytecode,
-          proc: (PR: GeneralRegister) => {
-            const value = srcGR.lookup()
-            distGR.store(value)
-            flagRegister.set(value)
-            advancePR(PR, wordLength)
-          }
-        }
+        return { bytecode }
       }
     }
   } else {
@@ -54,8 +44,6 @@ export function makeLD(tokens: Tokens): Instruction {
       tokens,
       gen: (
         grMap: Map<string, GeneralRegister>,
-        flagRegister: FlagRegister,
-        SP: GeneralRegister,
         memory: Memory,
         labels: Map<string, Label>,
         currentMemAddress?: number
@@ -76,19 +64,7 @@ export function makeLD(tokens: Tokens): Instruction {
         view.setUint8(0, opCode)
         view.setUint8(1, (grToBytecode(distGR) << 4) + grToBytecode(indexGR))
         view.setUint16(2, operandAddress, false)
-        return {
-          bytecode,
-          proc: (PR: GeneralRegister) => {
-            let address = operandAddress
-            if (indexGR != null) {
-              address = address + indexGR.lookup()
-            }
-            const value = memory.lookup(address)
-            distGR.store(value)
-            flagRegister.set(value)
-            advancePR(PR, wordLength)
-          }
-        }
+        return { bytecode }
       }
     }
   }
