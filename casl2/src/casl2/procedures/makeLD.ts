@@ -1,4 +1,3 @@
-import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
 import { GeneralRegister, isGeneralRegister, getGrOrThrow, grToBytecode } from "./registerAccessor"
@@ -17,9 +16,7 @@ export function makeLD(tokens: Tokens): Instruction {
       tokens,
       gen: (
         grMap: Map<string, GeneralRegister>,
-        memory: Memory,
         labels: Map<string, Label>,
-        currentMemAddress?: number
       ) => {
         // e.g. LD GR1,GR2 => [0x1412]
         const distGR = getGrOrThrow(target, grMap)
@@ -44,9 +41,7 @@ export function makeLD(tokens: Tokens): Instruction {
       tokens,
       gen: (
         grMap: Map<string, GeneralRegister>,
-        memory: Memory,
         labels: Map<string, Label>,
-        currentMemAddress?: number
       ) => {
         // e.g. LD GR1,adr => [0x1010, address]
         const distGR = getGrOrThrow(target, grMap)

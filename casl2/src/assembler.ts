@@ -59,7 +59,7 @@ export function assemble(
     const [label, insts] = aggregated
     let memAddress = label.memAddress
     insts.forEach(inst => {
-      const generated = inst.gen(grMap, memory, labels, memAddress)
+      const generated = inst.gen(grMap, labels)
       if (generated == null) {
         assembleResult.push({ memAddress, bytecode: null, tokens: inst.tokens })
       } else {

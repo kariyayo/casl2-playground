@@ -1,4 +1,3 @@
-import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { GeneralRegister } from "./registerAccessor"
 
@@ -9,9 +8,7 @@ export function makeRET(tokens: Tokens): Instruction {
     tokens,
     gen: (
       grMap: Map<string, GeneralRegister>,
-      memory: Memory,
       labels: Map<string, Label>,
-      currentMemAddress?: number
     ) => {
       const bytecode = new ArrayBuffer(2)
       const view = new DataView(bytecode)

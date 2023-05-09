@@ -1,4 +1,3 @@
-import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
 import { GeneralRegister, getGrOrThrow, grToBytecode } from "./registerAccessor"
@@ -17,9 +16,7 @@ export function makeST(tokens: Tokens): Instruction {
     tokens,
     gen: (
       grMap: Map<string, GeneralRegister>,
-      memory: Memory,
       labels: Map<string, Label>,
-      currentMemAddress?: number,
     ) => {
       // e.g. ST GR1,adr => [0x1110, address]
       const srcGR = getGrOrThrow(src, grMap)

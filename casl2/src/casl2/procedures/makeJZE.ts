@@ -1,4 +1,3 @@
-import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
 import { GeneralRegister, getGrOrThrow, grToBytecode } from "./registerAccessor"
@@ -15,9 +14,7 @@ export function makeJZE(tokens: Tokens): Instruction {
     tokens,
     gen: (
       grMap: Map<string, GeneralRegister>,
-      memory: Memory,
       labels: Map<string, Label>,
-      currentMemAddress?: number
     ) => {
       const grx = ts.length > 1 ? ts[1] : null
       const indexGR = grx == null ? null : getGrOrThrow(grx, grMap)

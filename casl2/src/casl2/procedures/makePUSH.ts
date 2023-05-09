@@ -1,4 +1,3 @@
-import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { GeneralRegister, getGrOrThrow, grToBytecode } from "./registerAccessor"
 import { isAddress, normalizeAddress } from "./strings"
@@ -14,9 +13,7 @@ export function makePUSH(tokens: Tokens): Instruction {
     tokens,
     gen: (
       grMap: Map<string, GeneralRegister>,
-      memory: Memory,
       labels: Map<string, Label>,
-      currentMemAddress?: number
     ) => {
       if (!isAddress(value)) {
         throw new Error(`operand should be address: ${tokens}`)

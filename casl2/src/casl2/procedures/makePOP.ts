@@ -1,4 +1,3 @@
-import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { GeneralRegister, getGrOrThrow, grToBytecode } from "./registerAccessor"
 
@@ -13,9 +12,7 @@ export function makePOP(tokens: Tokens): Instruction {
     tokens,
     gen: (
       grMap: Map<string, GeneralRegister>,
-      memory: Memory,
       labels: Map<string, Label>,
-      currentMemAddress?: number
     ) => {
       const targetGR = getGrOrThrow(operand, grMap)
       const bytecode = new ArrayBuffer(4)

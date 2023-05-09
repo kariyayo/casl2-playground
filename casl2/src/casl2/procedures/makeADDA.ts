@@ -1,4 +1,3 @@
-import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
 import { GeneralRegister, isGeneralRegister, getGrOrThrow, grToBytecode } from "./registerAccessor"
@@ -17,9 +16,7 @@ export function makeADDA(tokens: Tokens): Instruction {
       tokens,
       gen: (
         grMap: Map<string, GeneralRegister>,
-        memory: Memory,
         labels: Map<string, Label>,
-        currentMemAddress?: number
       ) => {
         // e.g. ADDA GR1,GR2
         const operand1GR = getGrOrThrow(operand1, grMap)
@@ -40,9 +37,7 @@ export function makeADDA(tokens: Tokens): Instruction {
       tokens,
       gen: (
         grMap: Map<string, GeneralRegister>,
-        memory: Memory,
         labels: Map<string, Label>,
-        currentMemAddress?: number
       ) => {
         // e.g. ADDA GR1,adr
         const grx = ts.length > 2 ? ts[2] : null

@@ -48,9 +48,9 @@ export class Memory {
     if (dataView.byteLength < 2) {
       throw new Error(`invalid bytecode. bytecode=${bytecode}`)
     }
-    this.storeLogical(offset, dataView.getUint16(0, false))
-    if (dataView.byteLength > 2) {
-      this.storeLogical(offset + 1, dataView.getUint16(2, false))
+    const wordLength = dataView.byteLength / 2
+    for (let i = 0; i < wordLength; i++) {
+      this.storeLogical(offset + i, dataView.getUint16(2*i, false))
     }
   }
 }

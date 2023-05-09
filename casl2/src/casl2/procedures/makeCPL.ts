@@ -1,4 +1,3 @@
-import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
 import { getLabelOrThrow } from "./labelAccessor"
 import { GeneralRegister, isGeneralRegister, getGrOrThrow, grToBytecode } from "./registerAccessor"
@@ -17,9 +16,7 @@ export function makeCPL(tokens: Tokens): Instruction {
       tokens,
       gen: (
         grMap: Map<string, GeneralRegister>,
-        memory: Memory,
         labels: Map<string, Label>,
-        currentMemAddress?: number
       ) => {
         const operand1GR = getGrOrThrow(operand1, grMap)
         const operand2GR = getGrOrThrow(target, grMap)
@@ -39,9 +36,7 @@ export function makeCPL(tokens: Tokens): Instruction {
       tokens,
       gen: (
         grMap: Map<string, GeneralRegister>,
-        memory: Memory,
         labels: Map<string, Label>,
-        currentMemAddress?: number
       ) => {
         const grx = ts.length > 2 ? ts[2] : null
         const operand1GR = getGrOrThrow(operand1, grMap)

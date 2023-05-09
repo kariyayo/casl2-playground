@@ -11,9 +11,7 @@ export type Instruction = {
   tokens: Tokens
   gen: (
     grMap: Map<string, GeneralRegister>,
-    memory: Memory,
     labels: Map<string, Label>,
-    currentMemAddress?: number
   ) => null | {
     bytecode: ArrayBuffer
   }

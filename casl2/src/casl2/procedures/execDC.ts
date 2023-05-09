@@ -1,11 +1,8 @@
-import { Memory } from "../../infra/memory"
 import { Instruction, Label, Tokens } from "../types"
-import { getLabelOrThrow } from "./labelAccessor"
 import { GeneralRegister } from "./registerAccessor"
 import { isHexadecimal, isJisX0201, isNumeric } from "./strings"
 
 export function execDC(tokens: Tokens): Instruction {
-  const labelText = tokens.label
   const operand = tokens.operand
   let values: Array<number> = []
   if (operand.startsWith("'")) {
@@ -41,24 +38,12 @@ export function execDC(tokens: Tokens): Instruction {
     tokens,
     gen: (
       grMap: Map<string, GeneralRegister>,
-      memory: Memory,
       labels: Map<string, Label>,
-      currentMemAddress?: number
     ) => {
-      const address =
-        labelText == "" ? currentMemAddress : getLabelOrThrow(labelText, labels).memAddress
-      if (address == null) {
-        throw Error(`address is null.`)
-      }
       // load constant value in memory
       const bytecode = new ArrayBuffer(2*values.length)
       const view = new DataView(bytecode)
       values.forEach((v, index) => {
-        if (v > 32767) {
-          memory.storeLogical(address + index, v)
-        } else {
-          memory.store(address + index, v)
-        }
         view.setInt16(index*2, v)
       })
       return { bytecode }

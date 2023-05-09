@@ -38,10 +38,11 @@ describe(`makeSLL`, () => {
     test(`makeSLL returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
-      expect(new DataView(res?.gen(grMap, memory, labels)!.bytecode).getUint8(0)).toEqual(expected.bytecode[0])
-      expect(new DataView(res?.gen(grMap, memory, labels)!.bytecode).getUint8(1)).toEqual(expected.bytecode[1])
+      const bytecodeView = new DataView(res?.gen(grMap, labels)!.bytecode)
+      expect(bytecodeView.getUint8(0)).toEqual(expected.bytecode[0])
+      expect(bytecodeView.getUint8(1)).toEqual(expected.bytecode[1])
       if (expected.wordLength == 2) {
-        expect(new DataView(res?.gen(grMap, memory, labels)!.bytecode).getUint16(2)).toEqual(expected.bytecode[2])
+        expect(bytecodeView.getUint16(2)).toEqual(expected.bytecode[2])
       }
     })
 
@@ -50,7 +51,7 @@ describe(`makeSLL`, () => {
     PR.storeLogical(0)
 
     // when
-    const bytecode = res?.gen(grMap, memory, labels)!.bytecode
+    const bytecode = res?.gen(grMap, labels)!.bytecode
     memory.storeBytecode(bytecode, 0)
     const interpreter = new Interpreter(grMap, flagRegister, PR, SP, memory)
     interpreter.step()
@@ -92,7 +93,7 @@ describe(`makeSLL`, () => {
 
     // when
     const res = makeSLL(tokens)
-    const bytecode = res?.gen(grMap, memory, labels)!.bytecode
+    const bytecode = res?.gen(grMap, labels)!.bytecode
     memory.storeBytecode(bytecode, 0)
     const interpreter = new Interpreter(grMap, flagRegister, PR, SP, memory)
     interpreter.step()

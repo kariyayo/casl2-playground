@@ -12,21 +12,21 @@ describe(`makeDC`, () => {
     {
       params: {
         tokens: { lineNum: 0, instructionNum: 2, label: "AA", operator: "DC", operand: "30" },
-        currentMemAddress: 1010,
+        currentMemAddress: 2000,
       },
       expected: { value1: 30, value2: null, wordLength: 1 }
     },
     {
       params: {
         tokens: { lineNum: 0, instructionNum: 2, label: "AA", operator: "DC", operand: "30,#000A,-1" },
-        currentMemAddress: 1010,
+        currentMemAddress: 2000,
       },
       expected: { value1: 30, value2: 10, value3: -1, wordLength: 3 }
     },
     {
       params: {
         tokens: { lineNum: 0, instructionNum: 2, label: "AA", operator: "DC", operand: "'ABC'" },
-        currentMemAddress: 1010,
+        currentMemAddress: 2000,
       },
       expected: { value1: 65, value2: 66, value3: 67, wordLength: 3 }
     },
@@ -47,7 +47,8 @@ describe(`makeDC`, () => {
     PR.storeLogical(0)
 
     // when
-    res?.gen(grMap, memory, labels, params.currentMemAddress)
+    const bytecode = res?.gen(grMap, labels)!.bytecode
+    memory.storeBytecode(bytecode, params.currentMemAddress)
     test(`Label "${params.tokens.label}" should be loaded address`, () => {
       expect(memory.lookup(getLabelOrThrow(params.tokens.label, labels).memAddress)).toEqual(expected.value1)
       if (expected.value2 != null) {
@@ -63,28 +64,28 @@ describe(`makeDC`, () => {
     {
       params: {
         tokens: { lineNum: 0, instructionNum: 2, label: "", operator: "DC", operand: "30" },
-        currentMemAddress: 1020,
+        currentMemAddress: 2000,
       },
       expected: 30
     },
     {
       params: {
         tokens: { lineNum: 0, instructionNum: 2, label: "", operator: "DC", operand: "-123" },
-        currentMemAddress: 1020,
+        currentMemAddress: 2000,
       },
       expected: 65413 // -123
     },
     {
       params: {
         tokens: { lineNum: 0, instructionNum: 2, label: "", operator: "DC", operand: "#0000" },
-        currentMemAddress: 1020,
+        currentMemAddress: 2000,
       },
       expected: 0
     },
     {
       params: {
         tokens: { lineNum: 0, instructionNum: 2, label: "", operator: "DC", operand: "#FFFF" },
-        currentMemAddress: 1020,
+        currentMemAddress: 2000,
       },
       expected: 65535
     },
@@ -100,7 +101,8 @@ describe(`makeDC`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(1)
     })
-    res?.gen(grMap, memory, labels, params.currentMemAddress)
+    const bytecode = res?.gen(grMap, labels)!.bytecode
+    memory.storeBytecode(bytecode, params.currentMemAddress)
     test(`memory#(start+2inst) should be loaded address`, () => {
       expect(memory.lookupLogical(params.currentMemAddress)).toEqual(expected)
     })
