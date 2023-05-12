@@ -1,5 +1,9 @@
 import { makeMachine } from "../lib/machine"
 
+window.casl2 = {
+  version: VERSION
+}
+
 function H2(text) {
   const header = document.createElement("h2")
   header.innerText = text

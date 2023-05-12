@@ -1,4 +1,4 @@
-import { isNumeric } from "../casl2/procedures/strings"
+import { isNumeric } from "../assembler/casl2/procedures/strings"
 
 export class Memory {
   content: DataView = new DataView(new ArrayBuffer(WORD_LENGTH * 65536))
@@ -15,37 +15,43 @@ export class Memory {
     if (address * WORD_LENGTH > this.content.byteLength) {
       throw new Error(`invalid address. address=${address}`)
     }
-    if (value > INT16_MAX) {
-      throw new Error(`invalid value. value=${value}`)
-    }
     if (typeof value === 'string') {
       if (!isNumeric(value)) {
         throw new Error(`invalid value. value=${value}`)
       }
-      this.content.setInt16(address * WORD_LENGTH, Number(value))
-    } else {
-      this.content.setInt16(address * WORD_LENGTH, value)
+      value = Number(value)
     }
+    if (value > INT16_MAX) {
+      throw new Error(`invalid value. value=${value}`)
+    }
+    this.content.setInt16(address * WORD_LENGTH, value)
   }
 
   storeLogical(address: number, value: number | string) {
     if (address * WORD_LENGTH > this.content.byteLength) {
       throw new Error(`invalid address. address=${address}`)
     }
-    if (value > UINT16_MAX) {
-      throw new Error(`invalid value. value=${value}`)
-    }
     if (typeof value === 'string') {
       if (!isNumeric(value)) {
         throw new Error(`invalid value. value=${value}`)
       }
-      this.content.setInt16(address * WORD_LENGTH, Number(value))
-    } else {
-      this.content.setInt16(address * WORD_LENGTH, value)
+      value = Number(value)
     }
+    if (value > UINT16_MAX) {
+      throw new Error(`invalid value. value=${value}`)
+    }
+    this.content.setInt16(address * WORD_LENGTH, value)
   }
 
-  private check(address: number, value: number | string) {
+  storeBytecode(bytecode: ArrayBuffer, offset: number) {
+    const dataView = new DataView(bytecode)
+    if (dataView.byteLength < 2) {
+      throw new Error(`invalid bytecode. bytecode=${bytecode}`)
+    }
+    const wordLength = dataView.byteLength / 2
+    for (let i = 0; i < wordLength; i++) {
+      this.storeLogical(offset + i, dataView.getUint16(2*i, false))
+    }
   }
 }
 
