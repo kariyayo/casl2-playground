@@ -1,4 +1,4 @@
-import { isNumeric } from "../casl2/procedures/strings"
+import { isNumeric } from "../assembler/casl2/procedures/strings"
 
 export class Memory {
   content: DataView = new DataView(new ArrayBuffer(WORD_LENGTH * 65536))

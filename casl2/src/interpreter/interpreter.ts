@@ -1,4 +1,4 @@
-import { advancePR, setPR } from "../casl2/procedures/registerAccessor"
+import { advancePR, setPR } from "../assembler/casl2/procedures/registerAccessor"
 import { Memory } from "../infra/memory"
 import { END_ADDRESS, FlagRegister, GeneralRegister } from "../infra/register"
 

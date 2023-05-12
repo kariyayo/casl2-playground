@@ -1,8 +1,8 @@
-import { Memory } from "./infra/memory";
-import { FlagRegister, GeneralRegister, END_ADDRESS } from "./infra/register";
-import { Label } from "./casl2/types";
-import { assemble, AssembleResult } from "./assembler";
-import { Interpreter } from "./interpreter/interpreter";
+import { Memory } from "./infra/memory"
+import { FlagRegister, GeneralRegister, END_ADDRESS } from "./infra/register"
+import { Label } from "./assembler/types"
+import { assemble, AssembleResult } from "./assembler/assembler"
+import { Interpreter } from "./interpreter/interpreter"
 
 export function makeMachine(input: string, startMemAddress: number): Commet2 {
   return new Commet2(input, startMemAddress)
