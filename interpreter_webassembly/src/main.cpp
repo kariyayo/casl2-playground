@@ -18,8 +18,9 @@ int main() {
   }
   ifs.close();
 
+  auto pr = new Register();
   auto m = new Memory(input_data);
-  auto intr = new Interpreter(m, input_data.size());
+  auto intr = new Interpreter(pr, m, input_data.size());
   std::cout << "size = " << input_data.size() << "\n";
   while (intr->step()) {}
   std::cout << "\n";
