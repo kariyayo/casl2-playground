@@ -46,18 +46,39 @@ const uint8_t CALL  = 0x80;
 // no support
 // const int SVC   = 0xF0;
 
+const int16_t END_ADDRESS = -32678;
+
 class Interpreter
 {
 private :
-  Register* pr;
+  Register* gr1 = new Register();
+  Register* gr2 = new Register();
+  Register* gr3 = new Register();
+  Register* gr4 = new Register();
+  Register* gr5 = new Register();
+  Register* gr6 = new Register();
+  Register* gr7 = new Register();
+  Register* pr = new Register();
   Memory* memory;
   int wordLength;
 
 public :
-  Interpreter(Register* pr, Memory* memory, int wordLength) {
-    this->pr = pr;
+  Interpreter(int startAddress, Memory* memory, int wordLength) {
+    this->pr->store(startAddress);
     this->memory = memory;
     this->wordLength = wordLength;
+  }
+
+  void dump() {
+    std::cout << "gr1: " << std::setw(4) << std::setfill('0') << std::hex << std::uppercase << gr1->lookupLogical() << std::endl;
+    std::cout << "gr2: " << std::setw(4) << std::setfill('0') << std::hex << std::uppercase << gr2->lookupLogical() << std::endl;
+    std::cout << "gr3: " << std::setw(4) << std::setfill('0') << std::hex << std::uppercase << gr3->lookupLogical() << std::endl;
+    std::cout << "gr4: " << std::setw(4) << std::setfill('0') << std::hex << std::uppercase << gr4->lookupLogical() << std::endl;
+    std::cout << "gr5: " << std::setw(4) << std::setfill('0') << std::hex << std::uppercase << gr5->lookupLogical() << std::endl;
+    std::cout << "gr6: " << std::setw(4) << std::setfill('0') << std::hex << std::uppercase << gr6->lookupLogical() << std::endl;
+    std::cout << "gr7: " << std::setw(4) << std::setfill('0') << std::hex << std::uppercase << gr7->lookupLogical() << std::endl;
+    std::cout << "pr: " << std::setw(4) << std::setfill('0') << std::hex << std::uppercase << pr->lookupLogical() << std::endl;
+    std::cout << std::endl;
   }
 
   void advancePR() {
@@ -67,9 +88,6 @@ public :
 
   std::pair<uint16_t, uint16_t> readWord() {
     auto currentPos = pr->lookupLogical();
-    if (currentPos >= wordLength) {
-      return std::make_pair(0, 0);
-    }
     auto word = memory->lookupLogical(currentPos);
     uint8_t lowerByte = word & 0b11111111;
     uint8_t upperByte = word >> 8;
@@ -77,11 +95,14 @@ public :
   }
 
   bool step() {
-    auto pair = readWord();
+    if (pr->lookup() == END_ADDRESS) {
+      std::cout << "END" << std::endl;
+      return false;
+    }
+    auto [opcode, operand] = readWord();
     advancePR();
-    auto opcode = pair.first;
-    auto operand = pair.second;
     if (opcode == 0 && operand == 0) {
+      std::cout << "opcode == 0 && operand == 0" << std::endl;
       return false;
     }
     std::cout << std::setw(2) << std::setfill('0') << std::hex << std::uppercase << opcode << " ";
@@ -96,6 +117,7 @@ public :
         break;
       case ADDA:
         std::cout << "ADDA";
+        adda(operand);
         break;
       case SUBA:
         std::cout << "SUBA";
@@ -126,53 +148,54 @@ public :
         break;
       case RET:
         std::cout << "RET";
+        ret();
         break;
       default:
-        auto pair = readWord();
+        auto [upper, lower] = readWord();
         advancePR();
-        auto upper = pair.first;
-        auto lower = pair.second;
-        if (opcode == 0 && operand == 0) {
+        if (upper == 0 && lower == 0) {
           return false;
         }
         auto address = (upper << 8) + lower;
         std::cout << std::setw(2) << std::setfill('0') << std::hex << std::uppercase << address << " ";
         switch (opcode) {
           case LD2:
-            std::cout << "LD";
+            std::cout << "LD2";
+            ld2(operand, address);
             break;
           case ST:
             std::cout << "ST";
+            st(operand, address);
             break;
           case LAD:
             std::cout << "LAD";
             break;
           case ADDA2:
-            std::cout << "ADDA";
+            std::cout << "ADDA2";
             break;
           case SUBA2:
-            std::cout << "SUBA";
+            std::cout << "SUBA2";
             break;
           case ADDL2:
-            std::cout << "ADDL";
+            std::cout << "ADDL2";
             break;
           case SUBL2:
-            std::cout << "SUBL";
+            std::cout << "SUBL2";
             break;
           case AND2:
-            std::cout << "AND";
+            std::cout << "AND2";
             break;
           case OR2:
-            std::cout << "OR";
+            std::cout << "OR2";
             break;
           case XOR2:
-            std::cout << "XOR";
+            std::cout << "XOR2";
             break;
           case CPA2:
-            std::cout << "CPA";
+            std::cout << "CPA2";
             break;
           case CPL2:
-            std::cout << "CPL";
+            std::cout << "CPL2";
             break;
           case SLA:
             std::cout << "SLA";
@@ -213,6 +236,77 @@ public :
         break;
     }
     std::cout << std::endl;
+    dump();
     return true;
   }
+
+  std::pair<uint8_t, uint8_t> divide(uint8_t byte) {
+    return std::make_pair(byte >> 4, byte & 0b1111);
+  }
+
+  Register* gr(uint8_t n) {
+    switch (n) {
+      case 1:
+        return gr1;
+      case 2:
+        return gr2;
+      case 3:
+        return gr3;
+      case 4:
+        return gr4;
+      case 5:
+        return gr5;
+      case 6:
+        return gr6;
+      case 7:
+        return gr7;
+      default:
+        throw std::runtime_error("Unknown register: GR" + std::to_string(n));
+    }
+  }
+
+  void adda(uint8_t operands) {
+    auto [n, m] = divide(operands);
+    auto v = gr(n)->lookup() + gr(m)->lookup();
+    std::cout << " operands=" << operands << ", n=" << std::to_string(n) << ", m=" << std::to_string(m) << ", v=" << std::to_string(v);
+    gr(n)->store(v);
+    // fr->set(v);
+  }
+
+  void ld2(uint8_t operands, uint16_t address) {
+    auto [n, x] = divide(operands);
+    auto xaddr = 0;
+    if (x != 0) {
+      xaddr = gr(x)->lookup();
+    }
+    auto v = memory->lookup(address + xaddr);
+    std::cout << " operands=" << operands << ", address= " << address << ", n=" << std::to_string(n) << ", x=" << std::to_string(x) << ", xaddr=" << std::to_string(xaddr) << ", v=" << std::to_string(v);
+    gr(n)->store(v);
+    // fr->set(v);
+  }
+
+  void st(uint8_t operands, uint16_t address) {
+    auto [n, x] = divide(operands);
+    auto v = gr(n)->lookup();
+    auto xaddr = 0;
+    if (x != 0) {
+      xaddr = gr(x)->lookup();
+    }
+    std::cout << " operands=" << operands << ", address= " << address << ", n=" << std::to_string(n) << ", x=" << std::to_string(x) << ", xaddr=" << std::to_string(xaddr) << ", v=" << std::to_string(v);
+    memory->store(address + xaddr, v);
+  }
+
+  void ret() {
+    // FIXME
+    pr->store(END_ADDRESS);
+    // auto sp = spReg->lookup();
+    // if (sp != END_ADDRESS) {
+    //   auto address = memory->lookup(sp);
+    //   prReg->store(address);
+    //   spReg->store(sp + 1);
+    // } else {
+    //   prReg->store(END_ADDRESS);
+    // }
+  }
+
 };

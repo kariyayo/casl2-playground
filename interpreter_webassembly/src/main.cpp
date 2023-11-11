@@ -2,7 +2,9 @@
 #include "interpreter.cpp"
 
 int main() {
-  auto s = "inputfile";
+  std::cout << "START!" << "\n";
+
+  auto s = "test_inputfile";
   std::ifstream ifs(s, std::ios::in | std::ios::binary);
   if (ifs.fail()) {
     std::cout << "file can not open." << std::endl;
@@ -18,9 +20,9 @@ int main() {
   }
   ifs.close();
 
-  auto pr = new Register();
-  auto m = new Memory(input_data);
-  auto intr = new Interpreter(pr, m, input_data.size());
+  auto startAddress = 2000;
+  auto m = new Memory(input_data.begin(), input_data.end(), startAddress);
+  auto intr = new Interpreter(startAddress, m, input_data.size());
   std::cout << "size = " << input_data.size() << "\n";
   while (intr->step()) {}
   std::cout << "\n";
