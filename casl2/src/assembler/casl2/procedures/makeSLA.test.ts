@@ -2,7 +2,7 @@ import { Memory } from "../../../infra/memory"
 import { Interpreter } from "../../../interpreter/interpreter"
 import { Label, Tokens } from "../../types"
 import { makeSLA } from "./makeSLA"
-import { getGrOrThrow, GeneralRegister, FlagRegister } from "./registerAccessor"
+import { GeneralRegister, FlagRegister } from "./registerAccessor"
 
 describe(`makeSLA`, () => {
 
@@ -27,8 +27,8 @@ describe(`makeSLA`, () => {
       const name = `GR${i}`
       grMap.set(name, new GeneralRegister(name))
     }
-    getGrOrThrow("GR1", grMap).store(0b0010)
-    getGrOrThrow("GR3", grMap).store(1)
+    grMap.get("GR1")?.store(0b0010)
+    grMap.get("GR3")?.store(1)
     const SP = new GeneralRegister("SP")
     const labels = new Map<string, Label>()
     const memory = new Memory()
@@ -38,7 +38,7 @@ describe(`makeSLA`, () => {
     test(`makeSLA returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
-      const bytecodeView = new DataView(res?.gen(grMap, labels)!.bytecode)
+      const bytecodeView = new DataView(res?.gen(labels)!.bytecode)
       expect(bytecodeView.getUint8(0)).toEqual(expected.bytecode[0])
       expect(bytecodeView.getUint8(1)).toEqual(expected.bytecode[1])
       if (expected.wordLength == 2) {
@@ -51,7 +51,7 @@ describe(`makeSLA`, () => {
     PR.storeLogical(0)
 
     // when
-    const bytecode = res?.gen(grMap, labels)!.bytecode
+    const bytecode = res?.gen(labels)!.bytecode
     memory.storeBytecode(bytecode, 0)
     const interpreter = new Interpreter(grMap, flagRegister, PR, SP, memory)
     interpreter.step()
@@ -84,7 +84,7 @@ describe(`makeSLA`, () => {
       const name = `GR${i}`
       grMap.set(name, new GeneralRegister(name))
     }
-    getGrOrThrow("GR2", grMap).store(beforeGR2)
+    grMap.get("GR2")?.store(beforeGR2)
     const SP = new GeneralRegister("SP")
     const labels = new Map<string, Label>()
     const memory = new Memory()
@@ -93,7 +93,7 @@ describe(`makeSLA`, () => {
 
     // when
     const res = makeSLA(tokens)
-    const bytecode = res?.gen(grMap, labels)!.bytecode
+    const bytecode = res?.gen(labels)!.bytecode
     memory.storeBytecode(bytecode, 0)
     const interpreter = new Interpreter(grMap, flagRegister, PR, SP, memory)
     interpreter.step()

@@ -2,7 +2,7 @@ import { Memory } from "../../../infra/memory"
 import { Interpreter } from "../../../interpreter/interpreter"
 import { Label, Tokens } from "../../types"
 import { makeOR } from "./makeOR"
-import { getGrOrThrow, GeneralRegister, FlagRegister } from "./registerAccessor"
+import { GeneralRegister, FlagRegister } from "./registerAccessor"
 
 describe(`makeOR`, () => {
   describe.each([
@@ -38,8 +38,8 @@ describe(`makeOR`, () => {
       const name = `GR${i}`
       grMap.set(name, new GeneralRegister(name))
     }
-    getGrOrThrow("GR1", grMap).store(0b0011)
-    getGrOrThrow("GR2", grMap).store(0b0110)
+    grMap.get("GR1")?.store(0b0011)
+    grMap.get("GR2")?.store(0b0110)
     const SP = new GeneralRegister("SP")
     const labels = new Map<string, Label>()
     labels.set("AA", {label: "AA", memAddress: 1000})
@@ -52,7 +52,7 @@ describe(`makeOR`, () => {
     test(`makeOR returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
-      const bytecodeView = new DataView(res?.gen(grMap, labels)!.bytecode)
+      const bytecodeView = new DataView(res?.gen(labels)!.bytecode)
       expect(bytecodeView.getUint8(0)).toEqual(expected.bytecode[0])
       expect(bytecodeView.getUint8(1)).toEqual(expected.bytecode[1])
       if (expected.wordLength == 2) {
@@ -65,7 +65,7 @@ describe(`makeOR`, () => {
     PR.storeLogical(0)
 
     // when
-    const bytecode = res?.gen(grMap, labels)!.bytecode
+    const bytecode = res?.gen(labels)!.bytecode
     memory.storeBytecode(bytecode, 0)
     const interpreter = new Interpreter(grMap, flagRegister, PR, SP, memory)
     interpreter.step()

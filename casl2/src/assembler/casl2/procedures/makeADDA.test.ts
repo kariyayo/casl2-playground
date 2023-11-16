@@ -2,7 +2,7 @@ import { Memory } from "../../../infra/memory"
 import { Interpreter } from "../../../interpreter/interpreter"
 import { Label, Tokens } from "../../types"
 import { makeADDA } from "./makeADDA"
-import { getGrOrThrow, GeneralRegister, FlagRegister } from "./registerAccessor"
+import { GeneralRegister, FlagRegister } from "./registerAccessor"
 
 describe(`makeADDA`, () => {
   const labels = new Map<string, Label>()
@@ -49,9 +49,9 @@ describe(`makeADDA`, () => {
       const name = `GR${i}`
       grMap.set(name, new GeneralRegister(name))
     }
-    getGrOrThrow("GR1", grMap).store(100)
-    getGrOrThrow("GR2", grMap).store(200)
-    getGrOrThrow("GR3", grMap).store(16)
+    grMap.get("GR1")?.store(100)
+    grMap.get("GR2")?.store(200)
+    grMap.get("GR3")?.store(16)
     const SP = new GeneralRegister("SP")
     const memory = new Memory()
     memory.store(1000, 20)
@@ -62,7 +62,7 @@ describe(`makeADDA`, () => {
     test(`makeADDA returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
-      const bytecodeView = new DataView(res?.gen(grMap, labels)!.bytecode)
+      const bytecodeView = new DataView(res?.gen(labels)!.bytecode)
       expect(bytecodeView.getUint8(0)).toEqual(expected.bytecode[0])
       expect(bytecodeView.getUint8(1)).toEqual(expected.bytecode[1])
       if (expected.wordLength == 2) {
@@ -75,7 +75,7 @@ describe(`makeADDA`, () => {
     PR.storeLogical(0)
 
     // when
-    const bytecode = res?.gen(grMap, labels)!.bytecode
+    const bytecode = res?.gen(labels)!.bytecode
     memory.storeBytecode(bytecode, 0)
     new Interpreter(grMap, flagRegister, PR, SP, memory).step()
 

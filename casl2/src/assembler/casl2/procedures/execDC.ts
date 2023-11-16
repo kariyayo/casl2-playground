@@ -1,5 +1,4 @@
 import { Instruction, Label, Tokens } from "../../types"
-import { GeneralRegister } from "./registerAccessor"
 import { isHexadecimal, isJisX0201, isNumeric } from "./strings"
 
 export function execDC(tokens: Tokens): Instruction {
@@ -37,7 +36,6 @@ export function execDC(tokens: Tokens): Instruction {
     wordLength,
     tokens,
     gen: (
-      grMap: Map<string, GeneralRegister>,
       labels: Map<string, Label>,
     ) => {
       // load constant value in memory

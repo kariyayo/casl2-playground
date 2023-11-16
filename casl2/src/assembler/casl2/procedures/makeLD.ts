@@ -1,6 +1,6 @@
 import { Instruction, Label, Tokens } from "../../types"
 import { getLabelOrThrow } from "./labelAccessor"
-import { GeneralRegister, isGeneralRegister, getGrOrThrow, grToBytecode } from "./registerAccessor"
+import { isGeneralRegister, getGrByteCodeOrThrow } from "./registerAccessor"
 import { isAddress, normalizeAddress } from "./strings"
 
 export function makeLD(tokens: Tokens): Instruction {
@@ -15,20 +15,19 @@ export function makeLD(tokens: Tokens): Instruction {
       wordLength,
       tokens,
       gen: (
-        grMap: Map<string, GeneralRegister>,
         labels: Map<string, Label>,
       ) => {
         // e.g. LD GR1,GR2 => [0x1412]
-        const distGR = getGrOrThrow(target, grMap)
+        const distGR = getGrByteCodeOrThrow(target)
         const grx = ts.length > 2 ? ts[2] : null
-        const srcGR = getGrOrThrow(value, grMap)
+        const srcGR = getGrByteCodeOrThrow(value)
         if (grx != null) {
           throw new Error(`cannot use GRx: ${tokens}`)
         }
         const bytecode = new ArrayBuffer(2)
         const byteArray = new Uint8Array(bytecode, 0, 2)
         byteArray[0] = opCode
-        byteArray[1] = (grToBytecode(distGR) << 4) + grToBytecode(srcGR)
+        byteArray[1] = (distGR << 4) + srcGR
         return { bytecode }
       }
     }
@@ -40,13 +39,12 @@ export function makeLD(tokens: Tokens): Instruction {
       wordLength,
       tokens,
       gen: (
-        grMap: Map<string, GeneralRegister>,
         labels: Map<string, Label>,
       ) => {
         // e.g. LD GR1,adr => [0x1010, address]
-        const distGR = getGrOrThrow(target, grMap)
+        const distGR = getGrByteCodeOrThrow(target)
         const grx = ts.length > 2 ? ts[2] : null
-        const indexGR = grx == null ? null : getGrOrThrow(grx, grMap)
+        const indexGR = grx == null ? 0 : getGrByteCodeOrThrow(grx)
         let operandAddress = 0
         if (isAddress(value)) {
           operandAddress = normalizeAddress(value)
@@ -57,7 +55,7 @@ export function makeLD(tokens: Tokens): Instruction {
         const bytecode = new ArrayBuffer(4)
         const view = new DataView(bytecode)
         view.setUint8(0, opCode)
-        view.setUint8(1, (grToBytecode(distGR) << 4) + grToBytecode(indexGR))
+        view.setUint8(1, (distGR << 4) + indexGR)
         view.setUint16(2, operandAddress, false)
         return { bytecode }
       }

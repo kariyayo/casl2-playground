@@ -1,5 +1,4 @@
 import { Instruction, Label, Tokens } from "../../types"
-import { GeneralRegister } from "./registerAccessor"
 import { isDigits } from "./strings"
 
 export function execDS(tokens: Tokens): Instruction {
@@ -13,7 +12,6 @@ export function execDS(tokens: Tokens): Instruction {
     wordLength,
     tokens,
     gen: (
-      grMap: Map<string, GeneralRegister>,
       labels: Map<string, Label>,
     ) => {
       const bf = new ArrayBuffer(2*wordLength)
