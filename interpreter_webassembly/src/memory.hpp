@@ -1,18 +1,15 @@
-#include <bits/stdc++.h>
+#include <stddef.h>
+#include <stdint.h>
 
 class Memory
 {
 private :
   const int WORD_LENGTH = 2;
-  std::vector<uint8_t> content;
+  uint8_t* buf;
+  size_t bufSize;
 
 public :
-  Memory(
-    std::vector<uint8_t>::iterator begin,
-    std::vector<uint8_t>::iterator end,
-    int start
-  );
-  ~Memory();
+  Memory(uint8_t* buf, size_t bufSize);
   int16_t lookup(int address);
   uint16_t lookupLogical(int address);
   void store(int address, uint16_t value);

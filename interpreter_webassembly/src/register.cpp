@@ -1,4 +1,4 @@
-#include <bits/stdc++.h>
+#include <cstdint>
 #include "register.hpp"
 
 Register::Register() {

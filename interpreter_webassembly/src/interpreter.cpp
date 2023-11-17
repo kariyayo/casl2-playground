@@ -1,4 +1,5 @@
-#include <bits/stdc++.h>
+#include <iomanip>
+#include <iostream>
 #include "register.hpp"
 #include "memory.hpp"
 
@@ -50,35 +51,38 @@ const int16_t END_ADDRESS = -32678;
 
 class Interpreter
 {
-private :
-  Register* gr1 = new Register();
-  Register* gr2 = new Register();
-  Register* gr3 = new Register();
-  Register* gr4 = new Register();
-  Register* gr5 = new Register();
-  Register* gr6 = new Register();
-  Register* gr7 = new Register();
-  Register* pr = new Register();
-  Memory* memory;
-  int wordLength;
-
+// private :
 public :
-  Interpreter(int startAddress, Memory* memory, int wordLength) {
-    this->pr->store(startAddress);
-    this->memory = memory;
-    this->wordLength = wordLength;
-  }
+  Register* pr;
+  Register* gr1;
+  Register* gr2;
+  Register* gr3;
+  Register* gr4;
+  Register* gr5;
+  Register* gr6;
+  Register* gr7;
+  Memory* memory;
 
-  void dump() {
-    std::cout << "gr1: " << std::setw(4) << std::setfill('0') << std::hex << std::uppercase << gr1->lookupLogical() << std::endl;
-    std::cout << "gr2: " << std::setw(4) << std::setfill('0') << std::hex << std::uppercase << gr2->lookupLogical() << std::endl;
-    std::cout << "gr3: " << std::setw(4) << std::setfill('0') << std::hex << std::uppercase << gr3->lookupLogical() << std::endl;
-    std::cout << "gr4: " << std::setw(4) << std::setfill('0') << std::hex << std::uppercase << gr4->lookupLogical() << std::endl;
-    std::cout << "gr5: " << std::setw(4) << std::setfill('0') << std::hex << std::uppercase << gr5->lookupLogical() << std::endl;
-    std::cout << "gr6: " << std::setw(4) << std::setfill('0') << std::hex << std::uppercase << gr6->lookupLogical() << std::endl;
-    std::cout << "gr7: " << std::setw(4) << std::setfill('0') << std::hex << std::uppercase << gr7->lookupLogical() << std::endl;
-    std::cout << "pr: " << std::setw(4) << std::setfill('0') << std::hex << std::uppercase << pr->lookupLogical() << std::endl;
-    std::cout << std::endl;
+  Interpreter(
+    Register* pr,
+    Register* gr1,
+    Register* gr2,
+    Register* gr3,
+    Register* gr4,
+    Register* gr5,
+    Register* gr6,
+    Register* gr7,
+    Memory* memory
+  ) {
+    this->pr = pr;
+    this->gr1 = gr1;
+    this->gr2 = gr2;
+    this->gr3 = gr3;
+    this->gr4 = gr4;
+    this->gr5 = gr5;
+    this->gr6 = gr6;
+    this->gr7 = gr7;
+    this->memory = memory;
   }
 
   void advancePR() {
@@ -87,26 +91,34 @@ public :
   }
 
   std::pair<uint16_t, uint16_t> readWord() {
-    auto currentPos = pr->lookupLogical();
-    auto word = memory->lookupLogical(currentPos);
-    uint8_t lowerByte = word & 0b11111111;
-    uint8_t upperByte = word >> 8;
-    return std::make_pair(upperByte, lowerByte);
+    try {
+      auto currentPos = pr->lookupLogical();
+      std::cout << "Interpreter:: currentPos=" << currentPos << std::endl;
+      auto word = memory->lookupLogical(currentPos);
+      uint8_t lowerByte = word & 0b11111111;
+      uint8_t upperByte = word >> 8;
+      return std::make_pair(upperByte, lowerByte);
+    } catch (const std::exception& e) {
+      std::cout << "Interpreter:: readWord() exception: " << e.what() << std::endl;
+      return std::make_pair(0, 0);
+    }
   }
 
   bool step() {
+    std::cout << "Interpreter:: iterpreter.step()" << std::endl;
     if (pr->lookup() == END_ADDRESS) {
-      std::cout << "END" << std::endl;
+      std::cout << "Interpreter:: END" << std::endl;
       return false;
     }
     auto [opcode, operand] = readWord();
     advancePR();
     if (opcode == 0 && operand == 0) {
-      std::cout << "opcode == 0 && operand == 0" << std::endl;
+      std::cout << "Interpreter:: opcode == 0 && operand == 0" << std::endl;
       return false;
     }
     std::cout << std::setw(2) << std::setfill('0') << std::hex << std::uppercase << opcode << " ";
     std::cout << std::setw(2) << std::setfill('0') << std::hex << std::uppercase << operand << " ";
+    std::cout << std::endl;
 
     switch (opcode) {
       case NOP:
@@ -236,7 +248,6 @@ public :
         break;
     }
     std::cout << std::endl;
-    dump();
     return true;
   }
 
@@ -292,8 +303,9 @@ public :
     if (x != 0) {
       xaddr = gr(x)->lookup();
     }
-    std::cout << " operands=" << operands << ", address= " << address << ", n=" << std::to_string(n) << ", x=" << std::to_string(x) << ", xaddr=" << std::to_string(xaddr) << ", v=" << std::to_string(v);
+    std::cout << " operands=" << operands << ", address= " << address << ", n=" << std::to_string(n) << ", x=" << std::to_string(x) << ", xaddr=" << std::to_string(xaddr) << ", v=" << std::to_string(v) << std::endl;
     memory->store(address + xaddr, v);
+    std::cout << memory->lookup(address + xaddr) << std::endl;
   }
 
   void ret() {

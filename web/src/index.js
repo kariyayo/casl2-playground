@@ -1,7 +1,9 @@
 import { makeMachine } from "../lib/machine"
+import { makeWasmMachine } from "../lib/wasm_machine"
 
 window.casl2 = {
-  version: VERSION
+  version: VERSION,
+  showWasmResult: false
 }
 
 function H2(text) {
@@ -78,6 +80,7 @@ function component() {
 
   const assembled = {
     machine: null,
+    wasmMachine: null,
     inputText: "",
   }
 
@@ -85,13 +88,25 @@ function component() {
     console.log("=== ASSEMBLE START ===")
     console.log("startAddress: ", globalConf.startAddress)
     assembled.inputText = inputText
-    assembled.machine = makeMachine(inputText.replaceAll("  ", "\t"), globalConf.startAddress)
+    const input = inputText.replaceAll("  ", "\t")
+    console.log("-----")
+    console.log(input)
+    console.log("-----")
+    assembled.machine = makeMachine(input, globalConf.startAddress)
+    console.log("makeMachine done.")
+    console.log(assembled.machine)
+    assembled.wasmMachine = makeWasmMachine(input, globalConf.startAddress)
+    console.log("makeWasmMachine done. result=" + assembled.wasmMachine)
+    console.log(assembled.wasmMachine)
     console.log("=== ASSEMBLE END ===")
-    console.log(assembled.machine.assembleResult)
   }
 
   function step() {
     const hasNext = assembled.machine.step()
+    console.log("-----")
+    console.log("ok currentPos=" + assembled.machine.PR.lookupLogical())
+    console.log("-----")
+    const res = assembled.wasmMachine.step()
     return hasNext
   }
 
@@ -160,7 +175,7 @@ C	DS	1
         throw e
       }
       renderAssembleResultArea(assembleResultArea, machineStateArea)
-      renderMachineState(machineStateArea)
+      renderMachineStates(machineStateArea)
     }
     container.appendChild(assembleButton)
   }
@@ -168,7 +183,12 @@ C	DS	1
   const renderAssembleResultArea = (container, machineStateArea) => {
     container.innerHTML = ""
 
-    container.appendChild(H2("Assemble result"))
+    const assembleResultHeader = H2("Assemble result")
+    assembleResultHeader.ondblclick = () => {
+      casl2.showWasmResult = !casl2.showWasmResult
+      renderMachineStates(machineStateArea)
+    };
+    container.appendChild(assembleResultHeader)
 
     const assembleResult = document.createElement("table")
     assembleResult.id = "assemble_result"
@@ -211,7 +231,7 @@ C	DS	1
     resetButton.onclick = () => {
       assemble(assembled.inputText)
       renderAssembleResultArea(container, machineStateArea)
-      renderMachineState(machineStateArea)
+      renderMachineStates(machineStateArea)
     }
 
     const stepOverButton = document.createElement("button")
@@ -220,7 +240,7 @@ C	DS	1
       const hasNext = step()
       if (hasNext) {
         coloring()
-        renderMachineState(machineStateArea)
+        renderMachineStates(machineStateArea)
       } else {
         stepOverButton.disabled = true
         runButton.disabled = true
@@ -235,7 +255,7 @@ C	DS	1
         hasNext = step()
         if (hasNext) {
           coloring()
-          renderMachineState(machineStateArea)
+          renderMachineStates(machineStateArea)
         } else {
           clearInterval(intervalId)
         }
@@ -251,13 +271,23 @@ C	DS	1
     coloring()
   }
 
-  const renderMachineState = (container) => {
-    console.log(assembled.machine)
+  const renderMachineStates = (container) => {
     container.innerHTML = ""
+    renderMachineState(container, "js", assembled.machine)
+    if (casl2.showWasmResult) {
+      renderMachineState(container, "wasm", assembled.wasmMachine)
+    }
+  }
 
-    container.appendChild(H2("Machine states"))
+  const renderMachineState = (container, idPrefix, machine) => {
+    console.log(machine)
+    if (casl2.showWasmResult) {
+      container.appendChild(H2(`Machine states ( ${idPrefix} )`))
+    } else {
+      container.appendChild(H2(`Machine states`))
+    }
     const statesBox = document.createElement("div")
-    statesBox.id = "machine_states"
+    statesBox.id = `${idPrefix}_machine_states`
     statesBox.style.display = "flex"
     statesBox.style.justifyContent = "space-between"
 
@@ -265,12 +295,12 @@ C	DS	1
     const grTable = document.createElement("table")
     grTable.appendChild(TR(
       TH("PR"),
-      TD(assembled.machine.PR.lookupLogical()),
+      TD(machine.PR.lookupLogical()),
     ))
-    for (let gr of ["GR0", "GR1", "GR2", "GR3", "GR4", "GR5", "GR6", "GR7"]) {
+    for (let gr of ["GR1", "GR2", "GR3", "GR4", "GR5", "GR6", "GR7"]) {
       grTable.appendChild(TR(
         TH(gr),
-        TD(assembled.machine.grMap.get(gr).lookup()),
+        TD(machine.grMap.get(gr).lookup()),
       ))
     }
     leftBox.appendChild(grTable)
@@ -278,16 +308,16 @@ C	DS	1
     const frTable = document.createElement("table")
     frTable.appendChild(TR(
       TH("FR"),
-      TD(assembled.machine.FR.of() ? "OF: 1" : "OF: 0"),
-      TD(assembled.machine.FR.sf() ? "SF: 1" : "SF: 0"),
-      TD(assembled.machine.FR.zf() ? "ZF: 1" : "ZF: 0"),
+      TD(machine.FR.of() ? "OF: 1" : "OF: 0"),
+      TD(machine.FR.sf() ? "SF: 1" : "SF: 0"),
+      TD(machine.FR.zf() ? "ZF: 1" : "ZF: 0"),
     ))
     leftBox.appendChild(frTable)
 
     const spTable = document.createElement("table")
     spTable.appendChild(TR(
       TH("SP"),
-      TD(assembled.machine.SP.lookupLogical()),
+      TD(machine.SP.lookupLogical()),
     ))
     leftBox.appendChild(spTable)
     statesBox.appendChild(leftBox)
@@ -302,7 +332,7 @@ C	DS	1
     memoryBox.appendChild(displayAddressLabel)
     memoryBox.appendChild(displayAddressInput)
     function renderMemoryTable(startAddress) {
-      const id = "memory_table"
+      const id = `${idPrefix}_memory_table`
       const target = document.getElementById(id)
       if (target) {
         memoryBox.removeChild(target)
@@ -325,14 +355,14 @@ C	DS	1
       while (i < end) {
         memoryTable.appendChild(TR(
           TH(i.toString()),
-          TD(toHexString(assembled.machine.memory.lookupLogical(i++))),
-          TD(toHexString(assembled.machine.memory.lookupLogical(i++))),
-          TD(toHexString(assembled.machine.memory.lookupLogical(i++))),
-          TD(toHexString(assembled.machine.memory.lookupLogical(i++))),
-          TD(toHexString(assembled.machine.memory.lookupLogical(i++))),
-          TD(toHexString(assembled.machine.memory.lookupLogical(i++))),
-          TD(toHexString(assembled.machine.memory.lookupLogical(i++))),
-          TD(toHexString(assembled.machine.memory.lookupLogical(i++))),
+          TD(toHexString(machine.memory.lookupLogical(i++))),
+          TD(toHexString(machine.memory.lookupLogical(i++))),
+          TD(toHexString(machine.memory.lookupLogical(i++))),
+          TD(toHexString(machine.memory.lookupLogical(i++))),
+          TD(toHexString(machine.memory.lookupLogical(i++))),
+          TD(toHexString(machine.memory.lookupLogical(i++))),
+          TD(toHexString(machine.memory.lookupLogical(i++))),
+          TD(toHexString(machine.memory.lookupLogical(i++))),
         ))
       }
       memoryBox.appendChild(memoryTable)
@@ -361,3 +391,17 @@ C	DS	1
 }
 
 document.getElementById("app").appendChild(component().render())
+
+
+function hoge(input) {
+  const length = input.length
+  const bytePerElement = Module.HEAPU16.BYTES_PER_ELEMENT
+  const arrayPointer = Module._malloc(length * bytePerElement)
+  Module.HEAPU16.set(input, arrayPointer / bytePerElement)
+
+  const result = Module.ccall(
+    'runInterPreter',
+    ['number', 'number'],
+    [arrayPointer, length],
+  )
+}
