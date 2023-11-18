@@ -34,11 +34,11 @@ function TR(...elms) {
 
 function INPUT_ADDRESS(labelText, id) {
   const label = document.createElement("label")
-  label.innerText = labelText
+  label.innerText = labelText + "#"
   label.htmlFor = id
   const input = document.createElement("input")
   input.id = id
-  input.type = "number"
+  input.type = "text"
   input.min = 0
   input.max = 9000
   input.step = 8
@@ -51,14 +51,14 @@ function displayOpecode(bytecode) {
     const view = new DataView(bytecode)
     if (bytecode.byteLength >= 2) {
       v = view.getUint8(0).toString(16).padStart(2, "0")
-      v = "0x" + v + view.getUint8(1).toString(16).padStart(2, "0")
+      v = "#" + v + view.getUint8(1).toString(16).padStart(2, "0")
     }
     if (bytecode.byteLength >= 4) {
       v = v + " "
-      v = v + "0x" + view.getUint16(2).toString(16).padStart(4, "0")
+      v = v + "#" + view.getUint16(2).toString(16).padStart(4, "0")
     }
   }
-  return v
+  return v.toUpperCase()
 }
 
 const COLOR = {
@@ -70,12 +70,12 @@ const COLOR = {
 }
 
 function toHexString(x) {
-  return "0x" + x.toString(16).padStart(4, "0")
+  return "#" + x.toString(16).padStart(4, "0").toUpperCase()
 }
 
 function component() {
   const globalConf = {
-    startAddress: 2000,
+    startAddress: 0x8000,
   }
 
   const assembled = {
@@ -145,9 +145,9 @@ C	DS	1
 
     const globalConfBox = document.createElement("div")
     const [startAddressLabel, startAddressInput] = INPUT_ADDRESS("Start address : ", "input_text_start_address")
-    startAddressInput.value = globalConf.startAddress
+    startAddressInput.value = globalConf.startAddress.toString(16)
     startAddressInput.oninput = () => {
-      globalConf.startAddress = Number(startAddressInput.value)
+      globalConf.startAddress = parseInt("0x" + startAddressInput.value, 16)
     }
     globalConfBox.appendChild(startAddressLabel)
     globalConfBox.appendChild(startAddressInput)
@@ -164,7 +164,7 @@ C	DS	1
     assembleButton.onclick = () => {
       try {
         assembleErrorMessage.innerText = ""
-        assemble(sourceCodeEditor.value)
+        assemble(sourceCodeEditor.value.toUpperCase())
       } catch(e) {
         let errorMessage = e.message
         if (e.tokens) {
@@ -193,7 +193,7 @@ C	DS	1
     const assembleResult = document.createElement("table")
     assembleResult.id = "assemble_result"
     assembleResult.appendChild(TR(
-      TH("#"),
+      TH(""),
       TH("opecode"),
       TH("address"),
       TH(""),
@@ -205,7 +205,7 @@ C	DS	1
       assembleResult.appendChild(TR(
         TD(line.tokens.lineNum),
         TD(displayOpecode(line.bytecode)),
-        TD(operator.startsWith("START") || operator.startsWith("END") ? "" : line.memAddress),
+        TD(operator.startsWith("START") || operator.startsWith("END") ? "" : toHexString(line.memAddress)),
         TD(line.tokens.label),
         TD(line.tokens.operator),
         TD(line.tokens.operand),
@@ -218,7 +218,7 @@ C	DS	1
       rows.forEach((row, i) => {
         if (i == 0) return
         const address = row.querySelectorAll("td").item(2).innerText
-        if (assembled.machine.PR.lookupLogical() == address) {
+        if (toHexString(assembled.machine.PR.lookupLogical()) == address) {
           row.style.backgroundColor = COLOR.accent
         } else {
           row.style.backgroundColor = null
@@ -295,12 +295,15 @@ C	DS	1
     const grTable = document.createElement("table")
     grTable.appendChild(TR(
       TH("PR"),
-      TD(machine.PR.lookupLogical()),
+      TD(toHexString(machine.PR.lookupLogical())),
+      TD(""),
     ))
     for (let gr of ["GR1", "GR2", "GR3", "GR4", "GR5", "GR6", "GR7"]) {
+      const register = machine.grMap.get(gr)
       grTable.appendChild(TR(
         TH(gr),
-        TD(machine.grMap.get(gr).lookup()),
+        TD(toHexString(register.lookupLogical())),
+        TD(register.lookup()),
       ))
     }
     leftBox.appendChild(grTable)
@@ -317,14 +320,14 @@ C	DS	1
     const spTable = document.createElement("table")
     spTable.appendChild(TR(
       TH("SP"),
-      TD(machine.SP.lookupLogical()),
+      TD(toHexString(machine.SP.lookupLogical())),
     ))
     leftBox.appendChild(spTable)
     statesBox.appendChild(leftBox)
 
     const memoryBox = document.createElement("div")
     const [displayAddressLabel, displayAddressInput] = INPUT_ADDRESS("Display from : ", "display_address")
-    displayAddressInput.value = globalConf.startAddress
+    displayAddressInput.value = globalConf.startAddress.toString(16)
     displayAddressInput.onchange = () => {
       console.log(Number(displayAddressInput.value))
       renderMemoryTable(Number(displayAddressInput.value))
@@ -354,7 +357,7 @@ C	DS	1
       const end = i + 8*16
       while (i < end) {
         memoryTable.appendChild(TR(
-          TH(i.toString()),
+          TH("#" + i.toString(16)),
           TD(toHexString(machine.memory.lookupLogical(i++))),
           TD(toHexString(machine.memory.lookupLogical(i++))),
           TD(toHexString(machine.memory.lookupLogical(i++))),
@@ -391,17 +394,3 @@ C	DS	1
 }
 
 document.getElementById("app").appendChild(component().render())
-
-
-function hoge(input) {
-  const length = input.length
-  const bytePerElement = Module.HEAPU16.BYTES_PER_ELEMENT
-  const arrayPointer = Module._malloc(length * bytePerElement)
-  Module.HEAPU16.set(input, arrayPointer / bytePerElement)
-
-  const result = Module.ccall(
-    'runInterPreter',
-    ['number', 'number'],
-    [arrayPointer, length],
-  )
-}

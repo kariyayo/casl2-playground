@@ -21,7 +21,7 @@ const jisX0201Fmt = /^[\s!"#$%&'()*+,-./0-9:;<=>?@A-Z\[¥\]^_`a-z{|}~]+$/
 export function isAddress(s: string): boolean {
   return addressFmt.test(s)
 }
-const addressFmt = /^#?[0-9]+$/
+const addressFmt = /^#[0-9A-Fa-f]+$/
 
 export function normalizeAddress(s: string): number {
   if (s.startsWith("#")) {
