@@ -17,6 +17,7 @@ class WasmMachine {
     }
     this.PR = new GeneralRegister("PR");
     this.SP = new GeneralRegister("SP");
+    this.SP.storeLogical(0x9001);
     this.PR.store(startMemAddress);
     this.labels = new Map();
 
@@ -51,6 +52,7 @@ class WasmMachine {
   step() {
     const result = Module.step();
     this.PR.store(result.pr);
+    this.SP.store(result.sp);
     this.grMap.get('GR1').store(result.gr1);
     this.grMap.get('GR2').store(result.gr2);
     this.grMap.get('GR3').store(result.gr3);
@@ -58,6 +60,9 @@ class WasmMachine {
     this.grMap.get('GR5').store(result.gr5);
     this.grMap.get('GR6').store(result.gr6);
     this.grMap.get('GR7').store(result.gr7);
+    this.FR.overflowFlag = result.overflowFlag;
+    this.FR.signFlag = result.signFlag;
+    this.FR.zeroFlag = result.zeroFlag;
 
     console.log("----- wasmMachine step output START -----")
     console.log("PR: " + this.PR.lookup())
@@ -68,14 +73,6 @@ class WasmMachine {
     console.log("GR5: " + this.grMap.get('GR5').lookup())
     console.log("GR6: " + this.grMap.get('GR6').lookup())
     console.log("GR7: " + this.grMap.get('GR7').lookup())
-    console.log("Module.getMemory():" + this.memoryUint8Array[0])
-    console.log("Module.getMemory():" + this.memoryUint8Array[1])
-    console.log("Module.getMemory():" + this.memoryUint8Array[2])
-    console.log("Module.getMemory():" + this.memoryUint8Array[3])
-    console.log("Module.getMemory():" + this.memoryUint8Array[4000])
-    console.log("Module.getMemory():" + this.memoryUint8Array[4001])
-    console.log("Module.getMemory():" + this.memoryUint8Array[4002])
-    console.log("Module.getMemory():" + this.memoryUint8Array[4003])
     console.log("memory.lookupLogical():" + this.memory.lookupLogical(0).toString(16))
     console.log("memory.lookupLogical():" + this.memory.lookupLogical(1).toString(16))
     console.log("memory.lookupLogical():" + this.memory.lookupLogical(2).toString(16))
