@@ -1,5 +1,3 @@
-import { GeneralRegister } from "../infra/register"
-
 export type Label = {
   label: string
   memAddress: number
@@ -9,7 +7,6 @@ export type Instruction = {
   wordLength: number
   tokens: Tokens
   gen: (
-    grMap: Map<string, GeneralRegister>,
     labels: Map<string, Label>,
   ) => null | {
     bytecode: ArrayBuffer

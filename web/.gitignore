@@ -17,6 +17,7 @@ tmp
 public/css/main.css
 public/js/*.js
 public/js/*.json
+public/js/*.wasm
 lib
 
 # Coverage reports

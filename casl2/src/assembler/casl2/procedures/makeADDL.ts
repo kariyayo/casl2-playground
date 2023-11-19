@@ -1,6 +1,6 @@
 import { Instruction, Label, Tokens } from "../../types"
 import { getLabelOrThrow } from "./labelAccessor"
-import { GeneralRegister, isGeneralRegister, getGrOrThrow, grToBytecode } from "./registerAccessor"
+import { isGeneralRegister, getGrByteCodeOrThrow } from "./registerAccessor"
 import { isNumeric } from "./strings"
 
 export function makeADDL(tokens: Tokens): Instruction {
@@ -15,16 +15,15 @@ export function makeADDL(tokens: Tokens): Instruction {
       wordLength,
       tokens,
       gen: (
-        grMap: Map<string, GeneralRegister>,
         labels: Map<string, Label>,
       ) => {
         // e.g. ADDL GR1,GR2
-        const operand1GR = getGrOrThrow(operand1, grMap)
-        const operand2GR = getGrOrThrow(target, grMap)
+        const operand1GR = getGrByteCodeOrThrow(operand1)
+        const operand2GR = getGrByteCodeOrThrow(target)
         const bytecode = new ArrayBuffer(2)
         const byteArray = new Uint8Array(bytecode, 0, 2)
         byteArray[0] = opCode
-        byteArray[1] = (grToBytecode(operand1GR) << 4) + grToBytecode(operand2GR)
+        byteArray[1] = (operand1GR << 4) + operand2GR
         return { bytecode }
       }
     }
@@ -36,13 +35,12 @@ export function makeADDL(tokens: Tokens): Instruction {
       wordLength,
       tokens,
       gen: (
-        grMap: Map<string, GeneralRegister>,
         labels: Map<string, Label>,
       ) => {
         // e.g. ADD GR1,adr
         const grx = ts.length > 2 ? ts[2] : null
-        const operand1GR = getGrOrThrow(operand1, grMap)
-        const indexGR = grx == null ? null : getGrOrThrow(grx, grMap)
+        const operand1GR = getGrByteCodeOrThrow(operand1)
+        const indexGR = grx == null ? 0 : getGrByteCodeOrThrow(grx)
         let operandAddress =  0
         if (isNumeric(target)) {
           operandAddress = Number(target)
@@ -52,7 +50,7 @@ export function makeADDL(tokens: Tokens): Instruction {
         const bytecode = new ArrayBuffer(4)
         const view = new DataView(bytecode)
         view.setUint8(0, opCode)
-        view.setUint8(1, (grToBytecode(operand1GR) << 4) + grToBytecode(indexGR))
+        view.setUint8(1, (operand1GR << 4) + indexGR)
         view.setUint16(2, operandAddress, false)
         return { bytecode }
       }

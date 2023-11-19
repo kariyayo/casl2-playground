@@ -32,7 +32,6 @@ describe(`makeDC`, () => {
     },
   ])(`$# :: $params`, ({params, expected}) => {
     // given
-    const grMap = new Map<string, GeneralRegister>()
     const memory = new Memory()
 
     // when, then
@@ -47,7 +46,7 @@ describe(`makeDC`, () => {
     PR.storeLogical(0)
 
     // when
-    const bytecode = res?.gen(grMap, labels)!.bytecode
+    const bytecode = res?.gen(labels)!.bytecode
     memory.storeBytecode(bytecode, params.currentMemAddress)
     test(`Label "${params.tokens.label}" should be loaded address`, () => {
       expect(memory.lookup(getLabelOrThrow(params.tokens.label, labels).memAddress)).toEqual(expected.value1)
@@ -91,7 +90,6 @@ describe(`makeDC`, () => {
     },
   ])(`$# :: $params`, ({params, expected}) => {
     // given
-    const grMap = new Map<string, GeneralRegister>()
     const memory = new Memory()
 
     // when, then
@@ -101,7 +99,7 @@ describe(`makeDC`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(1)
     })
-    const bytecode = res?.gen(grMap, labels)!.bytecode
+    const bytecode = res?.gen(labels)!.bytecode
     memory.storeBytecode(bytecode, params.currentMemAddress)
     test(`memory#(start+2inst) should be loaded address`, () => {
       expect(memory.lookupLogical(params.currentMemAddress)).toEqual(expected)

@@ -1,5 +1,4 @@
 import { Instruction, Label, Tokens } from "../../types"
-import { GeneralRegister } from "./registerAccessor"
 
 export function makeRET(tokens: Tokens): Instruction {
   const opCode = 0x81
@@ -7,7 +6,6 @@ export function makeRET(tokens: Tokens): Instruction {
     wordLength: 1,
     tokens,
     gen: (
-      grMap: Map<string, GeneralRegister>,
       labels: Map<string, Label>,
     ) => {
       const bytecode = new ArrayBuffer(2)

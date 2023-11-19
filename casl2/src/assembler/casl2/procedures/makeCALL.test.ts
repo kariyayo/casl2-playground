@@ -44,7 +44,7 @@ describe(`makeCALL`, () => {
     test(`makeCALL() returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
-      const bytecodeView = new DataView(res?.gen(grMap, labels)!.bytecode)
+      const bytecodeView = new DataView(res?.gen(labels)!.bytecode)
       expect(bytecodeView.getUint8(0)).toEqual(expected.bytecode[0])
       expect(bytecodeView.getUint8(1)).toEqual(expected.bytecode[1])
       expect(bytecodeView.getUint16(2)).toEqual(expected.bytecode[2])
@@ -55,7 +55,7 @@ describe(`makeCALL`, () => {
     PR.storeLogical(0x2000)
 
     // when
-    const bytecode = res?.gen(grMap, labels)!.bytecode
+    const bytecode = res?.gen(labels)!.bytecode
     memory.storeBytecode(bytecode, PR.lookupLogical())
     const interpreter = new Interpreter(grMap, flagRegister, PR, SP, memory)
     // then

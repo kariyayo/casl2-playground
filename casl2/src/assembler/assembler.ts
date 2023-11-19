@@ -1,5 +1,4 @@
 import { Memory } from "../infra/memory"
-import { FlagRegister, GeneralRegister } from "../infra/register"
 import { aggregateByLabel } from "./casl2/parser"
 import { Tokens } from "./types"
 
@@ -36,10 +35,7 @@ export function assemble(
   startAddress: number,
   text: string,
   labels: Map<string, Label>,
-  FR: FlagRegister,
-  grMap: Map<string, GeneralRegister>,
   memory: Memory,
-  SP: GeneralRegister,
 ): AssembleResult {
   if (text == null || text.length == 0) {
     // NOP
@@ -59,7 +55,7 @@ export function assemble(
     const [label, insts] = aggregated
     let memAddress = label.memAddress
     insts.forEach(inst => {
-      const generated = inst.gen(grMap, labels)
+      const generated = inst.gen(labels)
       if (generated == null) {
         assembleResult.push({ memAddress, bytecode: null, tokens: inst.tokens })
       } else {

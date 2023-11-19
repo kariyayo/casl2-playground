@@ -2,7 +2,7 @@ import { Memory } from "../../../infra/memory"
 import { Interpreter } from "../../../interpreter/interpreter"
 import { Label, Tokens } from "../../types"
 import { makeJZE } from "./makeJZE"
-import { getGrOrThrow, GeneralRegister, FlagRegister } from "./registerAccessor"
+import { getGrByteCodeOrThrow, GeneralRegister, FlagRegister } from "./registerAccessor"
 
 describe(`makeJZE`, () => {
 
@@ -38,7 +38,7 @@ describe(`makeJZE`, () => {
       const name = `GR${i}`
       grMap.set(name, new GeneralRegister(name))
     }
-    getGrOrThrow("GR3", grMap).store(20)
+    grMap.get("GR3")?.store(20)
     const SP = new GeneralRegister("SP")
 
     // when, then
@@ -46,7 +46,7 @@ describe(`makeJZE`, () => {
     test(`makeJZE returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
-      const bytecodeView = new DataView(res?.gen(grMap, labels)!.bytecode)
+      const bytecodeView = new DataView(res?.gen(labels)!.bytecode)
       expect(bytecodeView.getUint8(0)).toEqual(expected.bytecode[0])
       expect(bytecodeView.getUint8(1)).toEqual(expected.bytecode[1])
       expect(bytecodeView.getUint16(2)).toEqual(expected.bytecode[2])
@@ -57,7 +57,7 @@ describe(`makeJZE`, () => {
     PR.storeLogical(0)
 
     // when
-    const bytecode = res?.gen(grMap, labels)!.bytecode
+    const bytecode = res?.gen(labels)!.bytecode
     memory.storeBytecode(bytecode, 0)
     const interpreter = new Interpreter(grMap, flagRegister, PR, SP, memory)
     interpreter.step()

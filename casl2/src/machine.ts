@@ -26,11 +26,11 @@ export class Commet2 {
       this.grMap.set(name, new GeneralRegister(name))
     }
     this.PR.store(startMemAddress)
-    this.assembleResult = assemble(startMemAddress, input, this.labels, this.FR, this.grMap, this.memory, this.SP)
+    this.assembleResult = assemble(startMemAddress, input, this.labels, this.memory)
     this.interpreter = new Interpreter(this.grMap, this.FR, this.PR, this.SP, this.memory)
 
-    this.SP.storeLogical(0x9001)
-    this.memory.store(0x9001, END_ADDRESS)
+    this.SP.storeLogical(0x9000)
+    this.memory.storeLogical(0x9000, END_ADDRESS)
   }
 
   step(): boolean {

@@ -1,5 +1,4 @@
 import { Label } from "../../types"
-import { GeneralRegister } from "./registerAccessor"
 import { execDS } from "./execDS"
 
 describe(`execDS`, () => {
@@ -21,10 +20,8 @@ describe(`execDS`, () => {
 
     const tokens = { lineNum: 0, instructionNum: 2, label: "", operator: "DS", operand: "hoge" }
 
-    const grMap = new Map<string, GeneralRegister>()
-
     test(``, () => {
-      expect(() => execDS(tokens).gen(grMap, labels)).toThrow()
+      expect(() => execDS(tokens).gen(labels)).toThrow()
     })
   })
 })
