@@ -6,6 +6,15 @@ window.casl2 = {
   showWasmResult: false
 }
 
+function addClassName(elm, className) {
+  const classNames = elm.className.split(" ")
+  if (classNames.indexOf(className) == -1) {
+    classNames.push(className)
+  }
+  elm.className = classNames.join(" ")
+  return elm
+}
+
 function H2(text) {
   const header = document.createElement("h2")
   header.innerText = text
@@ -36,7 +45,8 @@ function INPUT_ADDRESS(labelText, id) {
   const label = document.createElement("label")
   label.innerText = labelText + "#"
   label.htmlFor = id
-  const input = document.createElement("input")
+  let input = document.createElement("input")
+  input = addClassName(input, "code")
   input.id = id
   input.type = "text"
   input.min = 0
@@ -73,9 +83,15 @@ function toHexString(x) {
   return "#" + x.toString(16).padStart(4, "0").toUpperCase()
 }
 
+function toBinaryString(x) {
+  const s = x.toString(2).padStart(16, "0").toUpperCase()
+  return s.slice(0, 4) + " " + s.slice(4, 8) + " " + s.slice(8, 12) + " " + s.slice(12, 16)
+}
+
 function component() {
   const globalConf = {
     startAddress: 0x8000,
+    displayAddress: 0x8000,
   }
 
   const assembled = {
@@ -124,7 +140,8 @@ C	DS	1
   const renderInputArea = (container, assembleResultArea, machineStateArea) => {
     container.appendChild(H2("Input source code"))
 
-    const sourceCodeEditor = document.createElement("textarea")
+    let sourceCodeEditor = document.createElement("textarea")
+    sourceCodeEditor = addClassName(sourceCodeEditor, "code")
     sourceCodeEditor.cols = 80
     sourceCodeEditor.rows = 20
     sourceCodeEditor.onkeydown = (event) => {
@@ -190,7 +207,8 @@ C	DS	1
     };
     container.appendChild(assembleResultHeader)
 
-    const assembleResult = document.createElement("table")
+    let assembleResult = document.createElement("table")
+    assembleResult = addClassName(assembleResult, "code")
     assembleResult.id = "assemble_result"
     assembleResult.appendChild(TR(
       TH(""),
@@ -273,13 +291,13 @@ C	DS	1
 
   const renderMachineStates = (container) => {
     container.innerHTML = ""
-    renderMachineState(container, "js", assembled.machine)
+    _renderMachineState(container, "js", assembled.machine)
     if (casl2.showWasmResult) {
-      renderMachineState(container, "wasm", assembled.wasmMachine)
+      _renderMachineState(container, "wasm", assembled.wasmMachine)
     }
   }
 
-  const renderMachineState = (container, idPrefix, machine) => {
+  const _renderMachineState = (container, idPrefix, machine) => {
     console.log(machine)
     if (casl2.showWasmResult) {
       container.appendChild(H2(`Machine states ( ${idPrefix} )`))
@@ -292,23 +310,30 @@ C	DS	1
     statesBox.style.justifyContent = "space-between"
 
     const leftBox = document.createElement("div")
-    const grTable = document.createElement("table")
-    grTable.appendChild(TR(
+
+    let prTable = document.createElement("table")
+    prTable = addClassName(prTable, "code")
+    prTable.appendChild(TR(
       TH("PR"),
       TD(toHexString(machine.PR.lookupLogical())),
-      TD(""),
     ))
+    let grTable = document.createElement("table")
+    leftBox.appendChild(prTable)
+
+    grTable = addClassName(grTable, "code")
     for (let gr of ["GR0", "GR1", "GR2", "GR3", "GR4", "GR5", "GR6", "GR7"]) {
       const register = machine.grMap.get(gr)
       grTable.appendChild(TR(
         TH(gr),
         TD(toHexString(register.lookupLogical())),
+        addClassName(TD(toBinaryString(register.lookupLogical())), "dashed-border"),
         TD(register.lookup()),
       ))
     }
     leftBox.appendChild(grTable)
 
-    const frTable = document.createElement("table")
+    let frTable = document.createElement("table")
+    frTable = addClassName(frTable, "code")
     frTable.appendChild(TR(
       TH("FR"),
       TD(machine.FR.of() ? "OF: 1" : "OF: 0"),
@@ -317,7 +342,8 @@ C	DS	1
     ))
     leftBox.appendChild(frTable)
 
-    const spTable = document.createElement("table")
+    let spTable = document.createElement("table")
+    spTable = addClassName(spTable, "code")
     spTable.appendChild(TR(
       TH("SP"),
       TD(toHexString(machine.SP.lookupLogical())),
@@ -327,20 +353,22 @@ C	DS	1
 
     const memoryBox = document.createElement("div")
     const [displayAddressLabel, displayAddressInput] = INPUT_ADDRESS("Display from : ", "display_address")
-    displayAddressInput.value = globalConf.startAddress.toString(16)
+    displayAddressInput.value = globalConf.displayAddress.toString(16)
     displayAddressInput.onchange = () => {
-      console.log(Number(displayAddressInput.value))
-      renderMemoryTable(Number(displayAddressInput.value))
+      globalConf.displayAddress = parseInt("0x" + displayAddressInput.value, 16)
+      console.log(globalConf.displayAddress)
+      renderMemoryTable(globalConf.displayAddress)
     }
     memoryBox.appendChild(displayAddressLabel)
     memoryBox.appendChild(displayAddressInput)
-    function renderMemoryTable(startAddress) {
+    function renderMemoryTable(displayAddress) {
       const id = `${idPrefix}_memory_table`
       const target = document.getElementById(id)
       if (target) {
         memoryBox.removeChild(target)
       }
-      const memoryTable = document.createElement("table")
+      let memoryTable = document.createElement("table")
+      memoryTable = addClassName(memoryTable, "code")
       memoryTable.id = id
       memoryTable.appendChild(TR(
         TH("address"),
@@ -353,7 +381,7 @@ C	DS	1
         TH(""),
         TH(""),
       ))
-      let i = startAddress;
+      let i = displayAddress;
       const end = i + 8*16
       while (i < end) {
         memoryTable.appendChild(TR(
@@ -370,7 +398,7 @@ C	DS	1
       }
       memoryBox.appendChild(memoryTable)
     }
-    renderMemoryTable(globalConf.startAddress)
+    renderMemoryTable(globalConf.displayAddress)
     statesBox.appendChild(memoryBox)
     container.appendChild(statesBox)
   }
