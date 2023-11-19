@@ -105,7 +105,7 @@ export class Interpreter {
   }
 
   step(): boolean {
-    if (this.PR.lookup() == END_ADDRESS) {
+    if (this.PR.lookupLogical() == END_ADDRESS) {
       return false
     }
     const [opcode, operands] = this.readWord()
@@ -231,7 +231,7 @@ export class Interpreter {
         }
     }
 
-    const next = this.PR.lookup()
+    const next = this.PR.lookupLogical()
     if (next == END_ADDRESS) {
       return false
     }
@@ -240,7 +240,7 @@ export class Interpreter {
 
   private xaddr(x: number): number {
     if (1 <= x && x <= 7) {
-      return this.gr(x)
+      return this.grLogical(x)
     }
     return 0
   }

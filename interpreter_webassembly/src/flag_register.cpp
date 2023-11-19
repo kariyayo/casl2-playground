@@ -1,5 +1,3 @@
-#include <iostream>
-#include <cstdint>
 #include <string>
 #include "flag_register.hpp"
 
@@ -9,7 +7,7 @@ FlagRegister::FlagRegister() {
   sign_flag = false;
 }
 
-void FlagRegister::set_sf_zf(int16_t value) {
+void FlagRegister::set_sf_zf(int value) {
   if ((value & 0x8000) != 0) {
     // negative
     sign_flag = true;
@@ -36,7 +34,7 @@ bool FlagRegister::sf() {
   return sign_flag;
 }
 
-void FlagRegister::set(int16_t value) {
+void FlagRegister::set(int value) {
   if (-32768 <= value && value <= 32767) {
     overflow_flag = false;
   } else {
@@ -45,7 +43,7 @@ void FlagRegister::set(int16_t value) {
   set_sf_zf(value);
 }
 
-void FlagRegister::set_logical(uint16_t value) {
+void FlagRegister::set_logical(int value) {
   if (0 <= value && value <= 65535) {
     overflow_flag = false;
   } else {
@@ -54,12 +52,12 @@ void FlagRegister::set_logical(uint16_t value) {
   set_sf_zf(value);
 }
 
-void FlagRegister::set_with_overflow_flag(int16_t value, bool overflow_flag) {
+void FlagRegister::set_with_overflow_flag(int value, bool overflow_flag) {
   this->overflow_flag = overflow_flag;
   set_sf_zf(value);
 }
 
-void FlagRegister::set_by_cpa(int16_t value) {
+void FlagRegister::set_by_cpa(int value) {
   overflow_flag = false;
   if (value < 0) {
     // negative
@@ -75,7 +73,7 @@ void FlagRegister::set_by_cpa(int16_t value) {
   }
 }
 
-void FlagRegister::set_logical_by_cpl(int16_t value) {
+void FlagRegister::set_logical_by_cpl(int value) {
   overflow_flag = false;
   if (value < 0) {
     // negative

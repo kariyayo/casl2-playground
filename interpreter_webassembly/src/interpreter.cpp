@@ -1,4 +1,3 @@
-#include <iomanip>
 #include <iostream>
 #include "register.hpp"
 #include "flag_register.hpp"
@@ -48,7 +47,7 @@ const uint8_t CALL  = 0x80;
 // no support
 // const int SVC   = 0xF0;
 
-const int16_t END_ADDRESS = -32678;
+const uint16_t END_ADDRESS = 0xE000;
 
 class Interpreter
 {
@@ -103,7 +102,6 @@ public :
   std::pair<uint16_t, uint16_t> readWord() {
     try {
       auto currentPos = pr->lookupLogical();
-      std::cout << "Interpreter:: currentPos=" << currentPos << std::endl;
       auto word = memory->lookupLogical(currentPos);
       uint8_t lowerByte = word & 0b11111111;
       uint8_t upperByte = word >> 8;
@@ -115,173 +113,129 @@ public :
   }
 
   bool step() {
-    std::cout << "Interpreter:: iterpreter.step()" << std::endl;
-    if (pr->lookup() == END_ADDRESS) {
-      std::cout << "Interpreter:: END" << std::endl;
+    if (pr->lookupLogical() == END_ADDRESS) {
       return false;
     }
     auto [opcode, operand] = readWord();
     advancePR();
     if (opcode == 0 && operand == 0) {
-      std::cout << "Interpreter:: opcode == 0 && operand == 0" << std::endl;
       return false;
     }
-    std::cout << std::setw(2) << std::setfill('0') << std::hex << std::uppercase << opcode << " ";
-    std::cout << std::setw(2) << std::setfill('0') << std::hex << std::uppercase << operand << " ";
-    std::cout << std::endl;
 
     switch (opcode) {
       case NOP:
-        std::cout << "NOP";
         break;
       case LD:
-        std::cout << "LD";
         ld(operand);
         break;
       case ADDA:
-        std::cout << "ADDA";
         adda(operand);
         break;
       case SUBA:
-        std::cout << "SUBA";
         suba(operand);
         break;
       case ADDL:
-        std::cout << "ADDL";
         addl(operand);
         break;
       case SUBL:
-        std::cout << "SUBL";
         subl(operand);
         break;
       case AND:
-        std::cout << "AND";
         and1(operand);
         break;
       case OR:
-        std::cout << "OR";
         or1(operand);
         break;
       case XOR:
-        std::cout << "XOR";
         xor1(operand);
         break;
       case CPA:
-        std::cout << "CPA";
         cpa(operand);
         break;
       case CPL:
-        std::cout << "CPL";
         cpl(operand);
         break;
       case POP:
-        std::cout << "POP";
         pop(operand);
         break;
       case RET:
-        std::cout << "RET";
         ret();
         break;
       default:
         auto [upper, lower] = readWord();
         advancePR();
-        if (upper == 0 && lower == 0) {
-          std::cout << "Interpreter:: upper == 0 && lower == 0" << std::endl;
-          return false;
-        }
         uint16_t address = (upper << 8) + lower;
-        std::cout << std::setw(2) << std::setfill('0') << std::hex << std::uppercase << address << " " << std::endl;
         switch (opcode) {
           case LD2:
-            std::cout << "LD2";
             ld2(operand, address);
             break;
           case ST:
-            std::cout << "ST";
             st(operand, address);
             break;
           case LAD:
-            std::cout << "LAD";
             lad(operand, address);
             break;
           case ADDA2:
-            std::cout << "ADDA2";
             adda2(operand, address);
             break;
           case SUBA2:
-            std::cout << "SUBA2";
             suba2(operand, address);
             break;
           case ADDL2:
-            std::cout << "ADDL2";
             addl2(operand, address);
             break;
           case SUBL2:
-            std::cout << "SUBL2";
             subl2(operand, address);
             break;
           case AND2:
-            std::cout << "AND2";
-            adda2(operand, address);
+            and2(operand, address);
             break;
           case OR2:
-            std::cout << "OR2";
             or2(operand, address);
             break;
           case XOR2:
-            std::cout << "XOR2";
             xor2(operand, address);
             break;
           case CPA2:
-            std::cout << "CPA2";
             cpa2(operand, address);
             break;
           case CPL2:
-            std::cout << "CPL2";
             cpl2(operand, address);
             break;
           case SLA:
-            std::cout << "SLA";
             sla(operand, address);
             break;
           case SRA:
-            std::cout << "SRA";
             sra(operand, address);
             break;
           case SLL:
-            std::cout << "SLL";
             sll(operand, address);
             break;
           case SRL:
-            std::cout << "SRL";
             srl(operand, address);
             break;
           case JMI:
-            std::cout << "JMI";
             jmi(operand, address);
             break;
           case JNZ:
-            std::cout << "JNZ";
             jnz(operand, address);
             break;
+          case JZE:
+            jze(operand, address);
+            break;
           case JUMP:
-            std::cout << "JUMP";
             jump(operand, address);
             break;
           case JPL:
-            std::cout << "JPL";
             jpl(operand, address);
             break;
           case JOV:
-            std::cout << "JOV";
             jov(operand, address);
             break;
           case PUSH:
-            std::cout << "PUSH";
             push(operand, address);
             break;
           case CALL:
-            std::cout << "CALL";
             call(operand, address);
             break;
           default:
@@ -289,7 +243,10 @@ public :
         }
         break;
     }
-    std::cout << std::endl;
+    auto next = pr->lookupLogical();
+    if (next == END_ADDRESS) {
+      return false;
+    }
     return true;
   }
 
@@ -322,7 +279,7 @@ public :
 
   int xaddr(int x) {
     if (1 <= x && x <= 7) {
-      return gr(x)->lookup();
+      return gr(x)->lookupLogical();
     }
     return 0;
   }
@@ -330,7 +287,6 @@ public :
   void ld(uint8_t operands) {
     auto [n, m] = divide(operands);
     auto v = gr(m)->lookup();
-    std::cout << " operands=" << operands << ", n=" << std::to_string(n) << ", m=" << std::to_string(m) << ", v=" << std::to_string(v);
     gr(n)->store(v);
     fr->set(v);
   }
@@ -338,7 +294,6 @@ public :
   void ld2(uint8_t operands, uint16_t address) {
     auto [n, x] = divide(operands);
     auto v = memory->lookup(address + xaddr(x));
-    std::cout << " operands=" << operands << ", address= " << address << ", n=" << std::to_string(n) << ", x=" << std::to_string(x) << ", xaddr=" << std::to_string(xaddr(x)) << ", v=" << std::to_string(v) << std::endl;
     gr(n)->store(v);
     fr->set(v);
   }
@@ -346,7 +301,6 @@ public :
   void adda(uint8_t operands) {
     auto [n, m] = divide(operands);
     auto v = gr(n)->lookup() + gr(m)->lookup();
-    std::cout << " operands=" << operands << ", n=" << std::to_string(n) << ", m=" << std::to_string(m) << ", v=" << std::to_string(v);
     gr(n)->store(v);
     fr->set(v);
   }
@@ -354,7 +308,6 @@ public :
   void adda2(uint8_t operands, uint16_t address) {
     auto [n, x] = divide(operands);
     auto v = gr(n)->lookup() + memory->lookup(address + xaddr(x));
-    std::cout << " operands=" << operands << ", address= " << address << ", n=" << std::to_string(n) << ", x=" << std::to_string(x) << ", xaddr=" << std::to_string(xaddr(x)) << ", v=" << std::to_string(v) << std::endl;
     gr(n)->store(v);
     fr->set(v);
   }
@@ -362,7 +315,6 @@ public :
   void suba(uint8_t operands) {
     auto [n, m] = divide(operands);
     auto v = gr(n)->lookup() - gr(m)->lookup();
-    std::cout << " operands=" << operands << ", n=" << std::to_string(n) << ", m=" << std::to_string(m) << ", v=" << std::to_string(v);
     gr(n)->store(v);
     fr->set(v);
   }
@@ -370,7 +322,6 @@ public :
   void suba2(uint8_t operands, uint16_t address) {
     auto [n, x] = divide(operands);
     auto v = gr(n)->lookup() - memory->lookup(address + xaddr(x));
-    std::cout << " operands=" << operands << ", address= " << address << ", n=" << std::to_string(n) << ", x=" << std::to_string(x) << ", xaddr=" << std::to_string(xaddr(x)) << ", v=" << std::to_string(v);
     gr(n)->store(v);
     fr->set(v);
   }
@@ -378,7 +329,6 @@ public :
   void addl(uint8_t operands) {
     auto [n, m] = divide(operands);
     auto v = gr(n)->lookupLogical() + gr(m)->lookupLogical();
-    std::cout << " operands=" << operands << ", n=" << std::to_string(n) << ", m=" << std::to_string(m) << ", v=" << std::to_string(v);
     gr(n)->storeLogical(v);
     fr->set_logical(v);
   }
@@ -386,7 +336,6 @@ public :
   void addl2(uint8_t operands, uint16_t address) {
     auto [n, x] = divide(operands);
     auto v = gr(n)->lookupLogical() + memory->lookupLogical(address + xaddr(x));
-    std::cout << " operands=" << operands << ", address= " << address << ", n=" << std::to_string(n) << ", x=" << std::to_string(x) << ", xaddr=" << std::to_string(xaddr(x)) << ", v=" << std::to_string(v);
     gr(n)->storeLogical(v);
     fr->set_logical(v);
   }
@@ -394,7 +343,6 @@ public :
   void subl(uint8_t operands) {
     auto [n, m] = divide(operands);
     auto v = gr(n)->lookupLogical() - gr(m)->lookupLogical();
-    std::cout << " operands=" << operands << ", n=" << std::to_string(n) << ", m=" << std::to_string(m) << ", v=" << std::to_string(v);
     gr(n)->storeLogical(v);
     fr->set_logical(v);
   }
@@ -402,7 +350,6 @@ public :
   void subl2(uint8_t operands, uint16_t address) {
     auto [n, x] = divide(operands);
     auto v = gr(n)->lookupLogical() - memory->lookupLogical(address + xaddr(x));
-    std::cout << " operands=" << operands << ", address= " << address << ", n=" << std::to_string(n) << ", x=" << std::to_string(x) << ", xaddr=" << std::to_string(xaddr(x)) << ", v=" << std::to_string(v);
     gr(n)->storeLogical(v);
     fr->set_logical(v);
   }
@@ -410,7 +357,6 @@ public :
   void and1(uint8_t operands) {
     auto [n, m] = divide(operands);
     auto v = gr(n)->lookup() & gr(m)->lookup();
-    std::cout << " operands=" << operands << ", n=" << std::to_string(n) << ", m=" << std::to_string(m) << ", v=" << std::to_string(v);
     gr(n)->store(v);
     fr->set(v);
   }
@@ -418,7 +364,6 @@ public :
   void and2(uint8_t operands, uint16_t address) {
     auto [n, x] = divide(operands);
     auto v = gr(n)->lookup() & memory->lookup(address + xaddr(x));
-    std::cout << " operands=" << operands << ", address= " << address << ", n=" << std::to_string(n) << ", x=" << std::to_string(x) << ", xaddr=" << std::to_string(xaddr(x)) << ", v=" << std::to_string(v);
     gr(n)->store(v);
     fr->set(v);
   }
@@ -426,7 +371,6 @@ public :
   void or1(uint8_t operands) {
     auto [n, m] = divide(operands);
     auto v = gr(n)->lookup() | gr(m)->lookup();
-    std::cout << " operands=" << operands << ", n=" << std::to_string(n) << ", m=" << std::to_string(m) << ", v=" << std::to_string(v);
     gr(n)->store(v);
     fr->set(v);
   }
@@ -434,7 +378,6 @@ public :
   void or2(uint8_t operands, uint16_t address) {
     auto [n, x] = divide(operands);
     auto v = gr(n)->lookup() | memory->lookup(address + xaddr(x));
-    std::cout << " operands=" << operands << ", address= " << address << ", n=" << std::to_string(n) << ", x=" << std::to_string(x) << ", xaddr=" << std::to_string(xaddr(x)) << ", v=" << std::to_string(v);
     gr(n)->store(v);
     fr->set(v);
   }
@@ -442,7 +385,6 @@ public :
   void xor1(uint8_t operands) {
     auto [n, m] = divide(operands);
     auto v = gr(n)->lookup() ^ gr(m)->lookup();
-    std::cout << " operands=" << operands << ", n=" << std::to_string(n) << ", m=" << std::to_string(m) << ", v=" << std::to_string(v);
     gr(n)->store(v);
     fr->set(v);
   }
@@ -450,7 +392,6 @@ public :
   void xor2(uint8_t operands, uint16_t address) {
     auto [n, x] = divide(operands);
     auto v = gr(n)->lookup() ^ memory->lookup(address + xaddr(x));
-    std::cout << " operands=" << operands << ", address= " << address << ", n=" << std::to_string(n) << ", x=" << std::to_string(x) << ", xaddr=" << std::to_string(xaddr(x)) << ", v=" << std::to_string(v);
     gr(n)->store(v);
     fr->set(v);
   }
@@ -458,48 +399,42 @@ public :
   void cpa(uint8_t operands) {
     auto [n, m] = divide(operands);
     auto v = gr(n)->lookup() - gr(m)->lookup();
-    std::cout << " operands=" << operands << ", n=" << std::to_string(n) << ", m=" << std::to_string(m) << ", v=" << std::to_string(v);
     fr->set_by_cpa(v);
   }
 
   void cpa2(uint8_t operands, uint16_t address) {
     auto [n, x] = divide(operands);
     auto v = gr(n)->lookup() - memory->lookup(address + xaddr(x));
-    std::cout << " operands=" << operands << ", address= " << address << ", n=" << std::to_string(n) << ", x=" << std::to_string(x) << ", xaddr=" << std::to_string(xaddr(x));
     fr->set_by_cpa(v);
   }
 
   void cpl(uint8_t operands) {
     auto [n, m] = divide(operands);
     auto v = gr(n)->lookupLogical() - gr(m)->lookupLogical();
-    std::cout << " operands=" << operands << ", n=" << std::to_string(n) << ", m=" << std::to_string(m);
     fr->set_logical_by_cpl(v);
   }
 
   void cpl2(uint8_t operands, uint16_t address) {
     auto [n, x] = divide(operands);
     auto v = gr(n)->lookupLogical() - memory->lookupLogical(address + xaddr(x));
-    std::cout << " operands=" << operands << ", address= " << address << ", n=" << std::to_string(n) << ", x=" << std::to_string(x) << ", xaddr=" << std::to_string(xaddr(x));
     fr->set_logical_by_cpl(v);
   }
 
   void pop(uint8_t operands) {
     auto [n, x] = divide(operands);
     auto v = memory->lookup(sp->lookupLogical());
-    std::cout << " operands=" << operands << ", n=" << std::to_string(n) << ", x=" << std::to_string(x) << ", v=" << std::to_string(v);
     gr(n)->storeLogical(v);
     sp->storeLogical(sp->lookupLogical() + 1);
   }
 
   void push(uint8_t operands, uint16_t address) {
     auto [_, x] = divide(operands);
-    std::cout << " operands=" << operands << ", x=" << std::to_string(x) << std::endl;
     sp->storeLogical(sp->lookupLogical() - 1);
     memory->storeLogical(sp->lookupLogical(), address + xaddr(x));
   }
 
   void ret() {
-    auto sp_value = sp->lookup();
+    auto sp_value = sp->lookupLogical();
     if (sp_value != END_ADDRESS) {
       auto address = memory->lookupLogical(sp_value);
       pr->storeLogical(address);
@@ -511,7 +446,6 @@ public :
 
   void call(uint8_t operands, uint16_t address) {
     auto [_, x] = divide(operands);
-    std::cout << " operands=" << operands << ", x=" << std::to_string(x) << std::endl;
     sp->storeLogical(sp->lookupLogical() - 1);
     memory->storeLogical(sp->lookupLogical(), pr->lookupLogical());
     pr->storeLogical(address + xaddr(x));
@@ -520,14 +454,11 @@ public :
   void st(uint8_t operands, uint16_t address) {
     auto [n, x] = divide(operands);
     auto v = gr(n)->lookup();
-    std::cout << " operands=" << operands << ", address= " << address << ", n=" << std::to_string(n) << ", x=" << std::to_string(x) << ", xaddr=" << std::to_string(xaddr(x)) << ", v=" << std::to_string(v) << std::endl;
     memory->store(address + xaddr(x), v);
-    std::cout << memory->lookup(address + xaddr(x)) << std::endl;
   }
 
   void lad(uint8_t operands, uint16_t address) {
     auto [n, x] = divide(operands);
-    std::cout << " operands=" << operands << ", address= " << address << ", n=" << std::to_string(n) << ", x=" << std::to_string(x) << ", xaddr=" << std::to_string(xaddr(x)) << std::endl;
     gr(n)->store(address + xaddr(x));
   }
 
@@ -545,7 +476,6 @@ public :
     if (((gr(n)->lookupLogical() >> (16 - 1 - b)) & 1) != 0) {
       overflow = true;
     }
-    std::cout << " operands=" << operands << ", n=" << std::to_string(n) << ", x=" << std::to_string(x) << ", v=" << std::to_string(v) << std::endl;
     gr(n)->store(v);
     fr->set_with_overflow_flag(v, overflow);
   }
@@ -558,7 +488,6 @@ public :
     if (((gr(n)->lookupLogical() >> (b - 1)) & 1) != 0) {
       overflow = true;
     }
-    std::cout << " operands=" << operands << ", n=" << std::to_string(n) << ", x=" << std::to_string(x) << ", v=" << std::to_string(v) << std::endl;
     gr(n)->store(v);
     fr->set_with_overflow_flag(v, overflow);
   }
@@ -571,7 +500,6 @@ public :
     if (((gr(n)->lookup() >> (16 - b)) & 1) != 0) {
       overflow = true;
     }
-    std::cout << " operands=" << operands << ", n=" << std::to_string(n) << ", x=" << std::to_string(x) << ", v=" << std::to_string(v) << std::endl;
     gr(n)->store(v);
     fr->set_with_overflow_flag(v, overflow);
   }
@@ -585,7 +513,6 @@ public :
     if (((gr(n)->lookup() >> (b - 1)) & 1) != 0) {
       overflow = true;
     }
-    std::cout << " operands=" << operands << ", n=" << std::to_string(n) << ", x=" << std::to_string(x) << ", v=" << std::to_string(v) << std::endl;
     gr(n)->store(v);
     fr->set_with_overflow_flag(v, overflow);
   }

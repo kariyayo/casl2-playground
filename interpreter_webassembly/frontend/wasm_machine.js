@@ -17,7 +17,7 @@ class WasmMachine {
     }
     this.PR = new GeneralRegister("PR");
     this.SP = new GeneralRegister("SP");
-    this.SP.storeLogical(0x9001);
+    this.SP.storeLogical(0x9000);
     this.PR.store(startMemAddress);
     this.labels = new Map();
 

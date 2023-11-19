@@ -121,4 +121,4 @@ export class FlagRegister {
   }
 }
 
-export const END_ADDRESS = -32678
+export const END_ADDRESS = 0xE000

@@ -19,6 +19,9 @@ export function isJisX0201(s: string): boolean {
 const jisX0201Fmt = /^[\s!"#$%&'()*+,-./0-9:;<=>?@A-Z\[¥\]^_`a-z{|}~]+$/
 
 export function isAddress(s: string): boolean {
+  if (isDigits(s)) {
+    return true
+  }
   return addressFmt.test(s)
 }
 const addressFmt = /^#[0-9A-Fa-f]+$/

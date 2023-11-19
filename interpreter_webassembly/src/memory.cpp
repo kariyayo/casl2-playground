@@ -1,4 +1,4 @@
-#include <iostream>
+#include <cstdint>
 #include <string>
 #include <stdexcept>
 #include "memory.hpp"
@@ -9,8 +9,6 @@ Memory::Memory(uint8_t* buf, size_t bufSize) {
 }
 
 int16_t Memory::lookup(int address) {
-  std::cout << "Memory::lookup() address =" << address << "\n";
-  std::cout << "Memory::lookup() idx =" << address * WORD_LENGTH << "\n";
   uint8_t a = this->buf[address * WORD_LENGTH];
   uint8_t b = this->buf[address * WORD_LENGTH + 1];
   uint16_t res = (a << 8) + b;

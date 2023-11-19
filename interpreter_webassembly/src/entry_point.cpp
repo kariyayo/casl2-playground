@@ -1,6 +1,4 @@
-#include <cstdlib>
-#include <cstring>
-#include <fstream>
+#include <cstdint>
 #include "interpreter.cpp"
 
 #include <emscripten.h>
@@ -95,10 +93,10 @@ extern "C" {
     auto pr = new Register();
     pr->store(startAddress);
     auto sp = new Register();
-    sp->storeLogical(strtol("0x9001", NULL, 16));
+    sp->storeLogical(0x9000);
     intr = new Interpreter(gr0, gr1, gr2, gr3, gr4, gr5, gr6, gr7, fr, pr, sp, mem);
 
-    mem->store(0x9001, -32678);
+    mem->store(0x9000, 0xE000);
 
     return 0;
   }
