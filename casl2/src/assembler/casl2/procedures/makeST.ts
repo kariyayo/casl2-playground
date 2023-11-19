@@ -1,6 +1,6 @@
 import { Instruction, Label, Tokens } from "../../types"
 import { getLabelOrThrow } from "./labelAccessor"
-import { GeneralRegister, getGrOrThrow, grToBytecode } from "./registerAccessor"
+import { getGrByteCodeOrThrow } from "./registerAccessor"
 import { isAddress, normalizeAddress } from "./strings"
 
 export function makeST(tokens: Tokens): Instruction {
@@ -15,13 +15,12 @@ export function makeST(tokens: Tokens): Instruction {
     wordLength,
     tokens,
     gen: (
-      grMap: Map<string, GeneralRegister>,
       labels: Map<string, Label>,
     ) => {
       // e.g. ST GR1,adr => [0x1110, address]
-      const srcGR = getGrOrThrow(src, grMap)
+      const srcGR = getGrByteCodeOrThrow(src)
       const grx = ts.length > 2 ? ts[2] : null
-      const indexGR = grx == null ? null : getGrOrThrow(grx, grMap)
+      const indexGR = grx == null ? 0 : getGrByteCodeOrThrow(grx)
       let operandAddress = 0
       if (isAddress(value)) {
         operandAddress = normalizeAddress(value)
@@ -32,7 +31,7 @@ export function makeST(tokens: Tokens): Instruction {
       const bytecode = new ArrayBuffer(4)
       const view = new DataView(bytecode)
       view.setUint8(0, opCode)
-      view.setUint8(1, (grToBytecode(srcGR) << 4) + grToBytecode(indexGR))
+      view.setUint8(1, (srcGR << 4) + indexGR)
       view.setUint16(2, operandAddress, false)
       return { bytecode }
     }

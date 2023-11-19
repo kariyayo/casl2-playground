@@ -1,16 +1,11 @@
 import { GeneralRegister } from "../../../infra/register"
 
 export { isGeneralRegister, GeneralRegister, FlagRegister, END_ADDRESS } from "../../../infra/register"
-export function getGrOrThrow(text: string, grMap: Map<string, GeneralRegister>): GeneralRegister {
-  const gr = grMap.get(text)
-  if (gr == null) {
-    throw new Error(`not found Register: ${text}`)
-  }
-  return gr
-}
-export function grToBytecode(gr: GeneralRegister | null): number {
-  if (gr == null) return 0
-  switch (gr.name) {
+
+export function getGrByteCodeOrThrow(text: string): number {
+  switch (text) {
+    case "GR0":
+      return 0
     case "GR1":
       return 1
     case "GR2":
@@ -26,7 +21,7 @@ export function grToBytecode(gr: GeneralRegister | null): number {
     case "GR7":
       return 7
   }
-  return 0
+  throw new Error(`invalid Register: ${text}`)
 }
 
 export function advancePR(PR: GeneralRegister, words: number) {

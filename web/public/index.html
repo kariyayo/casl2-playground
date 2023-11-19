@@ -34,16 +34,19 @@ h2 {
   border-bottom: dashed 1px #ccc;
   padding-top: 40px;
 }
+.code {
+  font-family: 'Source Code Pro', monospace;
+}
 input[type=number] {
   margin-bottom: 4px;
 }
 textarea {
-  font-family: 'Source Code Pro', monospace;
   color: white;
   background-color: black;
   font-size: 1.2rem;
   padding: 20px;
   width: 100%;
+  text-transform: uppercase;
 }
 table {
   border-collapse: collapse;
@@ -55,6 +58,10 @@ th, td {
   border-bottom: solid 1px #eee;
   empty-cells : show;
   padding: 2px 10px;
+}
+td.dashed-border {
+  border-left: dashed 1px #eee;
+  border-right: dashed 1px #eee;
 }
 th {
   background-color: #eee;
@@ -83,7 +90,6 @@ a, a:visited {
 <div id="container">
   <h1>CASL2 Playground</h1>
   <div id="app"></div>
-  <script src="js/main.js"></script>
   <footer>
     <ul>
       <li><a href="https://github.com/bati11/casl2-web/blob/main/README.md">Document</a></li>
@@ -91,5 +97,7 @@ a, a:visited {
     </ul>
   </footer>
 </div>
+<script src="js/main.js"></script>
+<script src="js/casl2interpriter.js"></script>
 </body>
 </html>

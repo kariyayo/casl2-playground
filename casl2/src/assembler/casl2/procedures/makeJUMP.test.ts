@@ -2,7 +2,7 @@ import { Memory } from "../../../infra/memory"
 import { Interpreter } from "../../../interpreter/interpreter"
 import { Label, Tokens } from "../../types"
 import { makeJUMP } from "./makeJUMP"
-import { getGrOrThrow, FlagRegister, GeneralRegister } from "./registerAccessor"
+import { FlagRegister, GeneralRegister } from "./registerAccessor"
 
 describe(`makeJUMP`, () => {
 
@@ -31,7 +31,7 @@ describe(`makeJUMP`, () => {
       const name = `GR${i}`
       grMap.set(name, new GeneralRegister(name))
     }
-    getGrOrThrow("GR3", grMap).store(20)
+    grMap.get("GR3")?.store(20)
     const flagRegister = new FlagRegister()
     const SP = new GeneralRegister("SP")
 
@@ -40,7 +40,7 @@ describe(`makeJUMP`, () => {
     test(`makeJUMP returns Instruction`, () => {
       expect(res?.gen).not.toBeNull()
       expect(res?.wordLength).toBe(expected.wordLength)
-      const bytecodeView = new DataView(res?.gen(grMap, labels)!.bytecode)
+      const bytecodeView = new DataView(res?.gen(labels)!.bytecode)
       expect(bytecodeView.getUint8(0)).toEqual(expected.bytecode[0])
       expect(bytecodeView.getUint8(1)).toEqual(expected.bytecode[1])
       expect(bytecodeView.getUint16(2)).toEqual(expected.bytecode[2])
@@ -51,7 +51,7 @@ describe(`makeJUMP`, () => {
     PR.storeLogical(0)
 
     // when
-    const bytecode = res?.gen(grMap, labels)!.bytecode
+    const bytecode = res?.gen(labels)!.bytecode
     memory.storeBytecode(bytecode, 0)
     const interpreter = new Interpreter(grMap, flagRegister, PR, SP, memory)
     interpreter.step()
@@ -81,7 +81,7 @@ describe(`makeJUMP`, () => {
 
     // when, then
     test(`makeJUMP throw Error`, () => {
-      expect(() => makeJUMP(tokens).gen(grMap, labels)).toThrow()
+      expect(() => makeJUMP(tokens).gen(labels)).toThrow()
     })
   })
 })

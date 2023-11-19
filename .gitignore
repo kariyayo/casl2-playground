@@ -15,6 +15,7 @@ tmp
 
 # Build
 public/css/main.css
+a.out
 
 # Coverage reports
 coverage
@@ -29,6 +30,8 @@ bower_components
 # Editors
 .idea
 *.iml
+.vscode
+
 
 # OS metadata
 .DS_Store

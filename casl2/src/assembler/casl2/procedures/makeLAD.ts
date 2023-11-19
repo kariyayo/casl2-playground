@@ -1,6 +1,6 @@
 import { Instruction, Label, Tokens } from "../../types"
 import { getLabelOrThrow } from "./labelAccessor"
-import { GeneralRegister, getGrOrThrow, grToBytecode } from "./registerAccessor"
+import { getGrByteCodeOrThrow } from "./registerAccessor"
 import { isHexadecimal, isNumeric } from "./strings"
 
 export function makeLAD(tokens: Tokens): Instruction {
@@ -14,13 +14,12 @@ export function makeLAD(tokens: Tokens): Instruction {
     wordLength,
     tokens,
     gen: (
-      grMap: Map<string, GeneralRegister>,
       labels: Map<string, Label>,
     ) => {
       // e.g. LAD GR1,adr => [0x1210, address]
-      const distGR = getGrOrThrow(target, grMap)
+      const distGR = getGrByteCodeOrThrow(target)
       const grx = ts.length > 2 ? ts[2] : null
-      const indexGR = grx == null ? null : getGrOrThrow(grx, grMap)
+      const indexGR = grx == null ? 0 : getGrByteCodeOrThrow(grx)
       let operandAddress = 0
       if (isNumeric(value)) {
         operandAddress = Number(value)
@@ -33,7 +32,7 @@ export function makeLAD(tokens: Tokens): Instruction {
       const bytecode = new ArrayBuffer(4)
       const view = new DataView(bytecode)
       view.setUint8(0, opCode)
-      view.setUint8(1, (grToBytecode(distGR) << 4) + grToBytecode(indexGR))
+      view.setUint8(1, (distGR << 4) + indexGR)
       view.setUint16(2, operandAddress, false)
       return { bytecode }
     }

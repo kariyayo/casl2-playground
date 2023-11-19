@@ -1,5 +1,5 @@
 import { Instruction, Label, Tokens } from "../../types"
-import { GeneralRegister, getGrOrThrow, grToBytecode } from "./registerAccessor"
+import { getGrByteCodeOrThrow } from "./registerAccessor"
 import { isAddress, normalizeAddress } from "./strings"
 
 export function makePUSH(tokens: Tokens): Instruction {
@@ -12,7 +12,6 @@ export function makePUSH(tokens: Tokens): Instruction {
     wordLength,
     tokens,
     gen: (
-      grMap: Map<string, GeneralRegister>,
       labels: Map<string, Label>,
     ) => {
       if (!isAddress(value)) {
@@ -20,11 +19,11 @@ export function makePUSH(tokens: Tokens): Instruction {
       }
       const operandAddress = normalizeAddress(value)
       const grx = ts.length > 1 ? ts[1] : null
-      const indexGR = grx == null ? null : getGrOrThrow(grx, grMap)
+      const indexGR = grx == null ? 0 : getGrByteCodeOrThrow(grx)
       const bytecode = new ArrayBuffer(4)
       const view = new DataView(bytecode)
       view.setUint8(0, opCode)
-      view.setUint8(1, (0 << 4) + grToBytecode(indexGR))
+      view.setUint8(1, (0 << 4) + indexGR)
       view.setUint16(2, operandAddress, false)
       return { bytecode }
     }

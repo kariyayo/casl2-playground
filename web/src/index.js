@@ -1,7 +1,18 @@
 import { makeMachine } from "../lib/machine"
+import { makeWasmMachine } from "../lib/wasm_machine"
 
 window.casl2 = {
-  version: VERSION
+  version: VERSION,
+  showWasmResult: false
+}
+
+function addClassName(elm, className) {
+  const classNames = elm.className.split(" ")
+  if (classNames.indexOf(className) == -1) {
+    classNames.push(className)
+  }
+  elm.className = classNames.join(" ")
+  return elm
 }
 
 function H2(text) {
@@ -32,11 +43,12 @@ function TR(...elms) {
 
 function INPUT_ADDRESS(labelText, id) {
   const label = document.createElement("label")
-  label.innerText = labelText
+  label.innerText = labelText + "#"
   label.htmlFor = id
-  const input = document.createElement("input")
+  let input = document.createElement("input")
+  input = addClassName(input, "code")
   input.id = id
-  input.type = "number"
+  input.type = "text"
   input.min = 0
   input.max = 9000
   input.step = 8
@@ -49,14 +61,14 @@ function displayOpecode(bytecode) {
     const view = new DataView(bytecode)
     if (bytecode.byteLength >= 2) {
       v = view.getUint8(0).toString(16).padStart(2, "0")
-      v = "0x" + v + view.getUint8(1).toString(16).padStart(2, "0")
+      v = "#" + v + view.getUint8(1).toString(16).padStart(2, "0")
     }
     if (bytecode.byteLength >= 4) {
       v = v + " "
-      v = v + "0x" + view.getUint16(2).toString(16).padStart(4, "0")
+      v = v + "#" + view.getUint16(2).toString(16).padStart(4, "0")
     }
   }
-  return v
+  return v.toUpperCase()
 }
 
 const COLOR = {
@@ -68,16 +80,23 @@ const COLOR = {
 }
 
 function toHexString(x) {
-  return "0x" + x.toString(16).padStart(4, "0")
+  return "#" + x.toString(16).padStart(4, "0").toUpperCase()
+}
+
+function toBinaryString(x) {
+  const s = x.toString(2).padStart(16, "0").toUpperCase()
+  return s.slice(0, 4) + " " + s.slice(4, 8) + " " + s.slice(8, 12) + " " + s.slice(12, 16)
 }
 
 function component() {
   const globalConf = {
-    startAddress: 2000,
+    startAddress: 0x8000,
+    displayAddress: 0x8000,
   }
 
   const assembled = {
     machine: null,
+    wasmMachine: null,
     inputText: "",
   }
 
@@ -85,13 +104,25 @@ function component() {
     console.log("=== ASSEMBLE START ===")
     console.log("startAddress: ", globalConf.startAddress)
     assembled.inputText = inputText
-    assembled.machine = makeMachine(inputText.replaceAll("  ", "\t"), globalConf.startAddress)
+    const input = inputText.replaceAll("  ", "\t")
+    console.log("-----")
+    console.log(input)
+    console.log("-----")
+    assembled.machine = makeMachine(input, globalConf.startAddress)
+    console.log("makeMachine done.")
+    console.log(assembled.machine)
+    assembled.wasmMachine = makeWasmMachine(input, globalConf.startAddress)
+    console.log("makeWasmMachine done. result=" + assembled.wasmMachine)
+    console.log(assembled.wasmMachine)
     console.log("=== ASSEMBLE END ===")
-    console.log(assembled.machine.assembleResult)
   }
 
   function step() {
     const hasNext = assembled.machine.step()
+    console.log("-----")
+    console.log("ok currentPos=" + assembled.machine.PR.lookupLogical())
+    console.log("-----")
+    const res = assembled.wasmMachine.step()
     return hasNext
   }
 
@@ -109,7 +140,8 @@ C	DS	1
   const renderInputArea = (container, assembleResultArea, machineStateArea) => {
     container.appendChild(H2("Input source code"))
 
-    const sourceCodeEditor = document.createElement("textarea")
+    let sourceCodeEditor = document.createElement("textarea")
+    sourceCodeEditor = addClassName(sourceCodeEditor, "code")
     sourceCodeEditor.cols = 80
     sourceCodeEditor.rows = 20
     sourceCodeEditor.onkeydown = (event) => {
@@ -130,9 +162,9 @@ C	DS	1
 
     const globalConfBox = document.createElement("div")
     const [startAddressLabel, startAddressInput] = INPUT_ADDRESS("Start address : ", "input_text_start_address")
-    startAddressInput.value = globalConf.startAddress
+    startAddressInput.value = globalConf.startAddress.toString(16)
     startAddressInput.oninput = () => {
-      globalConf.startAddress = Number(startAddressInput.value)
+      globalConf.startAddress = parseInt("0x" + startAddressInput.value, 16)
     }
     globalConfBox.appendChild(startAddressLabel)
     globalConfBox.appendChild(startAddressInput)
@@ -149,7 +181,7 @@ C	DS	1
     assembleButton.onclick = () => {
       try {
         assembleErrorMessage.innerText = ""
-        assemble(sourceCodeEditor.value)
+        assemble(sourceCodeEditor.value.toUpperCase())
       } catch(e) {
         let errorMessage = e.message
         if (e.tokens) {
@@ -160,7 +192,7 @@ C	DS	1
         throw e
       }
       renderAssembleResultArea(assembleResultArea, machineStateArea)
-      renderMachineState(machineStateArea)
+      renderMachineStates(machineStateArea)
     }
     container.appendChild(assembleButton)
   }
@@ -168,12 +200,18 @@ C	DS	1
   const renderAssembleResultArea = (container, machineStateArea) => {
     container.innerHTML = ""
 
-    container.appendChild(H2("Assemble result"))
+    const assembleResultHeader = H2("Assemble result")
+    assembleResultHeader.ondblclick = () => {
+      casl2.showWasmResult = !casl2.showWasmResult
+      renderMachineStates(machineStateArea)
+    };
+    container.appendChild(assembleResultHeader)
 
-    const assembleResult = document.createElement("table")
+    let assembleResult = document.createElement("table")
+    assembleResult = addClassName(assembleResult, "code")
     assembleResult.id = "assemble_result"
     assembleResult.appendChild(TR(
-      TH("#"),
+      TH(""),
       TH("opecode"),
       TH("address"),
       TH(""),
@@ -185,7 +223,7 @@ C	DS	1
       assembleResult.appendChild(TR(
         TD(line.tokens.lineNum),
         TD(displayOpecode(line.bytecode)),
-        TD(operator.startsWith("START") || operator.startsWith("END") ? "" : line.memAddress),
+        TD(operator.startsWith("START") || operator.startsWith("END") ? "" : toHexString(line.memAddress)),
         TD(line.tokens.label),
         TD(line.tokens.operator),
         TD(line.tokens.operand),
@@ -198,7 +236,7 @@ C	DS	1
       rows.forEach((row, i) => {
         if (i == 0) return
         const address = row.querySelectorAll("td").item(2).innerText
-        if (assembled.machine.PR.lookupLogical() == address) {
+        if (toHexString(assembled.machine.PR.lookupLogical()) == address) {
           row.style.backgroundColor = COLOR.accent
         } else {
           row.style.backgroundColor = null
@@ -211,7 +249,7 @@ C	DS	1
     resetButton.onclick = () => {
       assemble(assembled.inputText)
       renderAssembleResultArea(container, machineStateArea)
-      renderMachineState(machineStateArea)
+      renderMachineStates(machineStateArea)
     }
 
     const stepOverButton = document.createElement("button")
@@ -220,7 +258,7 @@ C	DS	1
       const hasNext = step()
       if (hasNext) {
         coloring()
-        renderMachineState(machineStateArea)
+        renderMachineStates(machineStateArea)
       } else {
         stepOverButton.disabled = true
         runButton.disabled = true
@@ -235,7 +273,7 @@ C	DS	1
         hasNext = step()
         if (hasNext) {
           coloring()
-          renderMachineState(machineStateArea)
+          renderMachineStates(machineStateArea)
         } else {
           clearInterval(intervalId)
         }
@@ -251,63 +289,86 @@ C	DS	1
     coloring()
   }
 
-  const renderMachineState = (container) => {
-    console.log(assembled.machine)
+  const renderMachineStates = (container) => {
     container.innerHTML = ""
+    _renderMachineState(container, "js", assembled.machine)
+    if (casl2.showWasmResult) {
+      _renderMachineState(container, "wasm", assembled.wasmMachine)
+    }
+  }
 
-    container.appendChild(H2("Machine states"))
+  const _renderMachineState = (container, idPrefix, machine) => {
+    console.log(machine)
+    if (casl2.showWasmResult) {
+      container.appendChild(H2(`Machine states ( ${idPrefix} )`))
+    } else {
+      container.appendChild(H2(`Machine states`))
+    }
     const statesBox = document.createElement("div")
-    statesBox.id = "machine_states"
+    statesBox.id = `${idPrefix}_machine_states`
     statesBox.style.display = "flex"
     statesBox.style.justifyContent = "space-between"
 
     const leftBox = document.createElement("div")
-    const grTable = document.createElement("table")
-    grTable.appendChild(TR(
+
+    let prTable = document.createElement("table")
+    prTable = addClassName(prTable, "code")
+    prTable.appendChild(TR(
       TH("PR"),
-      TD(assembled.machine.PR.lookupLogical()),
+      TD(toHexString(machine.PR.lookupLogical())),
     ))
+    let grTable = document.createElement("table")
+    leftBox.appendChild(prTable)
+
+    grTable = addClassName(grTable, "code")
     for (let gr of ["GR0", "GR1", "GR2", "GR3", "GR4", "GR5", "GR6", "GR7"]) {
+      const register = machine.grMap.get(gr)
       grTable.appendChild(TR(
         TH(gr),
-        TD(assembled.machine.grMap.get(gr).lookup()),
+        TD(toHexString(register.lookupLogical())),
+        addClassName(TD(toBinaryString(register.lookupLogical())), "dashed-border"),
+        TD(register.lookup()),
       ))
     }
     leftBox.appendChild(grTable)
 
-    const frTable = document.createElement("table")
+    let frTable = document.createElement("table")
+    frTable = addClassName(frTable, "code")
     frTable.appendChild(TR(
       TH("FR"),
-      TD(assembled.machine.FR.of() ? "OF: 1" : "OF: 0"),
-      TD(assembled.machine.FR.sf() ? "SF: 1" : "SF: 0"),
-      TD(assembled.machine.FR.zf() ? "ZF: 1" : "ZF: 0"),
+      TD(machine.FR.of() ? "OF: 1" : "OF: 0"),
+      TD(machine.FR.sf() ? "SF: 1" : "SF: 0"),
+      TD(machine.FR.zf() ? "ZF: 1" : "ZF: 0"),
     ))
     leftBox.appendChild(frTable)
 
-    const spTable = document.createElement("table")
+    let spTable = document.createElement("table")
+    spTable = addClassName(spTable, "code")
     spTable.appendChild(TR(
       TH("SP"),
-      TD(assembled.machine.SP.lookupLogical()),
+      TD(toHexString(machine.SP.lookupLogical())),
     ))
     leftBox.appendChild(spTable)
     statesBox.appendChild(leftBox)
 
     const memoryBox = document.createElement("div")
     const [displayAddressLabel, displayAddressInput] = INPUT_ADDRESS("Display from : ", "display_address")
-    displayAddressInput.value = globalConf.startAddress
+    displayAddressInput.value = globalConf.displayAddress.toString(16)
     displayAddressInput.onchange = () => {
-      console.log(Number(displayAddressInput.value))
-      renderMemoryTable(Number(displayAddressInput.value))
+      globalConf.displayAddress = parseInt("0x" + displayAddressInput.value, 16)
+      console.log(globalConf.displayAddress)
+      renderMemoryTable(globalConf.displayAddress)
     }
     memoryBox.appendChild(displayAddressLabel)
     memoryBox.appendChild(displayAddressInput)
-    function renderMemoryTable(startAddress) {
-      const id = "memory_table"
+    function renderMemoryTable(displayAddress) {
+      const id = `${idPrefix}_memory_table`
       const target = document.getElementById(id)
       if (target) {
         memoryBox.removeChild(target)
       }
-      const memoryTable = document.createElement("table")
+      let memoryTable = document.createElement("table")
+      memoryTable = addClassName(memoryTable, "code")
       memoryTable.id = id
       memoryTable.appendChild(TR(
         TH("address"),
@@ -320,24 +381,24 @@ C	DS	1
         TH(""),
         TH(""),
       ))
-      let i = startAddress;
+      let i = displayAddress;
       const end = i + 8*16
       while (i < end) {
         memoryTable.appendChild(TR(
-          TH(i.toString()),
-          TD(toHexString(assembled.machine.memory.lookupLogical(i++))),
-          TD(toHexString(assembled.machine.memory.lookupLogical(i++))),
-          TD(toHexString(assembled.machine.memory.lookupLogical(i++))),
-          TD(toHexString(assembled.machine.memory.lookupLogical(i++))),
-          TD(toHexString(assembled.machine.memory.lookupLogical(i++))),
-          TD(toHexString(assembled.machine.memory.lookupLogical(i++))),
-          TD(toHexString(assembled.machine.memory.lookupLogical(i++))),
-          TD(toHexString(assembled.machine.memory.lookupLogical(i++))),
+          TH("#" + i.toString(16)),
+          TD(toHexString(machine.memory.lookupLogical(i++))),
+          TD(toHexString(machine.memory.lookupLogical(i++))),
+          TD(toHexString(machine.memory.lookupLogical(i++))),
+          TD(toHexString(machine.memory.lookupLogical(i++))),
+          TD(toHexString(machine.memory.lookupLogical(i++))),
+          TD(toHexString(machine.memory.lookupLogical(i++))),
+          TD(toHexString(machine.memory.lookupLogical(i++))),
+          TD(toHexString(machine.memory.lookupLogical(i++))),
         ))
       }
       memoryBox.appendChild(memoryTable)
     }
-    renderMemoryTable(globalConf.startAddress)
+    renderMemoryTable(globalConf.displayAddress)
     statesBox.appendChild(memoryBox)
     container.appendChild(statesBox)
   }

@@ -1,5 +1,5 @@
 import { Instruction, Label, Tokens } from "../../types"
-import { GeneralRegister, getGrOrThrow, grToBytecode } from "./registerAccessor"
+import { getGrByteCodeOrThrow } from "./registerAccessor"
 
 export function makePOP(tokens: Tokens): Instruction {
   const ts = tokens.operand.split(",")
@@ -11,14 +11,13 @@ export function makePOP(tokens: Tokens): Instruction {
     wordLength,
     tokens,
     gen: (
-      grMap: Map<string, GeneralRegister>,
       labels: Map<string, Label>,
     ) => {
-      const targetGR = getGrOrThrow(operand, grMap)
+      const targetGR = getGrByteCodeOrThrow(operand)
       const bytecode = new ArrayBuffer(4)
       const view = new DataView(bytecode)
       view.setUint8(0, opCode)
-      view.setUint8(1, (grToBytecode(targetGR) << 4) + 0)
+      view.setUint8(1, (targetGR << 4) + 0)
       return { bytecode }
     }
   }
