@@ -102,26 +102,19 @@ function component() {
 
   function assemble(inputText) {
     console.log("=== ASSEMBLE START ===")
-    console.log("startAddress: ", globalConf.startAddress)
     assembled.inputText = inputText
     const input = inputText.replaceAll("  ", "\t")
-    console.log("-----")
-    console.log(input)
-    console.log("-----")
     assembled.machine = makeMachine(input, globalConf.startAddress)
     console.log("makeMachine done.")
     console.log(assembled.machine)
     assembled.wasmMachine = makeWasmMachine(input, globalConf.startAddress)
-    console.log("makeWasmMachine done. result=" + assembled.wasmMachine)
+    console.log("makeWasmMachine done.")
     console.log(assembled.wasmMachine)
     console.log("=== ASSEMBLE END ===")
   }
 
   function step() {
     const hasNext = assembled.machine.step()
-    console.log("-----")
-    console.log("ok currentPos=" + assembled.machine.PR.lookupLogical())
-    console.log("-----")
     const res = assembled.wasmMachine.step()
     return hasNext
   }
@@ -268,16 +261,14 @@ C	DS	1
     const runButton = document.createElement("button")
     runButton.textContent = "Run"
     runButton.onclick = () => {
-      let hasNext = true
-      const intervalId = setInterval(() => {
-        hasNext = step()
-        if (hasNext) {
-          coloring()
-          renderMachineStates(machineStateArea)
-        } else {
-          clearInterval(intervalId)
-        }
-      }, 500)
+      console.time("stepAll_js")
+      assembled.machine.stepAll()
+      console.timeEnd("stepAll_js")
+      console.time("stepAll_wasm")
+      assembled.wasmMachine.stepAll()
+      console.timeEnd("stepAll_wasm")
+      coloring()
+      renderMachineStates(machineStateArea)
       stepOverButton.disabled = true
       runButton.disabled = true
     }
@@ -356,7 +347,6 @@ C	DS	1
     displayAddressInput.value = globalConf.displayAddress.toString(16)
     displayAddressInput.onchange = () => {
       globalConf.displayAddress = parseInt("0x" + displayAddressInput.value, 16)
-      console.log(globalConf.displayAddress)
       renderMemoryTable(globalConf.displayAddress)
     }
     memoryBox.appendChild(displayAddressLabel)

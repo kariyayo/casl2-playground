@@ -36,4 +36,9 @@ export class Commet2 {
   step(): boolean {
     return this.interpreter.step()
   }
+
+  stepAll(): boolean {
+    while (this.interpreter.step()) {}
+    return true
+  }
 }
