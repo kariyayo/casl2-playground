@@ -45,6 +45,25 @@ StepResult step() {
   };
 }
 
+StepResult stepAll() {
+  while (intr->step()) {}
+  return StepResult{
+    intr->pr->lookupLogical(),
+    intr->sp->lookupLogical(),
+    intr->gr0->lookupLogical(),
+    intr->gr1->lookupLogical(),
+    intr->gr2->lookupLogical(),
+    intr->gr3->lookupLogical(),
+    intr->gr4->lookupLogical(),
+    intr->gr5->lookupLogical(),
+    intr->gr6->lookupLogical(),
+    intr->gr7->lookupLogical(),
+    intr->fr->of(),
+    intr->fr->sf(),
+    intr->fr->zf()
+  };
+}
+
 val getMemory() {
   return val(typed_memory_view(bufSize, buf));
 }
@@ -67,6 +86,8 @@ EMSCRIPTEN_BINDINGS(interpreter_module) {
     ;
 
   function("step", &step);
+
+  function("stepAll", &stepAll);
 
   function("getMemory", &getMemory);
 }
