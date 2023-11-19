@@ -4,6 +4,8 @@ export { isGeneralRegister, GeneralRegister, FlagRegister, END_ADDRESS } from ".
 
 export function getGrByteCodeOrThrow(text: string): number {
   switch (text) {
+    case "GR0":
+      return 0
     case "GR1":
       return 1
     case "GR2":

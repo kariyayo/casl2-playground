@@ -53,6 +53,7 @@ class WasmMachine {
     const result = Module.step();
     this.PR.store(result.pr);
     this.SP.store(result.sp);
+    this.grMap.get('GR0').store(result.gr0);
     this.grMap.get('GR1').store(result.gr1);
     this.grMap.get('GR2').store(result.gr2);
     this.grMap.get('GR3').store(result.gr3);
@@ -66,6 +67,7 @@ class WasmMachine {
 
     console.log("----- wasmMachine step output START -----")
     console.log("PR: " + this.PR.lookup())
+    console.log("GR0: " + this.grMap.get('GR0').lookup())
     console.log("GR1: " + this.grMap.get('GR1').lookup())
     console.log("GR2: " + this.grMap.get('GR2').lookup())
     console.log("GR3: " + this.grMap.get('GR3').lookup())

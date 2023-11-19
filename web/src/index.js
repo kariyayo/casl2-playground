@@ -298,7 +298,7 @@ C	DS	1
       TD(toHexString(machine.PR.lookupLogical())),
       TD(""),
     ))
-    for (let gr of ["GR1", "GR2", "GR3", "GR4", "GR5", "GR6", "GR7"]) {
+    for (let gr of ["GR0", "GR1", "GR2", "GR3", "GR4", "GR5", "GR6", "GR7"]) {
       const register = machine.grMap.get(gr)
       grTable.appendChild(TR(
         TH(gr),

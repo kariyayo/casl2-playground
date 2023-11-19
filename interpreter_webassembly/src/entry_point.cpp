@@ -15,6 +15,7 @@ Interpreter* intr;
 struct StepResult {
   int pr;
   int sp;
+  int gr0;
   int gr1;
   int gr2;
   int gr3;
@@ -32,6 +33,7 @@ StepResult step() {
   return StepResult{
     intr->pr->lookupLogical(),
     intr->sp->lookupLogical(),
+    intr->gr0->lookupLogical(),
     intr->gr1->lookupLogical(),
     intr->gr2->lookupLogical(),
     intr->gr3->lookupLogical(),
@@ -53,6 +55,7 @@ EMSCRIPTEN_BINDINGS(interpreter_module) {
   value_object<StepResult>("StepResult")
     .field("pr", &StepResult::pr)
     .field("sp", &StepResult::sp)
+    .field("gr0", &StepResult::gr0)
     .field("gr1", &StepResult::gr1)
     .field("gr2", &StepResult::gr2)
     .field("gr3", &StepResult::gr3)
@@ -80,6 +83,7 @@ extern "C" {
     bufSize = size;
 
     auto mem = new Memory(bytes, bufSize);
+    auto gr0 = new Register();
     auto gr1 = new Register();
     auto gr2 = new Register();
     auto gr3 = new Register();
@@ -92,7 +96,7 @@ extern "C" {
     pr->store(startAddress);
     auto sp = new Register();
     sp->storeLogical(strtol("0x9001", NULL, 16));
-    intr = new Interpreter(gr1, gr2, gr3, gr4, gr5, gr6, gr7, fr, pr, sp, mem);
+    intr = new Interpreter(gr0, gr1, gr2, gr3, gr4, gr5, gr6, gr7, fr, pr, sp, mem);
 
     mem->store(0x9001, -32678);
 

@@ -238,6 +238,13 @@ export class Interpreter {
     return true
   }
 
+  private xaddr(x: number): number {
+    if (1 <= x && x <= 7) {
+      return this.gr(x)
+    }
+    return 0
+  }
+
   ld(operands: number) {
     const [n, m] = this.divide(operands)
     const v = this.gr(m)
@@ -247,7 +254,7 @@ export class Interpreter {
 
   ld2(operands: number, address: number) {
     const [n, x] = this.divide(operands)
-    const v = this.memory.lookup(address + this.gr(x))
+    const v = this.memory.lookup(address + this.xaddr(x))
     this.storeGr(n, v)
     this.FR.set(v)
   }
@@ -261,7 +268,7 @@ export class Interpreter {
 
   adda2(operands: number, address: number) {
     const [n, x] = this.divide(operands)
-    const v = this.gr(n) + this.memory.lookup(address + this.gr(x))
+    const v = this.gr(n) + this.memory.lookup(address + this.xaddr(x))
     this.storeGr(n, v)
     this.FR.set(v)
   }
@@ -275,7 +282,7 @@ export class Interpreter {
 
   suba2(operands: number, address: number) {
     const [n, x] = this.divide(operands)
-    const v = this.gr(n) - this.memory.lookup(address + this.gr(x))
+    const v = this.gr(n) - this.memory.lookup(address + this.xaddr(x))
     this.storeGr(n, v)
     this.FR.set(v)
   }
@@ -289,7 +296,7 @@ export class Interpreter {
 
   addl2(operands: number, address: number) {
     const [n, x] = this.divide(operands)
-    const v = this.grLogical(n) + this.memory.lookupLogical(address + this.gr(x))
+    const v = this.grLogical(n) + this.memory.lookupLogical(address + this.xaddr(x))
     this.storeGrLogical(n, v)
     this.FR.setLogical(v)
   }
@@ -303,7 +310,7 @@ export class Interpreter {
 
   subl2(operands: number, address: number) {
     const [n, x] = this.divide(operands)
-    const v = this.grLogical(n) - this.memory.lookupLogical(address + this.gr(x))
+    const v = this.grLogical(n) - this.memory.lookupLogical(address + this.xaddr(x))
     this.storeGrLogical(n, v)
     this.FR.setLogical(v)
   }
@@ -317,7 +324,7 @@ export class Interpreter {
 
   and2(operands: number, address: number) {
     const [n, x] = this.divide(operands)
-    const v = this.gr(n) & this.memory.lookup(address + this.gr(x))
+    const v = this.gr(n) & this.memory.lookup(address + this.xaddr(x))
     this.storeGr(n, v)
     this.FR.set(v)
   }
@@ -331,7 +338,7 @@ export class Interpreter {
 
   or2(operands: number, address: number) {
     const [n, x] = this.divide(operands)
-    const v = this.gr(n) | this.memory.lookup(address + this.gr(x))
+    const v = this.gr(n) | this.memory.lookup(address + this.xaddr(x))
     this.storeGr(n, v)
     this.FR.set(v)
   }
@@ -345,7 +352,7 @@ export class Interpreter {
 
   xor2(operands: number, address: number) {
     const [n, x] = this.divide(operands)
-    const v = this.gr(n) ^ this.memory.lookup(address + this.gr(x))
+    const v = this.gr(n) ^ this.memory.lookup(address + this.xaddr(x))
     this.storeGr(n, v)
     this.FR.set(v)
   }
@@ -358,7 +365,7 @@ export class Interpreter {
 
   cpa2(operands: number, address: number) {
     const [n, x] = this.divide(operands)
-    const v = this.gr(n) - this.memory.lookup(address + this.gr(x))
+    const v = this.gr(n) - this.memory.lookup(address + this.xaddr(x))
     this.FR.setByCPA(v)
   }
 
@@ -370,7 +377,7 @@ export class Interpreter {
 
   cpl2(operands: number, address: number) {
     const [n, x] = this.divide(operands)
-    const v = this.grLogical(n) - this.memory.lookupLogical(address + this.gr(x))
+    const v = this.grLogical(n) - this.memory.lookupLogical(address + this.xaddr(x))
     this.FR.setLogicalByCPL(v)
   }
 
@@ -385,7 +392,7 @@ export class Interpreter {
     // address -> memory(SP-1)
     const [_, x] = this.divide(operands)
     this.SP.storeLogical(this.SP.lookupLogical() - 1)
-    this.memory.storeLogical(this.SP.lookupLogical(), address + this.gr(x))
+    this.memory.storeLogical(this.SP.lookupLogical(), address + this.xaddr(x))
   }
 
   ret() {
@@ -406,25 +413,25 @@ export class Interpreter {
     const wordLength = 2
     this.SP.storeLogical(this.SP.lookupLogical() - 1)
     this.memory.storeLogical(this.SP.lookupLogical(), this.PR.lookupLogical())
-    this.PR.storeLogical(address + this.gr(x))
+    this.PR.storeLogical(address + this.xaddr(x))
   }
 
   st(operands: number, address: number) {
     const [n, x] = this.divide(operands)
     const v = this.gr(n)
-    this.memory.store(address + this.gr(x), v)
+    this.memory.store(address + this.xaddr(x), v)
   }
 
   lad(operands: number, address: number) {
     const [n, x] = this.divide(operands)
-    const v = address + this.gr(x)
+    const v = address + this.xaddr(x)
     this.storeGr(n, v)
   }
 
   sla(operands: number, address: number) {
     const [n, x] = this.divide(operands)
     const isNegative = ((this.gr(n) >> 15) & 1) != 0
-    const b = address + this.gr(x)
+    const b = address + this.xaddr(x)
     let v = this.gr(n) << b
     if (isNegative) {
       v = v | (1 << 15)
@@ -441,7 +448,7 @@ export class Interpreter {
 
   sra(operands: number, address: number) {
     const [n, x] = this.divide(operands)
-    const b = address + this.gr(x)
+    const b = address + this.xaddr(x)
     let v = this.gr(n) >> b
     let overflowFlag = false
     if (((this.grLogical(n) >> (b - 1)) & 1) !== 0) {
@@ -453,7 +460,7 @@ export class Interpreter {
 
   sll(operands: number, address: number) {
     const [n, x] = this.divide(operands)
-    const b = address + this.gr(x)
+    const b = address + this.xaddr(x)
     let v = this.gr(n) << b
     let overflowFlag = false
     if (((this.grLogical(n) >> (16 - b)) & 1) !== 0) {
@@ -465,7 +472,7 @@ export class Interpreter {
 
   srl(operands: number, address: number) {
     const [n, x] = this.divide(operands)
-    const b = address + this.gr(x)
+    const b = address + this.xaddr(x)
     let v = this.grLogical(n) >>> b
     let overflowFlag = false
     if (((this.grLogical(n) >> (b - 1)) & 1) !== 0) {
@@ -478,40 +485,40 @@ export class Interpreter {
   jmi(operands: number, address: number) {
     const [_, x] = this.divide(operands)
     if (this.FR.sf()) {
-      setPR(this.PR, address + this.gr(x))
+      setPR(this.PR, address + this.xaddr(x))
     }
   }
 
   jnz(operands: number, address: number) {
     const [_, x] = this.divide(operands)
     if (!this.FR.zf()) {
-      setPR(this.PR, address + this.gr(x))
+      setPR(this.PR, address + this.xaddr(x))
     }
   }
 
   jze(operands: number, address: number) {
     const [_, x] = this.divide(operands)
     if (this.FR.zf()) {
-      setPR(this.PR, address + this.gr(x))
+      setPR(this.PR, address + this.xaddr(x))
     }
   }
 
   jump(operands: number, address: number) {
     const [_, x] = this.divide(operands)
-    setPR(this.PR, address + this.gr(x))
+    setPR(this.PR, address + this.xaddr(x))
   }
 
   jpl(operands: number, address: number) {
     const [_, x] = this.divide(operands)
     if (!this.FR.sf()) {
-      setPR(this.PR, address + this.gr(x))
+      setPR(this.PR, address + this.xaddr(x))
     }
   }
 
   jov(operands: number, address: number) {
     const [_, x] = this.divide(operands)
     if (this.FR.of()) {
-      setPR(this.PR, address + this.gr(x))
+      setPR(this.PR, address + this.xaddr(x))
     }
   }
 }
